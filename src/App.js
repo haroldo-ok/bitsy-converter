@@ -2,20 +2,27 @@ import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
 
+import {parseWorld} from 'bitsy-parser';
+import stringify from 'json-stringify-pretty-compact';
+
 class App extends Component {
   
   constructor(props) {
     super(props);
     
     this.state = {
-      value: 'This is another test'
+      original: 'This is another test',
+      converted: ''
     };
     
     this.handleChange = this.handleChange.bind(this);
   }
   
   handleChange(event) {
-    this.setState({value: event.target.value});
+    this.setState({
+      original: event.target.value,
+      converted: stringify(parseWorld(event.target.value), {maxLength: 160})
+    });
   }
   
   render() {
@@ -28,7 +35,8 @@ class App extends Component {
         <p className="App-intro">
           To get started, edit <code>src/App.js</code> and save to reload.
         </p>
-        <textarea value={this.state.value} onChange={this.handleChange} />
+        <textarea value={this.state.original} onChange={this.handleChange} />
+        <textarea value={this.state.converted} readOnly />
       </div>
     );
   }

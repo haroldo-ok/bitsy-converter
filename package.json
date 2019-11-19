@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "bitsy-parser": "^0.1.0",
+    "json-stringify-pretty-compact": "^2.0.0",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
     "react-scripts": "0.9.5"
