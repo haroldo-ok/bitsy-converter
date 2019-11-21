@@ -1,7 +1,13 @@
 import React, { Component } from 'react';
 import './App.css';
+import './prism.css';
 
-import { Grid, TextField } from '@material-ui/core';
+import { Grid } from '@material-ui/core';
+
+import Editor from 'react-simple-code-editor';
+import { highlight, languages } from 'prismjs/components/prism-core';
+import 'prismjs/components/prism-clike';
+import 'prismjs/components/prism-json';
 
 import {parseWorld} from 'bitsy-parser';
 import stringify from 'json-stringify-pretty-compact';
@@ -16,13 +22,13 @@ class App extends Component {
       converted: ''
     };
     
-    this.handleChange = this.handleChange.bind(this);
+    this.handleCodeChange = this.handleCodeChange.bind(this);
   }
   
-  handleChange(event) {
+  handleCodeChange({ code }) {
     this.setState({
-      original: event.target.value,
-      converted: stringify(parseWorld(event.target.value), {maxLength: 160})
+      original: code,
+      converted: stringify(parseWorld(code), {maxLength: 160})
     });
   }
   
@@ -31,12 +37,32 @@ class App extends Component {
       <div className="App">
         <Grid container spacing={3}  style={{ margin: 0, width: '100%' }}>
           <Grid item xs={6}>
-            <TextField value={this.state.original} onChange={this.handleChange} multiline
-              helperText="Past your bitsy script here" />
+      
+            <Editor
+              value={this.state.original}
+              onValueChange={code => this.handleCodeChange({ code })}
+              highlight={code => highlight(code, languages.clike)}
+              padding={10}
+              style={{
+                fontFamily: '"Fira code", "Fira Mono", monospace',
+                fontSize: 12,
+              }}
+            />
+
           </Grid>
           <Grid item xs={6}>
-            <TextField value={this.state.converted} multiline readOnly
-              helperText="The converted JSON will be placed here." />
+            
+            <Editor
+              value={this.state.converted}
+              onValueChange={code => this.handleCodeChange({ code })}
+              highlight={code => highlight(code, languages.json)}
+              padding={10}
+              style={{
+                fontFamily: '"Fira code", "Fira Mono", monospace',
+                fontSize: 12,
+              }}
+            />
+                
           </Grid>
         </Grid>
       </div>
