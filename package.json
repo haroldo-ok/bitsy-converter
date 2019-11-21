@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.6.1",
     "bitsy-parser": "^0.1.0",
     "json-stringify-pretty-compact": "^2.0.0",
     "react": "^16.11.0",

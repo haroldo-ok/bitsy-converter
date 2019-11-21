@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
+
+import { Grid, TextField } from '@material-ui/core';
 
 import {parseWorld} from 'bitsy-parser';
 import stringify from 'json-stringify-pretty-compact';
@@ -28,15 +29,16 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
-        <textarea value={this.state.original} onChange={this.handleChange} />
-        <textarea value={this.state.converted} readOnly />
+        <Grid container spacing={3}  style={{ margin: 0, width: '100%' }}>
+          <Grid item xs={6}>
+            <TextField value={this.state.original} onChange={this.handleChange} multiline
+              helperText="Past your bitsy script here" />
+          </Grid>
+          <Grid item xs={6}>
+            <TextField value={this.state.converted} multiline readOnly
+              helperText="The converted JSON will be placed here." />
+          </Grid>
+        </Grid>
       </div>
     );
   }
