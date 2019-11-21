@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.6.1",
     "bitsy-parser": "^0.1.0",
     "json-stringify-pretty-compact": "^2.0.0",
+    "prismjs": "^1.17.1",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
-    "react-scripts": "0.9.5"
+    "react-scripts": "0.9.5",
+    "react-simple-code-editor": "^0.10.0"
   },
   "devDependencies": {},
   "scripts": {
