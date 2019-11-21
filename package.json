@@ -9,6 +9,7 @@
     "prismjs": "^1.17.1",
     "react": "^16.11.0",
     "react-dom": "^16.11.0",
+    "react-ga": "^2.7.0",
     "react-scripts": "0.9.5",
     "react-simple-code-editor": "^0.10.0"
   },

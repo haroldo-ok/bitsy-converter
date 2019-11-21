@@ -12,6 +12,11 @@ import 'prismjs/components/prism-json';
 import {parseWorld} from 'bitsy-parser';
 import stringify from 'json-stringify-pretty-compact';
 
+import ReactGA from 'react-ga';
+
+ReactGA.initialize('UA-130174335-4');
+ReactGA.pageview(window.location.pathname + window.location.search)
+
 class App extends Component {
   
   constructor(props) {
