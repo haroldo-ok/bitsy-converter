@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import './prism.css';
 
-import { Grid, AppBar, Toolbar, Typography } from '@material-ui/core';
+import { Grid, AppBar, Toolbar, Typography, Paper } from '@material-ui/core';
 
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
@@ -51,32 +51,36 @@ class App extends Component {
       
       <Grid container spacing={3}  style={{ margin: 0, width: '100%' }}>
           <Grid item xs={6}>
+            <Paper>
       
-            <Editor
-              value={this.state.original}
-              onValueChange={code => this.handleCodeChange({ code })}
-              highlight={code => highlight(code, languages.clike)}
-              padding={10}
-              style={{
-                fontFamily: '"Fira code", "Fira Mono", monospace',
-                fontSize: 12,
-              }}
-            />
+              <Editor
+                value={this.state.original}
+                onValueChange={code => this.handleCodeChange({ code })}
+                highlight={code => highlight(code, languages.clike)}
+                padding={10}
+                style={{
+                  fontFamily: '"Fira code", "Fira Mono", monospace',
+                  fontSize: 12,
+                }}
+              />
 
+            </Paper>
           </Grid>
           <Grid item xs={6}>
+            <Paper>
             
-            <Editor
-              value={this.state.converted}
-              onValueChange={code => this.handleCodeChange({ code })}
-              highlight={code => highlight(code, languages.json)}
-              padding={10}
-              style={{
-                fontFamily: '"Fira code", "Fira Mono", monospace',
-                fontSize: 12,
-              }}
-            />
+              <Editor
+                value={this.state.converted}
+                onValueChange={code => this.handleCodeChange({ code })}
+                highlight={code => highlight(code, languages.json)}
+                padding={10}
+                style={{
+                  fontFamily: '"Fira code", "Fira Mono", monospace',
+                  fontSize: 12,
+                }}
+              />
                 
+            </Paper>
           </Grid>
         </Grid>
       </div>
