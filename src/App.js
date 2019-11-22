@@ -4,6 +4,9 @@ import './prism.css';
 
 import { Grid, AppBar, Toolbar, Typography, Paper } from '@material-ui/core';
 
+import InfoIcon from '@material-ui/icons/Info';
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
 import 'prismjs/components/prism-clike';
@@ -60,6 +63,18 @@ class App extends Component {
           <Grid item xs={6}>
             <Paper>
       
+              <Grid container direction="row" alignItems="center">
+                <Grid item>
+                  <InfoIcon /> 
+                </Grid>
+                <Grid item>
+                  Paste your bitsy code here.
+                </Grid>
+                <Grid item>
+                  <ArrowDownwardIcon />
+                </Grid>
+              </Grid>
+      
               <Editor
                 value={this.state.original}
                 onValueChange={code => this.handleCodeChange({ code })}
@@ -76,6 +91,18 @@ class App extends Component {
           <Grid item xs={6}>
             <Paper>
             
+              <Grid container direction="row" alignItems="center">
+                <Grid item>
+                  <InfoIcon /> 
+                </Grid>
+                <Grid item>
+                  The converted code will be generated here.
+                </Grid>
+                <Grid item>
+                  <ArrowDownwardIcon />
+                </Grid>
+              </Grid>
+
               <Editor
                 value={this.state.converted}
                 onValueChange={code => this.handleCodeChange({ code })}
