@@ -12,6 +12,8 @@ import 'prismjs/components/prism-json';
 import {parseWorld} from 'bitsy-parser';
 import stringify from 'json-stringify-pretty-compact';
 
+import exampleSource from './minimal.bitsy';
+
 import ReactGA from 'react-ga';
 
 ReactGA.initialize('UA-130174335-4');
@@ -23,11 +25,16 @@ class App extends Component {
     super(props);
     
     this.state = {
-      original: 'This is another test',
+      original: 'Loading, please wait...',
       converted: ''
     };
     
     this.handleCodeChange = this.handleCodeChange.bind(this);
+    
+    fetch(exampleSource).then(async (data) => {
+      const code = await data.text();
+      this.handleCodeChange({ code });
+    });
   }
   
   handleCodeChange({ code }) {
