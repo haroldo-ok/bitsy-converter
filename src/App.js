@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import './prism.css';
 
-import { Grid } from '@material-ui/core';
+import { Grid, AppBar, Toolbar, Typography } from '@material-ui/core';
 
 import Editor from 'react-simple-code-editor';
 import { highlight, languages } from 'prismjs/components/prism-core';
@@ -40,7 +40,16 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Grid container spacing={3}  style={{ margin: 0, width: '100%' }}>
+      
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6">
+            Bitsy Converter
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      
+      <Grid container spacing={3}  style={{ margin: 0, width: '100%' }}>
           <Grid item xs={6}>
       
             <Editor
