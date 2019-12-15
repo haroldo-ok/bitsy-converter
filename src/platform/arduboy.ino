@@ -10,6 +10,8 @@ void setup() {
   arduboy.display();
 }
 
+const uint8_t PROGMEM smiley[] = { B01111110, B10000001, B10010101, B10100001, B10100001, B10010101, B10000001, B01111110 };
+
 uint8_t y = 0;
 
 void loop() {
@@ -31,7 +33,8 @@ void loop() {
     arduboy.clear();
     arduboy.setCursor(0, y);
     arduboy.print("Hello World");
-    arduboy.display();
+    arduboy.drawBitmap(0, 0, smiley, 8, 8, WHITE);
+	arduboy.display();
 
     // Party time!
     arduboy.setRGBled(y, 0, 0);
