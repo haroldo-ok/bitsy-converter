@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import './prism.css';
 
-import { Grid, AppBar, Toolbar, Typography, Paper } from '@material-ui/core';
+import { Grid, AppBar, Toolbar, Typography, Paper, Tabs, Tab } from '@material-ui/core';
 
 import InfoIcon from '@material-ui/icons/Info';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
@@ -29,7 +29,8 @@ class App extends Component {
     
     this.state = {
       original: 'Loading, please wait...',
-      converted: ''
+      converted: '',
+      format: 'json'
     };
     
     this.handleCodeChange = this.handleCodeChange.bind(this);
@@ -102,6 +103,11 @@ class App extends Component {
                   <ArrowDownwardIcon />
                 </Grid>
               </Grid>
+
+              <Tabs value={this.state.format}>
+                <Tab value="json" label="JSON" />
+                <Tab value="arduboy" label="Arduboy" />
+              </Tabs>
 
               <Editor
                 value={this.state.converted}
