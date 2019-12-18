@@ -34,6 +34,7 @@ class App extends Component {
     };
     
     this.handleCodeChange = this.handleCodeChange.bind(this);
+    this.handleFormatChange = this.handleFormatChange.bind(this);
     
     fetch(exampleSource).then(async (data) => {
       const code = await data.text();
@@ -41,11 +42,25 @@ class App extends Component {
     });
   }
   
-  handleCodeChange({ code }) {
+  updateState({code, format}) {
+    code = code || this.state.original;
+    format = format || this.state.format;
+
+    const converted = format === 'arduboy' ? 'TODO' : stringify(parseWorld(code), {maxLength: 160});
+    
     this.setState({
       original: code,
-      converted: stringify(parseWorld(code), {maxLength: 160})
+      converted: converted,
+      format,
     });
+  }
+  
+  handleCodeChange({ code }) {
+    this.updateState({ code });
+  }
+  
+  handleFormatChange({ format }) {
+    this.updateState({ format });
   }
   
   render() {
@@ -104,7 +119,7 @@ class App extends Component {
                 </Grid>
               </Grid>
 
-              <Tabs value={this.state.format}>
+              <Tabs value={this.state.format} onChange={ (event, format) => this.handleFormatChange({ format }) }>
                 <Tab value="json" label="JSON" />
                 <Tab value="arduboy" label="Arduboy" />
               </Tabs>
