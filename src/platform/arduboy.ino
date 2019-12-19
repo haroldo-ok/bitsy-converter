@@ -10,6 +10,11 @@ void setup() {
   arduboy.display();
 }
 
+typedef uint8_t Tile[8];
+typedef Tile Frames[];
+
+const Frames frames = { {1, 2}, {3, 4} };
+
 const uint8_t PROGMEM smiley[] = { B01111110, B10000001, B10010101, B10100001, B10100001, B10010101, B10000001, B01111110 };
 
 uint8_t y = 0;
