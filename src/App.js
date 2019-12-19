@@ -15,6 +15,8 @@ import 'prismjs/components/prism-json';
 import {parseWorld} from 'bitsy-parser';
 import stringify from 'json-stringify-pretty-compact';
 
+import {convertArduboy} from './platform/arduboy'
+
 import exampleSource from './minimal.bitsy';
 
 import ReactGA from 'react-ga';
@@ -22,18 +24,7 @@ import ReactGA from 'react-ga';
 ReactGA.initialize('UA-130174335-4');
 ReactGA.pageview(window.location.pathname + window.location.search)
 
-const transpose = a => a[0].map((_, c) => a.map(r => r[c]));
-
 const convertJSON = code => stringify(parseWorld(code), {maxLength: 160});
-const convertArduboy = code => {
-  const world = parseWorld(code);
-  return Object.entries(world.images).map(([k, v]) => {
-    const frames = v.map(frame => {
-      return transpose(frame).map(row => 'B' + row.reverse().join('')).join(', ');
-    });
-    return  `const uint8_t PROGMEM img_${k}[] = { ${frames.join('\n')} };`;
-  }).join('\n');
-}
 
 class App extends Component {
   
