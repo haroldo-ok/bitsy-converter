@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import './prism.css';
 
-import { Grid, AppBar, Toolbar, Typography, Paper } from '@material-ui/core';
+import { Grid, AppBar, Toolbar, Typography, Paper, Tabs, Tab } from '@material-ui/core';
 
 import InfoIcon from '@material-ui/icons/Info';
 import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
@@ -15,12 +15,16 @@ import 'prismjs/components/prism-json';
 import {parseWorld} from 'bitsy-parser';
 import stringify from 'json-stringify-pretty-compact';
 
+import {convertArduboy} from './platform/arduboy'
+
 import exampleSource from './minimal.bitsy';
 
 import ReactGA from 'react-ga';
 
 ReactGA.initialize('UA-130174335-4');
 ReactGA.pageview(window.location.pathname + window.location.search)
+
+const convertJSON = code => stringify(parseWorld(code), {maxLength: 160});
 
 class App extends Component {
   
@@ -29,10 +33,12 @@ class App extends Component {
     
     this.state = {
       original: 'Loading, please wait...',
-      converted: ''
+      converted: '',
+      format: 'json'
     };
     
     this.handleCodeChange = this.handleCodeChange.bind(this);
+    this.handleFormatChange = this.handleFormatChange.bind(this);
     
     fetch(exampleSource).then(async (data) => {
       const code = await data.text();
@@ -40,11 +46,25 @@ class App extends Component {
     });
   }
   
-  handleCodeChange({ code }) {
+  updateState({code, format}) {
+    code = code || this.state.original;
+    format = format || this.state.format;
+
+    const converted = format === 'arduboy' ? convertArduboy(code) : convertJSON(code);
+    
     this.setState({
       original: code,
-      converted: stringify(parseWorld(code), {maxLength: 160})
+      converted: converted,
+      format,
     });
+  }
+  
+  handleCodeChange({ code }) {
+    this.updateState({ code });
+  }
+  
+  handleFormatChange({ format }) {
+    this.updateState({ format });
   }
   
   render() {
@@ -102,6 +122,11 @@ class App extends Component {
                   <ArrowDownwardIcon />
                 </Grid>
               </Grid>
+
+              <Tabs value={this.state.format} onChange={ (event, format) => this.handleFormatChange({ format }) }>
+                <Tab value="json" label="JSON" />
+                <Tab value="arduboy" label="Arduboy (Work in progress)" />
+              </Tabs>
 
               <Editor
                 value={this.state.converted}
