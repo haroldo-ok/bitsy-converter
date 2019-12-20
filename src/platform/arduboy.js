@@ -40,10 +40,50 @@ export const convertArduboy = code => {
   
   const imageIndexes = Object.fromEntries(imageInfos.map(({name, offset}) => [name, offset]));
   const frameCount = imageInfos.reduce((total, info) => total + info.frames.length, 0);
-
-  return [
+  
+  const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
 	  toEnumDeclaration('ImageOffsets', imageIndexes, k => `ofs_${k}`),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
+
+  return `
+#include <Arduboy.h>
+
+Arduboy arduboy;
+
+void setup() {
+  // put your setup code here, to run once:
+  arduboy.begin();
+  arduboy.clear();
+  arduboy.print("Hello World");
+  arduboy.display();
+}
+
+${mainGeneratedBody};
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  if (!arduboy.nextFrame()) return;
+
+  // Run twice every second.
+  if (arduboy.everyXFrames(30))
+  {
+    arduboy.clear();
+    arduboy.setCursor(0, 56);
+    arduboy.print("Hello World");
+    
+    // Fill the background with the tiles
+    uint8_t tn = 0;
+    for (uint8_t ty = 0; ty != 7; ty++) {
+      for (uint8_t tx = 0; tx != 16; tx++) {
+        arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
+        tn = (tn + 1) % FRAME_COUNT;
+      }
+    }
+    
+	  arduboy.display();
+  }
+}
+`;
 }

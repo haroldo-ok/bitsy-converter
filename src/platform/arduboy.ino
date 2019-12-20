@@ -10,14 +10,31 @@ void setup() {
   arduboy.display();
 }
 
-typedef uint8_t Tile[8];
-typedef Tile Frames[];
+const uint8_t FRAME_COUNT = 5;
 
-const Frames frames = { {1, 2}, {3, 4} };
 
-const uint8_t PROGMEM smiley[] = { B01111110, B10000001, B10010101, B10100001, B10100001, B10010101, B10000001, B01111110 };
+enum ImageOffsets {
+  ofs_BLANK = 0,
+  ofs_TIL_a = 1,
+  ofs_SPR_A = 2,
+  ofs_SPR_a = 3,
+  ofs_ITM_0 = 4
+};
 
-uint8_t y = 0;
+const uint8_t PROGMEM images[][8] = { 
+
+  // BLANK: index 0, offset 0, 1 frame(s)
+  { B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000, B00000000 },
+  // TIL_a: index 1, offset 1, 1 frame(s)
+  { B11111111, B10000001, B10000001, B10011001, B10011001, B10000001, B10000001, B11111111 },
+  // SPR_A: index 2, offset 2, 1 frame(s)
+  { B00100000, B00010000, B11111000, B00111111, B00111111, B11111000, B00010000, B00100000 },
+  // SPR_a: index 3, offset 3, 1 frame(s)
+  { B00000000, B00111100, B11111000, B01111100, B01100000, B11100000, B00010000, B00001100 },
+  // ITM_0: index 4, offset 4, 1 frame(s)
+  { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
+};
+
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -26,22 +43,19 @@ void loop() {
   // Run twice every second.
   if (arduboy.everyXFrames(30))
   {
-    // Start over after the text moves off screen.
-    if (y > arduboy.height())
-    {
-      y = 0;
-    }
-    else
-    {
-      y++;
-    }
     arduboy.clear();
-    arduboy.setCursor(0, y);
+    arduboy.setCursor(0, 56);
     arduboy.print("Hello World");
-    arduboy.drawBitmap(0, 0, smiley, 8, 8, WHITE);
-	arduboy.display();
-
-    // Party time!
-    arduboy.setRGBled(y, 0, 0);
+    
+    // Fill the background with the tiles
+    uint8_t tn = 0;
+    for (uint8_t ty = 0; ty != 7; ty++) {
+      for (uint8_t tx = 0; tx != 16; tx++) {
+        arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
+        tn = (tn + 1) % FRAME_COUNT;
+      }
+    }
+    
+	  arduboy.display();
   }
 }

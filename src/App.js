@@ -125,7 +125,7 @@ class App extends Component {
 
               <Tabs value={this.state.format} onChange={ (event, format) => this.handleFormatChange({ format }) }>
                 <Tab value="json" label="JSON" />
-                <Tab value="arduboy" label="Arduboy" />
+                <Tab value="arduboy" label="Arduboy (Work in progress)" />
               </Tabs>
 
               <Editor
