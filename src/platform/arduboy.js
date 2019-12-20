@@ -20,6 +20,8 @@ ${content}
 };`
 }
 
+const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
+
 const extractImageInfos = world => {
   const withBlank = [ ['BLANK', [ Array(8).fill(Array(8).fill(0)) ] ], ...Object.entries(world.images) ];
   const imageInfos = withBlank.map(([name, frames], index) => ({ name, frames, index }));
@@ -37,8 +39,10 @@ export const convertArduboy = code => {
   const imageInfos = extractImageInfos(world);
   
   const imageIndexes = Object.fromEntries(imageInfos.map(({name, offset}) => [name, offset]));
+  const frameCount = imageInfos.reduce((total, info) => total + info.frames.length, 0);
 
   return [
+    toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
 	  toEnumDeclaration('ImageOffsets', imageIndexes, k => `ofs_${k}`),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
