@@ -1,3 +1,4 @@
+
 #include <Arduboy.h>
 
 Arduboy arduboy;
@@ -9,6 +10,34 @@ void setup() {
   arduboy.print("Hello World");
   arduboy.display();
 }
+
+typedef struct Room {
+    uint8_t tileMap[16 * 16];
+} Room;
+
+const Room PROGMEM rooms[] = {
+
+  // Room 0
+  {{
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+    0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+  }}
+
+};
 
 const uint8_t FRAME_COUNT = 5;
 
@@ -33,8 +62,11 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00111100, B11111000, B01111100, B01100000, B11100000, B00010000, B00001100 },
   // ITM_0: index 4, offset 4, 1 frame(s)
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
-};
+};;
 
+uint8_t ty;
+uint8_t tx;
+uint8_t tn;
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -48,14 +80,13 @@ void loop() {
     arduboy.print("Hello World");
     
     // Fill the background with the tiles
-    uint8_t tn = 0;
-    for (uint8_t ty = 0; ty != 7; ty++) {
-      for (uint8_t tx = 0; tx != 16; tx++) {
+    for (ty = 0; ty != 7; ty++) {
+      for (tx = 0; tx != 16; tx++) {
+        tn = pgm_read_byte(rooms[0].tileMap + ty * 16 + tx);
         arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
-        tn = (tn + 1) % FRAME_COUNT;
       }
     }
-    
+
 	  arduboy.display();
   }
 }
