@@ -22,18 +22,18 @@ ${content}
 
 const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
-const toMatrixDeclaration = (matrix, transform, innerIndent='\n    ') => 
-  matrix.map(row => `{ ${row.map(cell => transform(cell)).join(', ')} }`).join(`,${innerIndent}`);
+const toTilemapDeclaration = (matrix, transform, innerIndent='\n    ') => 
+  matrix.map(row => row.map(cell => transform(cell)).join(', ')).join(`,${innerIndent}`);
 
 const toRoomDeclaration = (room, world, imageOffsets) => `
   // Room ${room.id}
-  {
-    ${ toMatrixDeclaration(room.tilemap, v => v === '0' ? 0 : imageOffsets[world.tile[v].drw] ) }
-  }
+  {{
+    ${ toTilemapDeclaration(room.tilemap, v => v === '0' ? 0 : imageOffsets[world.tile[v].drw] ) }
+  }}
 `;
 
 const toRoomsDeclaration = (name, world, imageOffsets) => {
-  return toConstantDeclaration(`${name}[]`, 'Room', `{
+  return toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
 ${ Object.values(world.room).map(room => toRoomDeclaration(room, world, imageOffsets)).join(',') }
 }`);
 }
@@ -78,10 +78,14 @@ void setup() {
 }
 
 typedef struct Room {
-    uint8_t tileMap[16][16];
+    uint8_t tileMap[16 * 16];
 } Room;
 
 ${mainGeneratedBody};
+
+uint8_t ty;
+uint8_t tx;
+uint8_t tn;
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -95,14 +99,13 @@ void loop() {
     arduboy.print("Hello World");
     
     // Fill the background with the tiles
-    uint8_t tn = 0;
-    for (uint8_t ty = 0; ty != 7; ty++) {
-      for (uint8_t tx = 0; tx != 16; tx++) {
+    for (ty = 0; ty != 7; ty++) {
+      for (tx = 0; tx != 16; tx++) {
+        tn = pgm_read_byte(rooms[0].tileMap + ty * 16 + tx);
         arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
-        tn = (tn + 1) % FRAME_COUNT;
       }
     }
-    
+
 	  arduboy.display();
   }
 }
