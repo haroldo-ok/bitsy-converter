@@ -22,6 +22,22 @@ ${content}
 
 const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
+const toMatrixDeclaration = (matrix, transform, innerIndent='\n    ') => 
+  matrix.map(row => `{ ${row.map(cell => transform(cell)).join(', ')} }`).join(`,${innerIndent}`);
+
+const toRoomDeclaration = (room, world, imageOffsets) => `
+  // Room ${room.id}
+  {
+    ${ toMatrixDeclaration(room.tilemap, v => v === '0' ? 0 : imageOffsets[world.tile[v].drw] ) }
+  }
+`;
+
+const toRoomsDeclaration = (name, world, imageOffsets) => {
+  return toConstantDeclaration(`${name}[]`, 'Room', `{
+${ Object.values(world.room).map(room => toRoomDeclaration(room, world, imageOffsets)).join(',') }
+}`);
+}
+
 const extractImageInfos = world => {
   const withBlank = [ ['BLANK', [ Array(8).fill(Array(8).fill(0)) ] ], ...Object.entries(world.images) ];
   const imageInfos = withBlank.map(([name, frames], index) => ({ name, frames, index }));
@@ -38,12 +54,13 @@ export const convertArduboy = code => {
   const world = parseWorld(code);
   const imageInfos = extractImageInfos(world);
   
-  const imageIndexes = Object.fromEntries(imageInfos.map(({name, offset}) => [name, offset]));
+  const imageOffsets = Object.fromEntries(imageInfos.map(({name, offset}) => [name, offset]));
   const frameCount = imageInfos.reduce((total, info) => total + info.frames.length, 0);
   
   const mainGeneratedBody = [
+    toRoomsDeclaration('rooms', world, imageOffsets),
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
-	  toEnumDeclaration('ImageOffsets', imageIndexes, k => `ofs_${k}`),
+	  toEnumDeclaration('ImageOffsets', imageOffsets, k => `ofs_${k}`),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
 
@@ -59,6 +76,10 @@ void setup() {
   arduboy.print("Hello World");
   arduboy.display();
 }
+
+typedef struct Room {
+    uint8_t tileMap[16][16];
+} Room;
 
 ${mainGeneratedBody};
 
