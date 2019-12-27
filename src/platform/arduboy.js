@@ -46,8 +46,8 @@ const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${
 /**
  * Generates a flat C array constant from a bidimensional JS array.
  */
-const toTilemapDeclaration = (matrix, transform, innerIndent='\n    ') => 
-  matrix.map(row => row.map(cell => transform(cell)).join(', ')).join(`,${innerIndent}`);
+const toMatrixDeclaration = (matrix, transform, innerIndent='\n    ') => 
+  matrix.map(row => `{ ${row.map(cell => transform(cell)).join(', ')} }`).join(`,${innerIndent}`);
 
 /**
  * Generates a C constant from a room object.
@@ -55,7 +55,7 @@ const toTilemapDeclaration = (matrix, transform, innerIndent='\n    ') =>
 const toRoomDeclaration = (room, world, imageOffsets) => `
   // Room ${room.id}
   {{
-    ${ toTilemapDeclaration(room.tilemap, v => v === '0' ? 0 : imageOffsets[world.tile[v].drw] ) }
+    ${ toMatrixDeclaration(room.tilemap, v => v === '0' ? 0 : imageOffsets[world.tile[v].drw] ) }
   }}
 `;
 
@@ -101,9 +101,9 @@ export const convertArduboy = code => {
   ].join('\n\n');
 
   return `
-#include <Arduboy.h>
+#include <Arduboy2.h>
 
-Arduboy arduboy;
+Arduboy2 arduboy;
 
 void setup() {
   // put your setup code here, to run once:
@@ -113,15 +113,11 @@ void setup() {
   arduboy.display();
 }
 
-typedef struct Room {
-    uint8_t tileMap[16 * 16];
+typedef struct {
+    uint8_t tileMap[16][16];
 } Room;
 
 ${mainGeneratedBody};
-
-uint8_t ty;
-uint8_t tx;
-uint8_t tn;
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -135,9 +131,9 @@ void loop() {
     arduboy.print("Hello World");
     
     // Fill the background with the tiles
-    for (ty = 0; ty != 7; ty++) {
-      for (tx = 0; tx != 16; tx++) {
-        tn = pgm_read_byte(rooms[0].tileMap + ty * 16 + tx);
+    for (uint8_t ty = 0; ty != 7; ty++) {
+      for (uint8_t tx = 0; tx != 16; tx++) {
+        uint8_t tn = pgm_read_byte(&rooms[0].tileMap[ty][tx]);
         arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
       }
     }
