@@ -182,7 +182,7 @@ void loop() {
       drawTile(spr->x, spr->y, spr->image);
     }
     
-	  arduboy.display();
+    arduboy.display();
   }
 }
 `;
