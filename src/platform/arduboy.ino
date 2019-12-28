@@ -31,7 +31,7 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
-BitsySprite room_0_sprites[] = {
+const BitsySprite PROGMEM room_0_sprites[] = {
     {ofs_SPR_A, 3, 5}
 };
 
@@ -102,7 +102,8 @@ void loop() {
     
     // Draw the sprites on top of the background
     for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
-//      uint8_t tn = rooms[currentLevel].sprites[i];
+      BitsySprite *spr = rooms[currentLevel].sprites + i;
+      drawTile(spr->x, spr->y, spr->image);
     }
     
 	  arduboy.display();
