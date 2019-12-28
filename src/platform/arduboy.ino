@@ -11,9 +11,29 @@ void setup() {
   arduboy.display();
 }
 
+enum ImageOffset {
+  ofs_BLANK = 0,
+  ofs_TIL_a = 1,
+  ofs_SPR_A = 2,
+  ofs_SPR_a = 3,
+  ofs_ITM_0 = 4
+};
+
 typedef struct {
+    ImageOffset image;
+    uint8_t x, y;
+} BitsySprite;
+
+typedef struct Room {
     uint8_t tileMap[16][16];
+    
+    uint8_t spriteCount;
+    BitsySprite *sprites;
 } Room;
+
+const BitsySprite PROGMEM room_0_sprites[] = {
+    {ofs_SPR_A, 3, 5}
+};
 
 const Room PROGMEM rooms[] = {
 
@@ -35,20 +55,11 @@ const Room PROGMEM rooms[] = {
     { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }}
+  }, 1, room_0_sprites}
 
 };
 
 const uint8_t FRAME_COUNT = 5;
-
-
-enum ImageOffsets {
-  ofs_BLANK = 0,
-  ofs_TIL_a = 1,
-  ofs_SPR_A = 2,
-  ofs_SPR_a = 3,
-  ofs_ITM_0 = 4
-};
 
 const uint8_t PROGMEM images[][8] = { 
 
@@ -64,6 +75,12 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
 };;
 
+uint8_t currentLevel = 0;
+
+void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
+  arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
@@ -78,11 +95,17 @@ void loop() {
     // Fill the background with the tiles
     for (uint8_t ty = 0; ty != 7; ty++) {
       for (uint8_t tx = 0; tx != 16; tx++) {
-        uint8_t tn = pgm_read_byte(&rooms[0].tileMap[ty][tx]);
-        arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
+        uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[ty][tx]);
+        drawTile(tx, ty, tn);
       }
     }
-
+    
+    // Draw the sprites on top of the background
+    for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
+      BitsySprite *spr = rooms[currentLevel].sprites + i;
+      drawTile(spr->x, spr->y, spr->image);
+    }
+    
 	  arduboy.display();
   }
 }
