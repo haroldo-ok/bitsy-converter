@@ -58,16 +58,22 @@ const toRoomDeclaration = (room) => `
   // Room ${room.id}
   {{
     ${ toMatrixDeclaration(room.tilemap) }
-  }}
+  }, ${room.sprites.length}, room_${room.id}_sprites}
 `;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
  */
 const toRoomsDeclaration = (name, roomInfos) => {
-  return toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
+  const spriteDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_sprites[]`, 'BitsySprite PROGMEM', `{
+  ${ room.sprites.map(sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y} }`).join(',\n  ') }
+}`));
+  
+  const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }`);
+
+  return [...spriteDeclarations, roomsDeclaration].join('\n\n');
 }
 
 /**
