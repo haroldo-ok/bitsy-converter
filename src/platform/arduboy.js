@@ -1,3 +1,5 @@
+import {groupBy} from 'lodash-es';
+
 import {parseWorld} from 'bitsy-parser';
 
 /** 
@@ -46,25 +48,25 @@ const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${
 /**
  * Generates a flat C array constant from a bidimensional JS array.
  */
-const toMatrixDeclaration = (matrix, transform, innerIndent='\n    ') => 
+const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\n    ') => 
   matrix.map(row => `{ ${row.map(cell => transform(cell)).join(', ')} }`).join(`,${innerIndent}`);
 
 /**
  * Generates a C constant from a room object.
  */
-const toRoomDeclaration = (room, world, imageOffsets) => `
+const toRoomDeclaration = (room) => `
   // Room ${room.id}
   {{
-    ${ toMatrixDeclaration(room.tilemap, v => v === '0' ? 0 : imageOffsets[world.tile[v].drw] ) }
+    ${ toMatrixDeclaration(room.tilemap) }
   }}
 `;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
  */
-const toRoomsDeclaration = (name, world, imageOffsets) => {
+const toRoomsDeclaration = (name, roomInfos) => {
   return toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
-${ Object.values(world.room).map(room => toRoomDeclaration(room, world, imageOffsets)).join(',') }
+${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }`);
 }
 
@@ -84,6 +86,18 @@ const extractImageInfos = world => {
 }
 
 /**
+ * Generates an array containing information about the rooms contained in the world object.
+ */
+const extractRoomInfos = (world, imageOffsets) => {
+  const spritesPerRoom = groupBy(Object.values(world.sprite), 'room');
+  return Object.values(world.room).map(room => ({
+    ...room,
+    sprites: spritesPerRoom[room.id] || [],
+    tilemap: room.tilemap.map(row => row.map(v => v === '0' ? 0 : imageOffsets[world.tile[v].drw]))
+  }));
+};
+
+/**
  * Generates Arduboy-compatible C++ code from a Bitsy script object.
  */
 export const convertArduboy = code => {
@@ -93,10 +107,12 @@ export const convertArduboy = code => {
   const imageOffsets = Object.fromEntries(imageInfos.map(({name, offset}) => [name, offset]));
   const frameCount = imageInfos.reduce((total, info) => total + info.frames.length, 0);
   
+  const roomInfos = extractRoomInfos(world, imageOffsets);
+  
   const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
-    toRoomsDeclaration('rooms', world, imageOffsets),
+    toRoomsDeclaration('rooms', roomInfos),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
 
