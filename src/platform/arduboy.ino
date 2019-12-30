@@ -69,7 +69,7 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
 };
 
-const uint8_t BUTTON_REPEAT_RATE = 10;
+const uint8_t BUTTON_REPEAT_RATE = 8;
 
 uint8_t currentLevel = 0;
 uint8_t buttonDelay = 0;
@@ -124,20 +124,23 @@ void loop() {
   // Wait between keypresses
   if (buttonDelay > 0) {
     buttonDelay--;
-    return;
-  }
-
-  if (controlPlayer()) {
-    buttonDelay = BUTTON_REPEAT_RATE;
-    needUpdate = true;
-  
-    if (playerSprite.y < 4) {
-      targetScrollY = 0;
-    } else {
-      targetScrollY = playerSprite.y * 8 - 4;
+  } else {
+    if (controlPlayer()) {
+      buttonDelay = BUTTON_REPEAT_RATE;
+      needUpdate = true;
+    
+      // Calculates scrolling
+      if (playerSprite.y < 4) {
+        targetScrollY = 0;
+      } else {
+        uint8_t scrollTY = playerSprite.y - 4;
+        if (scrollTY > 7) scrollTY = 7;
+        targetScrollY = scrollTY * 8;
+      }
     }
   }
   
+  // Scroll if necessary
   if (scrollY != targetScrollY) {
     if (scrollY < targetScrollY) {
       scrollY++;
