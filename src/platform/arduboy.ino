@@ -69,7 +69,11 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
 };
 
+const uint8_t BUTTON_REPEAT_RATE = 20;
+
 uint8_t currentLevel = 0;
+uint8_t buttonDelay = 0;
+bool needUpdate = true;
 BitsySprite playerSprite;
 
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
@@ -80,6 +84,26 @@ void drawSprite(BitsySprite *spr) {
   drawTile(spr->x, spr->y, spr->image);
 }
 
+bool controlPlayer() {
+  if (arduboy.pressed(UP_BUTTON)) {
+    playerSprite.y--;
+    return true;
+  }
+  if (arduboy.pressed(DOWN_BUTTON)) {
+    playerSprite.y++;
+    return true;
+  }
+  if (arduboy.pressed(LEFT_BUTTON)) {
+    playerSprite.x--;
+    return true;
+  }
+  if (arduboy.pressed(RIGHT_BUTTON)) {
+    playerSprite.x++;
+    return true;
+  }
+  
+  return false;
+}
 
 void setup() {
   // put your setup code here, to run once:
@@ -94,10 +118,20 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
+  
+  // Wait between keypresses
+  if (buttonDelay > 0) {
+    buttonDelay--;
+    return;
+  }
 
-  // Run twice every second.
-  if (arduboy.everyXFrames(30))
-  {
+  if (controlPlayer()) {
+    buttonDelay = BUTTON_REPEAT_RATE;
+    needUpdate = true;
+  }
+
+  // Draw the graphics
+  if (needUpdate) {
     arduboy.clear();
     arduboy.setCursor(0, 56);
     arduboy.print("Hello World");
@@ -116,8 +150,11 @@ void loop() {
       drawSprite(spr);
     }
     
+    // Draw the player's sprite
     drawSprite(&playerSprite);
     
     arduboy.display();
+    
+    needUpdate = false;
   }
 }
