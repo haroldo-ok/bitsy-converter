@@ -69,15 +69,17 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
 };
 
-const uint8_t BUTTON_REPEAT_RATE = 20;
+const uint8_t BUTTON_REPEAT_RATE = 10;
 
 uint8_t currentLevel = 0;
 uint8_t buttonDelay = 0;
+uint8_t scrollY = 0;
+uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
 
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
-  arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
+  arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
 }
 
 void drawSprite(BitsySprite *spr) {
@@ -128,16 +130,29 @@ void loop() {
   if (controlPlayer()) {
     buttonDelay = BUTTON_REPEAT_RATE;
     needUpdate = true;
+  
+    if (playerSprite.y < 4) {
+      targetScrollY = 0;
+    } else {
+      targetScrollY = playerSprite.y * 8 - 4;
+    }
+  }
+  
+  if (scrollY != targetScrollY) {
+    if (scrollY < targetScrollY) {
+      scrollY++;
+    } else {
+      scrollY--;
+    }
+    needUpdate = true;
   }
 
   // Draw the graphics
   if (needUpdate) {
     arduboy.clear();
-    arduboy.setCursor(0, 56);
-    arduboy.print("Hello World");
-    
+
     // Fill the background with the tiles
-    for (uint8_t ty = 0; ty != 7; ty++) {
+    for (uint8_t ty = 0; ty != 16; ty++) {
       for (uint8_t tx = 0; tx != 16; tx++) {
         uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[ty][tx]);
         drawTile(tx, ty, tn);
