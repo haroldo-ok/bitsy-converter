@@ -62,11 +62,16 @@ const toRoomDeclaration = (room) => `
 `;
 
 /**
+ * Generates a C constant from a sprite object.
+ */
+const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y} }`;
+
+/**
  * Generates a C constant representing all the rooms contained in a room object.
  */
 const toRoomsDeclaration = (name, roomInfos) => {
   const spriteDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_sprites[]`, 'BitsySprite PROGMEM', `{
-  ${ room.sprites.map(sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y} }`).join(',\n  ') }
+  ${ room.sprites.map(toSpriteDeclaration).join(',\n  ') }
 }`));
   
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
@@ -92,13 +97,18 @@ const extractImageInfos = world => {
 }
 
 /**
+ * Checks if a given sprite is from the player.
+ */
+const isPlayerSprite = (sprite, world) => sprite.id === world.playerId;
+
+/**
  * Generates an array containing information about the rooms contained in the world object.
  */
 const extractRoomInfos = (world, imageOffsets) => {
   const spritesPerRoom = groupBy(Object.values(world.sprite), 'room');
   return Object.values(world.room).map(room => ({
     ...room,
-    sprites: spritesPerRoom[room.id] || [],
+    sprites: (spritesPerRoom[room.id] || []).filter(sprite => !isPlayerSprite(sprite, world)),
     tilemap: room.tilemap.map(row => row.map(v => v === '0' ? 0 : imageOffsets[world.tile[v].drw]))
   }));
 };
@@ -114,10 +124,12 @@ export const convertArduboy = code => {
   const frameCount = imageInfos.reduce((total, info) => total + info.frames.length, 0);
   
   const roomInfos = extractRoomInfos(world, imageOffsets);
+  const playerSpriteStart = Object.values(world.sprite).find(sprite => isPlayerSprite(sprite, world));
   
   const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
+    toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
     toRoomsDeclaration('rooms', roomInfos),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
@@ -151,25 +163,93 @@ typedef struct Room {
 
 ${mainGeneratedBody}
 
+const uint8_t BUTTON_REPEAT_RATE = 8;
+
 uint8_t currentLevel = 0;
+uint8_t buttonDelay = 0;
+uint8_t scrollY = 0;
+uint8_t targetScrollY = 0;
+bool needUpdate = true;
+BitsySprite playerSprite;
 
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
-  arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
+  arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
+}
+
+void drawSprite(BitsySprite *spr) {
+  drawTile(spr->x, spr->y, spr->image);
+}
+
+bool controlPlayer() {
+  if (arduboy.pressed(UP_BUTTON)) {
+    playerSprite.y--;
+    return true;
+  }
+  if (arduboy.pressed(DOWN_BUTTON)) {
+    playerSprite.y++;
+    return true;
+  }
+  if (arduboy.pressed(LEFT_BUTTON)) {
+    playerSprite.x--;
+    return true;
+  }
+  if (arduboy.pressed(RIGHT_BUTTON)) {
+    playerSprite.x++;
+    return true;
+  }
+  
+  return false;
+}
+
+void setup() {
+  // put your setup code here, to run once:
+  arduboy.begin();
+  arduboy.clear();
+  arduboy.print("Hello World");
+  arduboy.display();
+  
+  playerSprite = playerSpriteStart;
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
-
-  // Run twice every second.
-  if (arduboy.everyXFrames(30))
-  {
-    arduboy.clear();
-    arduboy.setCursor(0, 56);
-    arduboy.print("Hello World");
+  
+  // Wait between keypresses
+  if (buttonDelay > 0) {
+    buttonDelay--;
+  } else {
+    if (controlPlayer()) {
+      buttonDelay = BUTTON_REPEAT_RATE;
+      needUpdate = true;
     
+      // Calculates scrolling
+      if (playerSprite.y < 4) {
+        targetScrollY = 0;
+      } else {
+        uint8_t scrollTY = playerSprite.y - 4;
+        if (scrollTY > 7) scrollTY = 7;
+        targetScrollY = scrollTY * 8;
+      }
+    }
+  }
+  
+  // Scroll if necessary
+  if (scrollY != targetScrollY) {
+    if (scrollY < targetScrollY) {
+      scrollY++;
+    } else {
+      scrollY--;
+    }
+    needUpdate = true;
+  }
+
+  // Draw the graphics
+  if (needUpdate) {
+    arduboy.clear();
+
     // Fill the background with the tiles
-    for (uint8_t ty = 0; ty != 7; ty++) {
+    for (uint8_t ty = 0; ty != 16; ty++) {
       for (uint8_t tx = 0; tx != 16; tx++) {
         uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[ty][tx]);
         drawTile(tx, ty, tn);
@@ -179,11 +259,16 @@ void loop() {
     // Draw the sprites on top of the background
     for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
       BitsySprite *spr = rooms[currentLevel].sprites + i;
-      drawTile(spr->x, spr->y, spr->image);
+      drawSprite(spr);
     }
     
+    // Draw the player's sprite
+    drawSprite(&playerSprite);
+    
     arduboy.display();
+    
+    needUpdate = false;
   }
 }
-`;
+`.trimStart();
 }
