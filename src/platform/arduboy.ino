@@ -1,15 +1,6 @@
-
 #include <Arduboy2.h>
 
 Arduboy2 arduboy;
-
-void setup() {
-  // put your setup code here, to run once:
-  arduboy.begin();
-  arduboy.clear();
-  arduboy.print("Hello World");
-  arduboy.display();
-}
 
 enum ImageOffset {
   ofs_BLANK = 0,
@@ -31,8 +22,13 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
+const uint8_t FRAME_COUNT = 5;
+
+const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
+
 const BitsySprite PROGMEM room_0_sprites[] = {
-    {ofs_SPR_A, 3, 5}
+/*  { ofs_SPR_A, 4, 4 },*/
+  { ofs_SPR_a, 8, 12 }
 };
 
 const Room PROGMEM rooms[] = {
@@ -55,11 +51,9 @@ const Room PROGMEM rooms[] = {
     { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 1, room_0_sprites}
+  }, 2, room_0_sprites}
 
 };
-
-const uint8_t FRAME_COUNT = 5;
 
 const uint8_t PROGMEM images[][8] = { 
 
@@ -73,12 +67,28 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00111100, B11111000, B01111100, B01100000, B11100000, B00010000, B00001100 },
   // ITM_0: index 4, offset 4, 1 frame(s)
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
-};;
+};
 
 uint8_t currentLevel = 0;
+BitsySprite playerSprite;
 
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
   arduboy.drawBitmap(tx * 8, ty * 8, images[tn], 8, 8, WHITE);
+}
+
+void drawSprite(BitsySprite *spr) {
+  drawTile(spr->x, spr->y, spr->image);
+}
+
+
+void setup() {
+  // put your setup code here, to run once:
+  arduboy.begin();
+  arduboy.clear();
+  arduboy.print("Hello World");
+  arduboy.display();
+  
+  playerSprite = playerSpriteStart;
 }
 
 void loop() {
@@ -103,9 +113,11 @@ void loop() {
     // Draw the sprites on top of the background
     for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
       BitsySprite *spr = rooms[currentLevel].sprites + i;
-      drawTile(spr->x, spr->y, spr->image);
+      drawSprite(spr);
     }
     
-	  arduboy.display();
+    drawSprite(&playerSprite);
+    
+    arduboy.display();
   }
 }
