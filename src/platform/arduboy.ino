@@ -86,6 +86,8 @@ uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
 
+void  (*currentDialog)() = NULL;
+
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
   arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
 }
@@ -204,11 +206,13 @@ void loop() {
     // Draw the player's sprite
     drawSprite(&playerSprite);
     
-    (*room_0_sprites[0].dialog)();
-  
     arduboy.display();
     
     needUpdate = false;
+  }
+  
+  if (currentDialog) {
+    (*currentDialog)();
   }
   
 }
