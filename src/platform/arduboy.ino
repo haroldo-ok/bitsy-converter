@@ -2,6 +2,7 @@
 
 Arduboy2 arduboy;
 
+
 enum ImageOffset {
   ofs_BLANK = 0,
   ofs_TIL_a = 1,
@@ -27,7 +28,6 @@ const uint8_t FRAME_COUNT = 5;
 const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
 
 const BitsySprite PROGMEM room_0_sprites[] = {
-/*  { ofs_SPR_A, 4, 4 },*/
   { ofs_SPR_a, 8, 12 }
 };
 
@@ -51,7 +51,7 @@ const Room PROGMEM rooms[] = {
     { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 2, room_0_sprites}
+  }, 1, room_0_sprites}
 
 };
 
@@ -86,22 +86,33 @@ void drawSprite(BitsySprite *spr) {
   drawTile(spr->x, spr->y, spr->image);
 }
 
+bool tryMovingPlayer(int8_t dx, uint8_t dy) {
+  uint8_t x = playerSprite.x + dx;
+  uint8_t y = playerSprite.y + dy;
+
+  // Out of bounds  
+  if (x > 127 || y > 127) {
+    return false;
+  }
+  
+  playerSprite.x = x;
+  playerSprite.y = y;
+  
+  return true;
+}
+
 bool controlPlayer() {
   if (arduboy.pressed(UP_BUTTON)) {
-    playerSprite.y--;
-    return true;
+    return tryMovingPlayer(0, -1);
   }
   if (arduboy.pressed(DOWN_BUTTON)) {
-    playerSprite.y++;
-    return true;
+    return tryMovingPlayer(0, 1);
   }
   if (arduboy.pressed(LEFT_BUTTON)) {
-    playerSprite.x--;
-    return true;
+    return tryMovingPlayer(-1, 0);
   }
   if (arduboy.pressed(RIGHT_BUTTON)) {
-    playerSprite.x++;
-    return true;
+    return tryMovingPlayer(1, 0);
   }
   
   return false;
