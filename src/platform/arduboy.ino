@@ -31,11 +31,15 @@ const uint8_t FRAME_COUNT = 5;
 const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
 
 void dialog_SPR_0() {
-  showDialog("Meow!!");
+  showDialog("I'm a cat");  
+}
+
+void dialog_ITM_0() {
+  showDialog("Encontraste um copo com chá quentinho");  
 }
 
 const BitsySprite PROGMEM room_0_sprites[] = {
-  { ofs_SPR_a, 8, 12, &dialog_SPR_0 }
+  { ofs_SPR_a, 8, 12, dialog_SPR_0 }
 };
 
 const Room PROGMEM rooms[] = {
@@ -116,15 +120,7 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
     BitsySprite *spr = rooms[currentLevel].sprites + i;
     if (spr->x == x && spr->y == y) {
-      currentDialog = spr->dialog;
-      
-      Serial.print("spr->dialog: ");
-      Serial.print((long int) spr->dialog);
-      Serial.print(" currentDialog: ");
-      Serial.print((long int) currentDialog);
-      Serial.print(" is true: ");
-      Serial.println(!!currentDialog);
-      
+      currentDialog = spr->dialog;      
       return true;
     }
   }
@@ -190,8 +186,6 @@ void setup() {
   arduboy.display();
   
   playerSprite = playerSpriteStart;
-  
-  Serial.begin(9600);
 }
 
 void loop() {
@@ -254,11 +248,9 @@ void loop() {
   }
   
   if (currentDialog) {
-    Serial.println("Showing dialog...");
     (*currentDialog)();
     currentDialog = NULL;
     needUpdate = true;
-    Serial.println("Done.");
   }
   
 }
