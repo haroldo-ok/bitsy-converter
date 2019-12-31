@@ -45,13 +45,21 @@ ${content}
  */
 const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
+const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
+
+const generatePrintDialogCommand = command => `showDialog("${command.arguments[0].value}");`;
+
+const generateBlockDialogCommand = command => command.children
+  .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
+
 /**
  * Generates a dialog function.
  */
 const toDialogDeclaration = (name, dialog) => {
-  const content = '//TODO'
+  const content = dialog.type === 'block' && dialog.mode === 'dialog' ?
+    generateBlockDialogCommand(dialog) : generateUnknownDialogCommand(dialog);
   return `void dialog_${name}() {
-${content}  
+  ${content}  
 }`;
 }
 
