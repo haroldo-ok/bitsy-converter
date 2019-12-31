@@ -87,14 +87,22 @@ void drawSprite(BitsySprite *spr) {
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
+  // Calculate where the player will try to move to
   uint8_t x = playerSprite.x + dx;
   uint8_t y = playerSprite.y + dy;
 
   // Out of bounds  
-  if (x > 127 || y > 127) {
+  if (x > 15 || y > 15) {
     return false;
   }
   
+  // Checks if there are background tiles in the way
+  uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[y][x]);
+  if (tn) {
+    return false;
+  }
+  
+  // No obstacles found: the player can move.
   playerSprite.x = x;
   playerSprite.y = y;
   
@@ -145,7 +153,7 @@ void loop() {
         targetScrollY = 0;
       } else {
         uint8_t scrollTY = playerSprite.y - 4;
-        if (scrollTY > 7) scrollTY = 7;
+        if (scrollTY > 8) scrollTY = 8;
         targetScrollY = scrollTY * 8;
       }
     }
