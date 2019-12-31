@@ -139,14 +139,6 @@ export const convertArduboy = code => {
 
 Arduboy2 arduboy;
 
-void setup() {
-  // put your setup code here, to run once:
-  arduboy.begin();
-  arduboy.clear();
-  arduboy.print("Hello World");
-  arduboy.display();
-}
-
 ${imageOffsetBody}
 
 typedef struct {
