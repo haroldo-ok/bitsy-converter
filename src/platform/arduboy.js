@@ -46,6 +46,21 @@ ${content}
 const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
 /**
+ * Generates a dialog function.
+ */
+const toDialogDeclaration = (name, dialog) => {
+  const content = '//TODO'
+  return `void dialog_${name}() {
+${content}  
+}`;
+}
+
+/**
+ * Generates dialog functions from the world object
+ */
+const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration(name, dialog)).join('\n\n');
+
+/**
  * Generates a flat C array constant from a bidimensional JS array.
  */
 const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\n    ') => 
@@ -64,7 +79,7 @@ const toRoomDeclaration = (room) => `
 /**
  * Generates a C constant from a sprite object.
  */
-const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y} }`;
+const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
@@ -130,6 +145,7 @@ export const convertArduboy = code => {
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
     toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
+    toDialogsDeclaration(world),
     toRoomsDeclaration('rooms', roomInfos),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
