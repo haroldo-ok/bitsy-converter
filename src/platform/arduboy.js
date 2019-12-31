@@ -198,15 +198,7 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
     BitsySprite *spr = rooms[currentLevel].sprites + i;
     if (spr->x == x && spr->y == y) {
-      currentDialog = spr->dialog;
-      
-      Serial.print("spr->dialog: ");
-      Serial.print((long int) spr->dialog);
-      Serial.print(" currentDialog: ");
-      Serial.print((long int) currentDialog);
-      Serial.print(" is true: ");
-      Serial.println(!!currentDialog);
-      
+      currentDialog = spr->dialog;      
       return true;
     }
   }
@@ -253,7 +245,7 @@ void showDialog(char *s) {
     waitNextFrame();
     
     if (arduboy.everyXFrames(30)) {
-      arduboy.drawChar(120, 36, '\x1F', blinkState ? BLACK : WHITE, blinkState ? WHITE : BLACK, 1);
+      arduboy.drawChar(120, 36, '\\x1F', blinkState ? BLACK : WHITE, blinkState ? WHITE : BLACK, 1);
       blinkState = !blinkState;
       arduboy.display();
     }
@@ -272,8 +264,6 @@ void setup() {
   arduboy.display();
   
   playerSprite = playerSpriteStart;
-  
-  Serial.begin(9600);
 }
 
 void loop() {
@@ -336,11 +326,9 @@ void loop() {
   }
   
   if (currentDialog) {
-    Serial.println("Showing dialog...");
     (*currentDialog)();
     currentDialog = NULL;
     needUpdate = true;
-    Serial.println("Done.");
   }
   
 }
