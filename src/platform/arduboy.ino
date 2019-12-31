@@ -14,6 +14,7 @@ enum ImageOffset {
 typedef struct {
     ImageOffset image;
     uint8_t x, y;
+    void  (*dialog)();
 } BitsySprite;
 
 typedef struct Room {
@@ -23,12 +24,18 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
+extern void showDialog(char *s);
+
 const uint8_t FRAME_COUNT = 5;
 
 const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
 
+void dialog_SPR_0() {
+  showDialog("Meow!!");
+}
+
 const BitsySprite PROGMEM room_0_sprites[] = {
-  { ofs_SPR_a, 8, 12 }
+  { ofs_SPR_a, 8, 12, &dialog_SPR_0 }
 };
 
 const Room PROGMEM rooms[] = {
@@ -68,6 +75,7 @@ const uint8_t PROGMEM images[][8] = {
   // ITM_0: index 4, offset 4, 1 frame(s)
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
 };
+
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
 
@@ -124,6 +132,12 @@ bool controlPlayer() {
   }
   
   return false;
+}
+
+void showDialog(char *s) {
+  arduboy.setTextWrap(true);
+  arduboy.setCursor(10, 10);
+  arduboy.print(s);  
 }
 
 void setup() {
@@ -190,8 +204,11 @@ void loop() {
     // Draw the player's sprite
     drawSprite(&playerSprite);
     
+    (*room_0_sprites[0].dialog)();
+  
     arduboy.display();
     
     needUpdate = false;
   }
+  
 }
