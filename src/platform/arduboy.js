@@ -144,6 +144,7 @@ ${imageOffsetBody}
 typedef struct {
     ImageOffset image;
     uint8_t x, y;
+    void  (*dialog)();
 } BitsySprite;
 
 typedef struct Room {
@@ -153,7 +154,10 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
+extern void showDialog(char *s);
+
 ${mainGeneratedBody}
+
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
 
@@ -164,6 +168,8 @@ uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
 
+void  (*currentDialog)() = NULL;
+
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
   arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
 }
@@ -172,25 +178,90 @@ void drawSprite(BitsySprite *spr) {
   drawTile(spr->x, spr->y, spr->image);
 }
 
+bool tryMovingPlayer(int8_t dx, uint8_t dy) {
+  // Calculate where the player will try to move to
+  uint8_t x = playerSprite.x + dx;
+  uint8_t y = playerSprite.y + dy;
+
+  // Out of bounds  
+  if (x > 15 || y > 15) {
+    return false;
+  }
+  
+  // Check if there are background tiles in the way
+  uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[y][x]);
+  if (tn) {
+    return false;
+  }
+  
+  // Check collision against the sprites
+  for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
+    BitsySprite *spr = rooms[currentLevel].sprites + i;
+    if (spr->x == x && spr->y == y) {
+      currentDialog = spr->dialog;
+      
+      Serial.print("spr->dialog: ");
+      Serial.print((long int) spr->dialog);
+      Serial.print(" currentDialog: ");
+      Serial.print((long int) currentDialog);
+      Serial.print(" is true: ");
+      Serial.println(!!currentDialog);
+      
+      return true;
+    }
+  }
+    
+  // No obstacles found: the player can move.
+  playerSprite.x = x;
+  playerSprite.y = y;
+  
+  return true;
+}
+
 bool controlPlayer() {
   if (arduboy.pressed(UP_BUTTON)) {
-    playerSprite.y--;
-    return true;
+    return tryMovingPlayer(0, -1);
   }
   if (arduboy.pressed(DOWN_BUTTON)) {
-    playerSprite.y++;
-    return true;
+    return tryMovingPlayer(0, 1);
   }
   if (arduboy.pressed(LEFT_BUTTON)) {
-    playerSprite.x--;
-    return true;
+    return tryMovingPlayer(-1, 0);
   }
   if (arduboy.pressed(RIGHT_BUTTON)) {
-    playerSprite.x++;
-    return true;
+    return tryMovingPlayer(1, 0);
   }
   
   return false;
+}
+
+void waitNextFrame() {
+    while (!arduboy.nextFrame()) arduboy.idle();
+}
+
+void showDialog(char *s) {
+  arduboy.fillRect(0, 4, 127, 44, BLACK);
+  
+  arduboy.setTextWrap(true);
+  arduboy.setCursor(0, 6);
+  arduboy.print(s);
+  arduboy.display();
+  
+  bool blinkState = true;
+  
+  while (arduboy.notPressed(A_BUTTON | B_BUTTON)) {
+    waitNextFrame();
+    
+    if (arduboy.everyXFrames(30)) {
+      arduboy.drawChar(120, 36, '\x1F', blinkState ? BLACK : WHITE, blinkState ? WHITE : BLACK, 1);
+      blinkState = !blinkState;
+      arduboy.display();
+    }
+  }
+  
+  while (arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
+    waitNextFrame();
+  }
 }
 
 void setup() {
@@ -201,6 +272,8 @@ void setup() {
   arduboy.display();
   
   playerSprite = playerSpriteStart;
+  
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -220,7 +293,7 @@ void loop() {
         targetScrollY = 0;
       } else {
         uint8_t scrollTY = playerSprite.y - 4;
-        if (scrollTY > 7) scrollTY = 7;
+        if (scrollTY > 8) scrollTY = 8;
         targetScrollY = scrollTY * 8;
       }
     }
@@ -261,6 +334,15 @@ void loop() {
     
     needUpdate = false;
   }
+  
+  if (currentDialog) {
+    Serial.println("Showing dialog...");
+    (*currentDialog)();
+    currentDialog = NULL;
+    needUpdate = true;
+    Serial.println("Done.");
+  }
+  
 }
 `.trimStart();
 }
