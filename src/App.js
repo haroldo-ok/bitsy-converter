@@ -24,7 +24,7 @@ import ReactGA from 'react-ga';
 ReactGA.initialize('UA-130174335-4');
 ReactGA.pageview(window.location.pathname + window.location.search)
 
-const convertJSON = code => stringify(parseWorld(code), {maxLength: 160});
+const convertJSON = code => stringify(parseWorld(code, {parseScripts: true}), {maxLength: 160});
 
 class App extends Component {
   

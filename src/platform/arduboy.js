@@ -45,6 +45,29 @@ ${content}
  */
 const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
+const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
+
+const generatePrintDialogCommand = command => `showDialog("${command.arguments[0].value}");`;
+
+const generateBlockDialogCommand = command => command.children
+  .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
+
+/**
+ * Generates a dialog function.
+ */
+const toDialogDeclaration = (name, dialog) => {
+  const content = dialog.type === 'block' && dialog.mode === 'dialog' ?
+    generateBlockDialogCommand(dialog) : generateUnknownDialogCommand(dialog);
+  return `void dialog_${name}() {
+  ${content}  
+}`;
+}
+
+/**
+ * Generates dialog functions from the world object
+ */
+const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration(name, dialog)).join('\n\n');
+
 /**
  * Generates a flat C array constant from a bidimensional JS array.
  */
@@ -64,7 +87,7 @@ const toRoomDeclaration = (room) => `
 /**
  * Generates a C constant from a sprite object.
  */
-const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y} }`;
+const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
@@ -117,7 +140,7 @@ const extractRoomInfos = (world, imageOffsets) => {
  * Generates Arduboy-compatible C++ code from a Bitsy script object.
  */
 export const convertArduboy = code => {
-  const world = parseWorld(code);
+  const world = parseWorld(code, {parseScripts: true});
   const imageInfos = extractImageInfos(world);
   
   const imageOffsets = Object.fromEntries(imageInfos.map(({name, offset}) => [name, offset]));
@@ -130,6 +153,7 @@ export const convertArduboy = code => {
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
     toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
+    toDialogsDeclaration(world),
     toRoomsDeclaration('rooms', roomInfos),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
@@ -144,6 +168,7 @@ ${imageOffsetBody}
 typedef struct {
     ImageOffset image;
     uint8_t x, y;
+    void  (*dialog)();
 } BitsySprite;
 
 typedef struct Room {
@@ -153,7 +178,10 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
+extern void showDialog(char *s);
+
 ${mainGeneratedBody}
+
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
 
@@ -164,6 +192,8 @@ uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
 
+void  (*currentDialog)() = NULL;
+
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
   arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
 }
@@ -172,25 +202,82 @@ void drawSprite(BitsySprite *spr) {
   drawTile(spr->x, spr->y, spr->image);
 }
 
+bool tryMovingPlayer(int8_t dx, uint8_t dy) {
+  // Calculate where the player will try to move to
+  uint8_t x = playerSprite.x + dx;
+  uint8_t y = playerSprite.y + dy;
+
+  // Out of bounds  
+  if (x > 15 || y > 15) {
+    return false;
+  }
+  
+  // Check if there are background tiles in the way
+  uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[y][x]);
+  if (tn) {
+    return false;
+  }
+  
+  // Check collision against the sprites
+  for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
+    BitsySprite *spr = rooms[currentLevel].sprites + i;
+    if (spr->x == x && spr->y == y) {
+      currentDialog = spr->dialog;      
+      return true;
+    }
+  }
+    
+  // No obstacles found: the player can move.
+  playerSprite.x = x;
+  playerSprite.y = y;
+  
+  return true;
+}
+
 bool controlPlayer() {
   if (arduboy.pressed(UP_BUTTON)) {
-    playerSprite.y--;
-    return true;
+    return tryMovingPlayer(0, -1);
   }
   if (arduboy.pressed(DOWN_BUTTON)) {
-    playerSprite.y++;
-    return true;
+    return tryMovingPlayer(0, 1);
   }
   if (arduboy.pressed(LEFT_BUTTON)) {
-    playerSprite.x--;
-    return true;
+    return tryMovingPlayer(-1, 0);
   }
   if (arduboy.pressed(RIGHT_BUTTON)) {
-    playerSprite.x++;
-    return true;
+    return tryMovingPlayer(1, 0);
   }
   
   return false;
+}
+
+void waitNextFrame() {
+    while (!arduboy.nextFrame()) arduboy.idle();
+}
+
+void showDialog(char *s) {
+  arduboy.fillRect(0, 4, 127, 44, BLACK);
+  
+  arduboy.setTextWrap(true);
+  arduboy.setCursor(0, 6);
+  arduboy.print(s);
+  arduboy.display();
+  
+  bool blinkState = true;
+  
+  while (arduboy.notPressed(A_BUTTON | B_BUTTON)) {
+    waitNextFrame();
+    
+    if (arduboy.everyXFrames(30)) {
+      arduboy.drawChar(120, 36, '\\x1F', blinkState ? BLACK : WHITE, blinkState ? WHITE : BLACK, 1);
+      blinkState = !blinkState;
+      arduboy.display();
+    }
+  }
+  
+  while (arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
+    waitNextFrame();
+  }
 }
 
 void setup() {
@@ -220,7 +307,7 @@ void loop() {
         targetScrollY = 0;
       } else {
         uint8_t scrollTY = playerSprite.y - 4;
-        if (scrollTY > 7) scrollTY = 7;
+        if (scrollTY > 8) scrollTY = 8;
         targetScrollY = scrollTY * 8;
       }
     }
@@ -261,6 +348,13 @@ void loop() {
     
     needUpdate = false;
   }
+  
+  if (currentDialog) {
+    (*currentDialog)();
+    currentDialog = NULL;
+    needUpdate = true;
+  }
+  
 }
 `.trimStart();
 }

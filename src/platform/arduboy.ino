@@ -2,6 +2,7 @@
 
 Arduboy2 arduboy;
 
+
 enum ImageOffset {
   ofs_BLANK = 0,
   ofs_TIL_a = 1,
@@ -13,6 +14,7 @@ enum ImageOffset {
 typedef struct {
     ImageOffset image;
     uint8_t x, y;
+    void  (*dialog)();
 } BitsySprite;
 
 typedef struct Room {
@@ -22,13 +24,22 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
+extern void showDialog(char *s);
+
 const uint8_t FRAME_COUNT = 5;
 
 const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
 
+void dialog_SPR_0() {
+  showDialog("I'm a cat");  
+}
+
+void dialog_ITM_0() {
+  showDialog("Encontraste um copo com chá quentinho");  
+}
+
 const BitsySprite PROGMEM room_0_sprites[] = {
-/*  { ofs_SPR_A, 4, 4 },*/
-  { ofs_SPR_a, 8, 12 }
+  { ofs_SPR_a, 8, 12, dialog_SPR_0 }
 };
 
 const Room PROGMEM rooms[] = {
@@ -51,7 +62,7 @@ const Room PROGMEM rooms[] = {
     { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 2, room_0_sprites}
+  }, 1, room_0_sprites}
 
 };
 
@@ -69,6 +80,7 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
 };
 
+
 const uint8_t BUTTON_REPEAT_RATE = 8;
 
 uint8_t currentLevel = 0;
@@ -78,6 +90,8 @@ uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
 
+void  (*currentDialog)() = NULL;
+
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
   arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
 }
@@ -86,25 +100,82 @@ void drawSprite(BitsySprite *spr) {
   drawTile(spr->x, spr->y, spr->image);
 }
 
+bool tryMovingPlayer(int8_t dx, uint8_t dy) {
+  // Calculate where the player will try to move to
+  uint8_t x = playerSprite.x + dx;
+  uint8_t y = playerSprite.y + dy;
+
+  // Out of bounds  
+  if (x > 15 || y > 15) {
+    return false;
+  }
+  
+  // Check if there are background tiles in the way
+  uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[y][x]);
+  if (tn) {
+    return false;
+  }
+  
+  // Check collision against the sprites
+  for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
+    BitsySprite *spr = rooms[currentLevel].sprites + i;
+    if (spr->x == x && spr->y == y) {
+      currentDialog = spr->dialog;      
+      return true;
+    }
+  }
+    
+  // No obstacles found: the player can move.
+  playerSprite.x = x;
+  playerSprite.y = y;
+  
+  return true;
+}
+
 bool controlPlayer() {
   if (arduboy.pressed(UP_BUTTON)) {
-    playerSprite.y--;
-    return true;
+    return tryMovingPlayer(0, -1);
   }
   if (arduboy.pressed(DOWN_BUTTON)) {
-    playerSprite.y++;
-    return true;
+    return tryMovingPlayer(0, 1);
   }
   if (arduboy.pressed(LEFT_BUTTON)) {
-    playerSprite.x--;
-    return true;
+    return tryMovingPlayer(-1, 0);
   }
   if (arduboy.pressed(RIGHT_BUTTON)) {
-    playerSprite.x++;
-    return true;
+    return tryMovingPlayer(1, 0);
   }
   
   return false;
+}
+
+void waitNextFrame() {
+    while (!arduboy.nextFrame()) arduboy.idle();
+}
+
+void showDialog(char *s) {
+  arduboy.fillRect(0, 4, 127, 44, BLACK);
+  
+  arduboy.setTextWrap(true);
+  arduboy.setCursor(0, 6);
+  arduboy.print(s);
+  arduboy.display();
+  
+  bool blinkState = true;
+  
+  while (arduboy.notPressed(A_BUTTON | B_BUTTON)) {
+    waitNextFrame();
+    
+    if (arduboy.everyXFrames(30)) {
+      arduboy.drawChar(120, 36, '\x1F', blinkState ? BLACK : WHITE, blinkState ? WHITE : BLACK, 1);
+      blinkState = !blinkState;
+      arduboy.display();
+    }
+  }
+  
+  while (arduboy.pressed(A_BUTTON) || arduboy.pressed(B_BUTTON)) {
+    waitNextFrame();
+  }
 }
 
 void setup() {
@@ -134,7 +205,7 @@ void loop() {
         targetScrollY = 0;
       } else {
         uint8_t scrollTY = playerSprite.y - 4;
-        if (scrollTY > 7) scrollTY = 7;
+        if (scrollTY > 8) scrollTY = 8;
         targetScrollY = scrollTY * 8;
       }
     }
@@ -175,4 +246,11 @@ void loop() {
     
     needUpdate = false;
   }
+  
+  if (currentDialog) {
+    (*currentDialog)();
+    currentDialog = NULL;
+    needUpdate = true;
+  }
+  
 }
