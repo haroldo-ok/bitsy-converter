@@ -1,8 +1,12 @@
 # Bitsy-Converter
 
-This tool allows one to convert Bitsy scripts into various output formats; for now, only JSON is supported; more formats will come later.
+This tool allows one to convert Bitsy scripts into various output formats:
 
-All you have to do is paste the script on the left panel, and the converted result will be displayed on the right panel.
+* JSON: fully;
+* Arduboy source code: work in progress; 
+* More formats will come later.
+
+All you have to do is paste the script on the left panel, and the converted result will be displayed on the right panel; you can alternate between JSON and Arduboy formats by.
 
 Future implementations: while it only outputs JSON, for now, this tool is intended to convert the scripts into formats compatible with various programming languages/libraries, like, say, generating Arduboy-Compatible C source, curses-compatible C source, or Batari Basic compatible BB source, and so on.
 
