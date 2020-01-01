@@ -198,6 +198,16 @@ uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
 
+void calculateRequiredScrolling() {
+  if (playerSprite.y < 4) {
+    targetScrollY = 0;
+  } else {
+    uint8_t scrollTY = playerSprite.y - 4;
+    if (scrollTY > 8) scrollTY = 8;
+    targetScrollY = scrollTY * 8;
+  }
+}
+
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
   uint8_t frameNumber = frameControl % pgm_read_byte(&tileInfos[tn].frameCount);
   arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn + frameNumber], 8, 8, WHITE);
@@ -209,6 +219,16 @@ void drawRomSprite(BitsySprite *spr) {
 
 void drawSprite(BitsySprite *spr) {
   drawTile(spr->x, spr->y, spr->image);
+}
+
+BitsySprite *fetchSprite(uint16_t spriteNumber) {
+    // Basically, rooms[currentLevel].sprites + i
+  return pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite);
+}
+
+Exit *fetchExit(uint16_t exitNumber) {
+    // Basically, rooms[currentLevel].exits + i
+  return pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -229,7 +249,7 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   
   // Check collision against the sprites
   for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
-    BitsySprite *spr = pgm_read_word(rooms[currentLevel].sprites + i);
+    BitsySprite *spr = fetchSprite(i);
     if (pgm_read_byte(&spr->x) == x && pgm_read_byte(&spr->y) == y) {
       currentDialog = pgm_read_word(&spr->dialog);
       return true;
@@ -237,15 +257,17 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   }
     
   // Check collision against the exits
-  Serial.println("exitCount=");
-  Serial.println(rooms[currentLevel].exitCount);
-  for (uint8_t i = 0; i != rooms[currentLevel].exitCount; i++) {
-    Exit *ext = rooms[currentLevel].exits + i;
-    //Serial.println(ext->origX);
-    if (ext->origX == x && ext->origY == y) {
-      playerSprite.x = ext->destX;
-      playerSprite.y = ext->destY;
-      currentLevel = ext->destRoom;
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].exitCount); i++) {
+    Exit *ext = fetchExit(i);
+    
+    if (pgm_read_byte(&ext->origX) == x && pgm_read_byte(&ext->origY) == y) {
+      playerSprite.x = pgm_read_byte(&ext->destX);
+      playerSprite.y = pgm_read_byte(&ext->destY);
+      currentLevel = pgm_read_byte(&ext->destRoom);
+      
+      calculateRequiredScrolling();    
+      scrollY = targetScrollY;
+      
       return true;
     }
   }
@@ -332,15 +354,8 @@ void loop() {
     if (controlPlayer()) {
       buttonDelay = BUTTON_REPEAT_RATE;
       needUpdate = true;
-    
-      // Calculates scrolling
-      if (playerSprite.y < 4) {
-        targetScrollY = 0;
-      } else {
-        uint8_t scrollTY = playerSprite.y - 4;
-        if (scrollTY > 8) scrollTY = 8;
-        targetScrollY = scrollTY * 8;
-      }
+
+      calculateRequiredScrolling();    
     }
   }
   
@@ -367,28 +382,8 @@ void loop() {
     }
     
     // Draw the sprites on top of the background
-    Serial.print("spriteCount=");
-    Serial.print(pgm_read_byte(&rooms[currentLevel].spriteCount));
-    Serial.print(", ");
-    Serial.println(rooms[currentLevel].spriteCount);
     for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
-      Serial.print("sprites=");
-      Serial.print((unsigned long) (rooms[0].sprites + i));
-      Serial.println();
-
-      // Basically, rooms[currentLevel].sprites + i
-      BitsySprite *spr = pgm_read_word(&rooms[currentLevel].sprites) + (uint16_t) i * sizeof(BitsySprite);
-      
-      Serial.print("spr=");
-      Serial.print((unsigned long) spr);
-      Serial.print(", ");
-      Serial.print(spr->x);
-      Serial.print(", ");
-      Serial.print(rooms[0].sprites[0].x);
-      Serial.print(", ");
-      Serial.print(pgm_read_byte(&spr->x));
-      Serial.println();
-
+      BitsySprite *spr = fetchSprite(i);
       drawRomSprite(spr);
     }
     
