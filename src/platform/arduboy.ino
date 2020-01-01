@@ -27,22 +27,22 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
-extern void showDialog(char *s);
+extern void showDialog(String s);
 
 const uint8_t FRAME_COUNT = 11;
 
 const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
 
 void dialog_SPR_0() {
-  showDialog("I'm a cat. Meow!");  
+  showDialog(F("I'm a cat. Meow!"));  
 }
 
 void dialog_ITM_0() {
-  showDialog("Encontraste um copo com chá quentinho");  
+  showDialog(F("Encontraste um copo com chá quentinho"));  
 }
 
 void dialog_SPR_1() {
-  showDialog("Hello, I'm a chair.");  
+  showDialog(F("Hello, I'm a chair."));  
 }
 
 const BitsySprite PROGMEM room_0_sprites[] = {
@@ -218,7 +218,7 @@ void waitNextFrame() {
     while (!arduboy.nextFrame()) arduboy.idle();
 }
 
-void showDialog(char *s) {
+void showDialog(String s) {
   arduboy.fillRect(0, 4, 127, 44, BLACK);
   
   arduboy.setTextWrap(true);

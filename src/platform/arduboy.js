@@ -47,7 +47,7 @@ const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${
 
 const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
 
-const generatePrintDialogCommand = command => `showDialog("${command.arguments[0].value}");`;
+const generatePrintDialogCommand = command => `showDialog(F("${command.arguments[0].value}"));`;
 
 const generateBlockDialogCommand = command => command.children
   .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
@@ -178,7 +178,7 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
-extern void showDialog(char *s);
+extern void showDialog(String s);
 
 ${mainGeneratedBody}
 
@@ -255,7 +255,7 @@ void waitNextFrame() {
     while (!arduboy.nextFrame()) arduboy.idle();
 }
 
-void showDialog(char *s) {
+void showDialog(String s) {
   arduboy.fillRect(0, 4, 127, 44, BLACK);
   
   arduboy.setTextWrap(true);
