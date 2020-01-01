@@ -95,13 +95,18 @@ const toRoomDeclaration = (room) => `
   // Room ${room.id}
   {{
     ${ toMatrixDeclaration(room.tilemap) }
-  }, ${room.sprites.length}, room_${room.id}_sprites}
+  }, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits}
 `;
 
 /**
  * Generates a C constant from a sprite object.
  */
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
+
+/**
+ * Generates a C array declaration from an array
+ */
+const toArrayDeclaration = elements => `{ ${elements.join(', ')} }`;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
@@ -111,11 +116,15 @@ const toRoomsDeclaration = (name, roomInfos) => {
   ${ room.sprites.map(toSpriteDeclaration).join(',\n  ') }
 }`));
   
+  const exitDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_exits[]`, 'Exit PROGMEM', `{
+  ${ room.exits.map(({x, y, dest}) => toArrayDeclaration([x, y, dest.x, dest.y, dest.room])).join(',\n  ') }
+}`));
+
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }`);
 
-  return [...spriteDeclarations, roomsDeclaration].join('\n\n');
+  return [...spriteDeclarations, ...exitDeclarations, roomsDeclaration].join('\n\n');
 }
 
 /**
@@ -345,7 +354,7 @@ void showDialog(String s) {
     waitNextFrame();
     
     if (arduboy.everyXFrames(30)) {
-      arduboy.drawChar(120, 36, '\x1F', blinkState ? BLACK : WHITE, blinkState ? WHITE : BLACK, 1);
+      arduboy.drawChar(120, 36, '\\x1F', blinkState ? BLACK : WHITE, blinkState ? WHITE : BLACK, 1);
       blinkState = !blinkState;
       arduboy.display();
     }
