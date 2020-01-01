@@ -222,7 +222,7 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
     BitsySprite *spr = rooms[currentLevel].sprites + i;
     if (spr->x == x && spr->y == y) {
-      currentDialog = spr->dialog;      
+      currentDialog = pgm_read_word(&spr->dialog);
       return true;
     }
   }
