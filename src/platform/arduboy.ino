@@ -25,11 +25,20 @@ typedef struct {
   uint8_t frameCount;
 } TileInfo;
 
+typedef struct {
+  uint8_t origX, origY;
+  uint8_t destX, destY;
+  uint8_t destRoom;
+} Exit;
+
 typedef struct Room {
     uint8_t tileMap[16][16];
     
     uint8_t spriteCount;
     BitsySprite *sprites;
+    
+    uint8_t exitCount;
+    Exit *exits;
 } Room;
 
 extern void showDialog(String s);
@@ -49,6 +58,10 @@ void dialog_ITM_0() {
 void dialog_SPR_1() {
   showDialog(F("Hello, I'm a chair."));  
 }
+
+const Exit PROGMEM room_0_exits[] = {
+  { 7, 0, 7, 15, 1 },
+};
 
 const BitsySprite PROGMEM room_0_sprites[] = {
   { ofs_SPR_a, 8, 12, dialog_SPR_0 },
@@ -83,7 +96,7 @@ const Room PROGMEM rooms[] = {
     { 0, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 0 },
     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 2, room_0_sprites}
+  }, 2, room_0_sprites, 1, room_0_exits}
 ,
   // Room 1
   {{
@@ -190,6 +203,10 @@ void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
   arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn + frameNumber], 8, 8, WHITE);
 }
 
+void drawRomSprite(BitsySprite *spr) {
+  drawTile(pgm_read_byte(&spr->x), pgm_read_byte(&spr->y), pgm_read_byte(&spr->image));
+}
+
 void drawSprite(BitsySprite *spr) {
   drawTile(spr->x, spr->y, spr->image);
 }
@@ -211,14 +228,28 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   }
   
   // Check collision against the sprites
-  for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
-    BitsySprite *spr = rooms[currentLevel].sprites + i;
-    if (spr->x == x && spr->y == y) {
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
+    BitsySprite *spr = pgm_read_word(rooms[currentLevel].sprites + i);
+    if (pgm_read_byte(&spr->x) == x && pgm_read_byte(&spr->y) == y) {
       currentDialog = pgm_read_word(&spr->dialog);
       return true;
     }
   }
     
+  // Check collision against the exits
+  Serial.println("exitCount=");
+  Serial.println(rooms[currentLevel].exitCount);
+  for (uint8_t i = 0; i != rooms[currentLevel].exitCount; i++) {
+    Exit *ext = rooms[currentLevel].exits + i;
+    //Serial.println(ext->origX);
+    if (ext->origX == x && ext->origY == y) {
+      playerSprite.x = ext->destX;
+      playerSprite.y = ext->destY;
+      currentLevel = ext->destRoom;
+      return true;
+    }
+  }
+
   // No obstacles found: the player can move.
   playerSprite.x = x;
   playerSprite.y = y;
@@ -280,6 +311,9 @@ void setup() {
   arduboy.display();
   
   playerSprite = playerSpriteStart;
+  
+  Serial.begin(9600);
+  Serial.println("ready");
 }
 
 void loop() {
@@ -333,9 +367,29 @@ void loop() {
     }
     
     // Draw the sprites on top of the background
-    for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
-      BitsySprite *spr = rooms[currentLevel].sprites + i;
-      drawSprite(spr);
+    Serial.print("spriteCount=");
+    Serial.print(pgm_read_byte(&rooms[currentLevel].spriteCount));
+    Serial.print(", ");
+    Serial.println(rooms[currentLevel].spriteCount);
+    for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
+      Serial.print("sprites=");
+      Serial.print((unsigned long) (rooms[0].sprites + i));
+      Serial.println();
+
+      // Basically, rooms[currentLevel].sprites + i
+      BitsySprite *spr = pgm_read_word(&rooms[currentLevel].sprites) + (uint16_t) i * sizeof(BitsySprite);
+      
+      Serial.print("spr=");
+      Serial.print((unsigned long) spr);
+      Serial.print(", ");
+      Serial.print(spr->x);
+      Serial.print(", ");
+      Serial.print(rooms[0].sprites[0].x);
+      Serial.print(", ");
+      Serial.print(pgm_read_byte(&spr->x));
+      Serial.println();
+
+      drawRomSprite(spr);
     }
     
     // Draw the player's sprite
