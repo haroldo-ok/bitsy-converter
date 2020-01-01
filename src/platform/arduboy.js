@@ -27,27 +27,41 @@ enum ${name} {
 ${ Object.entries(object).map(([k, i]) => `  ${keyFunction(k)} = ${i}`).join(',\n') }
 };`
 
-/** 
- * Generates a C constant containing all the images contained in imageInfos
- */
-const toImageDeclaration = (name, imageInfos) => {
-  const content = imageInfos.map(({name, frames, index, offset}) => `
-  // ${name}: index ${index}, offset ${offset}, ${frames.length} frame(s)
-  ${frames.map(frame => `{ ${convertTile(frame)} }`).join(',\n  ')}`).join(',');
-  
-  return `const uint8_t PROGMEM ${name}[][8] = { 
-${content} 
-};`
-}
-
 /**
  * Generates a C constant declaration.
  */
 const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
+/**
+ * Generates image information declaration.
+ */
+const toImageInfoDeclaration = ({name, frames, isWall}) => `
+  // ${name}
+  ${ Array(frames.length).fill(`{ ${isWall}, ${frames.length} }`).join(',\n  ') }
+`.trim();
+
+/** 
+ * Generates a C constant containing all the images contained in imageInfos
+ */
+const toImageDeclaration = (name, imageInfos) => {
+  const infoDeclaration = toConstantDeclaration('tileInfos[]', 'TileInfo PROGMEM', `{
+  ${ imageInfos.map(toImageInfoDeclaration).join(',\n  ') }
+}`);
+  
+  const content = imageInfos.map(({name, frames, index, offset}) => `
+  // ${name}: index ${index}, offset ${offset}, ${frames.length} frame(s)
+  ${frames.map(frame => `{ ${convertTile(frame)} }`).join(',\n  ')}`).join(',');
+  
+  return `${infoDeclaration}
+
+const uint8_t PROGMEM ${name}[][8] = { 
+${content} 
+};`
+}
+
 const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
 
-const generatePrintDialogCommand = command => `showDialog("${command.arguments[0].value}");`;
+const generatePrintDialogCommand = command => `showDialog(F("${command.arguments[0].value}"));`;
 
 const generateBlockDialogCommand = command => command.children
   .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
@@ -111,7 +125,13 @@ const extractImageInfos = world => {
   const withBlank = [ ['BLANK', [ Array(8).fill(Array(8).fill(0)) ] ], ...Object.entries(world.images) ];
   const imageInfos = withBlank.map(([name, frames], index) => ({ name, frames, index }));
   
-  const withOffsets = imageInfos.reduce(({offset, results}, info) => ({
+  const tilesByDrw = Object.fromEntries(Object.values(world.tile).map(tile => [tile.drw, tile]));
+  const withWalls = imageInfos.map(info => ({
+    ...info, 
+    isWall: !!(tilesByDrw[info.name] && tilesByDrw[info.name].isWall)
+  }));
+  
+  const withOffsets = withWalls.reduce(({offset, results}, info) => ({
     offset: offset + info.frames.length,
     results: [...results, {offset, ...info}]
   }), {offset: 0, results: []}).results;  
@@ -171,6 +191,11 @@ typedef struct {
     void  (*dialog)();
 } BitsySprite;
 
+typedef struct {
+  bool isWall;
+  uint8_t frameCount;
+} TileInfo;
+
 typedef struct Room {
     uint8_t tileMap[16][16];
     
@@ -178,7 +203,7 @@ typedef struct Room {
     BitsySprite *sprites;
 } Room;
 
-extern void showDialog(char *s);
+extern void showDialog(String s);
 
 ${mainGeneratedBody}
 
@@ -191,11 +216,13 @@ uint8_t scrollY = 0;
 uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
+uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
 
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
-  arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
+  uint8_t frameNumber = frameControl % pgm_read_byte(&tileInfos[tn].frameCount);
+  arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn + frameNumber], 8, 8, WHITE);
 }
 
 void drawSprite(BitsySprite *spr) {
@@ -214,7 +241,7 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   
   // Check if there are background tiles in the way
   uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[y][x]);
-  if (tn) {
+  if (tn && pgm_read_byte(&tileInfos[tn].isWall)) {
     return false;
   }
   
@@ -222,7 +249,7 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
     BitsySprite *spr = rooms[currentLevel].sprites + i;
     if (spr->x == x && spr->y == y) {
-      currentDialog = spr->dialog;      
+      currentDialog = pgm_read_word(&spr->dialog);
       return true;
     }
   }
@@ -255,7 +282,7 @@ void waitNextFrame() {
     while (!arduboy.nextFrame()) arduboy.idle();
 }
 
-void showDialog(char *s) {
+void showDialog(String s) {
   arduboy.fillRect(0, 4, 127, 44, BLACK);
   
   arduboy.setTextWrap(true);
@@ -293,6 +320,11 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
+  
+  if (arduboy.everyXFrames(30)) {
+    frameControl++;
+    needUpdate = true;
+  }
   
   // Wait between keypresses
   if (buttonDelay > 0) {
