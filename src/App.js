@@ -17,7 +17,7 @@ import stringify from 'json-stringify-pretty-compact';
 
 import {convertArduboy} from './platform/arduboy'
 
-import exampleSource from './minimal.bitsy';
+import exampleSource from './example.bitsy';
 
 import ReactGA from 'react-ga';
 
