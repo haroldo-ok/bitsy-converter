@@ -95,13 +95,18 @@ const toRoomDeclaration = (room) => `
   // Room ${room.id}
   {{
     ${ toMatrixDeclaration(room.tilemap) }
-  }, ${room.sprites.length}, room_${room.id}_sprites}
+  }, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits}
 `;
 
 /**
  * Generates a C constant from a sprite object.
  */
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
+
+/**
+ * Generates a C array declaration from an array
+ */
+const toArrayDeclaration = elements => `{ ${elements.join(', ')} }`;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
@@ -111,11 +116,15 @@ const toRoomsDeclaration = (name, roomInfos) => {
   ${ room.sprites.map(toSpriteDeclaration).join(',\n  ') }
 }`));
   
+  const exitDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_exits[]`, 'Exit PROGMEM', `{
+  ${ room.exits.map(({x, y, dest}) => toArrayDeclaration([x, y, dest.x, dest.y, dest.room])).join(',\n  ') }
+}`));
+
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }`);
 
-  return [...spriteDeclarations, roomsDeclaration].join('\n\n');
+  return [...spriteDeclarations, ...exitDeclarations, roomsDeclaration].join('\n\n');
 }
 
 /**
@@ -196,11 +205,20 @@ typedef struct {
   uint8_t frameCount;
 } TileInfo;
 
+typedef struct {
+  uint8_t origX, origY;
+  uint8_t destX, destY;
+  uint8_t destRoom;
+} Exit;
+
 typedef struct Room {
     uint8_t tileMap[16][16];
     
     uint8_t spriteCount;
     BitsySprite *sprites;
+    
+    uint8_t exitCount;
+    Exit *exits;
 } Room;
 
 extern void showDialog(String s);
@@ -220,13 +238,37 @@ uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
 
+void calculateRequiredScrolling() {
+  if (playerSprite.y < 4) {
+    targetScrollY = 0;
+  } else {
+    uint8_t scrollTY = playerSprite.y - 4;
+    if (scrollTY > 8) scrollTY = 8;
+    targetScrollY = scrollTY * 8;
+  }
+}
+
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
   uint8_t frameNumber = frameControl % pgm_read_byte(&tileInfos[tn].frameCount);
   arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn + frameNumber], 8, 8, WHITE);
 }
 
+void drawRomSprite(BitsySprite *spr) {
+  drawTile(pgm_read_byte(&spr->x), pgm_read_byte(&spr->y), pgm_read_byte(&spr->image));
+}
+
 void drawSprite(BitsySprite *spr) {
   drawTile(spr->x, spr->y, spr->image);
+}
+
+BitsySprite *fetchSprite(uint16_t spriteNumber) {
+    // Basically, rooms[currentLevel].sprites + i
+  return pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite);
+}
+
+Exit *fetchExit(uint16_t exitNumber) {
+    // Basically, rooms[currentLevel].exits + i
+  return pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -246,14 +288,30 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   }
   
   // Check collision against the sprites
-  for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
-    BitsySprite *spr = rooms[currentLevel].sprites + i;
-    if (spr->x == x && spr->y == y) {
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
+    BitsySprite *spr = fetchSprite(i);
+    if (pgm_read_byte(&spr->x) == x && pgm_read_byte(&spr->y) == y) {
       currentDialog = pgm_read_word(&spr->dialog);
       return true;
     }
   }
     
+  // Check collision against the exits
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].exitCount); i++) {
+    Exit *ext = fetchExit(i);
+    
+    if (pgm_read_byte(&ext->origX) == x && pgm_read_byte(&ext->origY) == y) {
+      playerSprite.x = pgm_read_byte(&ext->destX);
+      playerSprite.y = pgm_read_byte(&ext->destY);
+      currentLevel = pgm_read_byte(&ext->destRoom);
+      
+      calculateRequiredScrolling();    
+      scrollY = targetScrollY;
+      
+      return true;
+    }
+  }
+
   // No obstacles found: the player can move.
   playerSprite.x = x;
   playerSprite.y = y;
@@ -315,6 +373,9 @@ void setup() {
   arduboy.display();
   
   playerSprite = playerSpriteStart;
+  
+  Serial.begin(9600);
+  Serial.println("ready");
 }
 
 void loop() {
@@ -333,15 +394,8 @@ void loop() {
     if (controlPlayer()) {
       buttonDelay = BUTTON_REPEAT_RATE;
       needUpdate = true;
-    
-      // Calculates scrolling
-      if (playerSprite.y < 4) {
-        targetScrollY = 0;
-      } else {
-        uint8_t scrollTY = playerSprite.y - 4;
-        if (scrollTY > 8) scrollTY = 8;
-        targetScrollY = scrollTY * 8;
-      }
+
+      calculateRequiredScrolling();    
     }
   }
   
@@ -368,9 +422,9 @@ void loop() {
     }
     
     // Draw the sprites on top of the background
-    for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
-      BitsySprite *spr = rooms[currentLevel].sprites + i;
-      drawSprite(spr);
+    for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
+      BitsySprite *spr = fetchSprite(i);
+      drawRomSprite(spr);
     }
     
     // Draw the player's sprite
