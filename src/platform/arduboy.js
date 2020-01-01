@@ -171,6 +171,11 @@ typedef struct {
     void  (*dialog)();
 } BitsySprite;
 
+typedef struct {
+  bool isWall;
+  uint8_t frameCount;
+} TileInfo;
+
 typedef struct Room {
     uint8_t tileMap[16][16];
     
@@ -214,7 +219,7 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   
   // Check if there are background tiles in the way
   uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[y][x]);
-  if (tn) {
+  if (tn && pgm_read_byte(&tileInfos[tn].isWall)) {
     return false;
   }
   
