@@ -45,7 +45,7 @@ const toImageInfoDeclaration = ({name, frames, isWall}) => `
  */
 const toImageDeclaration = (name, imageInfos) => {
 //  const infosPerFrame = imageInfos.flatMap(info => Array(info.frames.length).fill(info));
-  const infoDeclaration = toConstantDeclaration('tileInfos[]', 'ImageInfo PROGMEM', `{
+  const infoDeclaration = toConstantDeclaration('tileInfos[]', 'TileInfo PROGMEM', `{
   ${ imageInfos.map(toImageInfoDeclaration).join(',\n  ') }
 }`);
   
