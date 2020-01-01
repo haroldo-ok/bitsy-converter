@@ -27,23 +27,38 @@ enum ${name} {
 ${ Object.entries(object).map(([k, i]) => `  ${keyFunction(k)} = ${i}`).join(',\n') }
 };`
 
-/** 
- * Generates a C constant containing all the images contained in imageInfos
- */
-const toImageDeclaration = (name, imageInfos) => {
-  const content = imageInfos.map(({name, frames, index, offset}) => `
-  // ${name}: index ${index}, offset ${offset}, ${frames.length} frame(s)
-  ${frames.map(frame => `{ ${convertTile(frame)} }`).join(',\n  ')}`).join(',');
-  
-  return `const uint8_t PROGMEM ${name}[][8] = { 
-${content} 
-};`
-}
-
 /**
  * Generates a C constant declaration.
  */
 const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
+
+/**
+ * Generates image information declaration.
+ */
+const toImageInfoDeclaration = ({name, frames, isWall}) => `
+  // ${name}
+  ${ Array(frames.length).fill(`{ ${isWall}, ${frames.length} }`).join(',\n  ') }
+`.trim();
+
+/** 
+ * Generates a C constant containing all the images contained in imageInfos
+ */
+const toImageDeclaration = (name, imageInfos) => {
+//  const infosPerFrame = imageInfos.flatMap(info => Array(info.frames.length).fill(info));
+  const infoDeclaration = toConstantDeclaration('tileInfos[]', 'ImageInfo PROGMEM', `{
+  ${ imageInfos.map(toImageInfoDeclaration).join(',\n  ') }
+}`);
+  
+  const content = imageInfos.map(({name, frames, index, offset}) => `
+  // ${name}: index ${index}, offset ${offset}, ${frames.length} frame(s)
+  ${frames.map(frame => `{ ${convertTile(frame)} }`).join(',\n  ')}`).join(',');
+  
+  return `${infoDeclaration}
+
+const uint8_t PROGMEM ${name}[][8] = { 
+${content} 
+};`
+}
 
 const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
 
@@ -111,7 +126,13 @@ const extractImageInfos = world => {
   const withBlank = [ ['BLANK', [ Array(8).fill(Array(8).fill(0)) ] ], ...Object.entries(world.images) ];
   const imageInfos = withBlank.map(([name, frames], index) => ({ name, frames, index }));
   
-  const withOffsets = imageInfos.reduce(({offset, results}, info) => ({
+  const tilesByDrw = Object.fromEntries(Object.values(world.tile).map(tile => [tile.drw, tile]));
+  const withWalls = imageInfos.map(info => ({
+    ...info, 
+    isWall: !!(tilesByDrw[info.name] && tilesByDrw[info.name].isWall)
+  }));
+  
+  const withOffsets = withWalls.reduce(({offset, results}, info) => ({
     offset: offset + info.frames.length,
     results: [...results, {offset, ...info}]
   }), {offset: 0, results: []}).results;  
