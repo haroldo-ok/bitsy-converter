@@ -59,10 +59,6 @@ void dialog_SPR_1() {
   showDialog(F("Hello, I'm a chair."));  
 }
 
-const Exit PROGMEM room_0_exits[] = {
-  { 7, 0, 7, 15, 1 },
-};
-
 const BitsySprite PROGMEM room_0_sprites[] = {
   { ofs_SPR_a, 8, 12, dialog_SPR_0 },
   { ofs_SPR_b, 10, 6, dialog_SPR_1 }
@@ -73,6 +69,19 @@ const BitsySprite PROGMEM room_1_sprites[] = {
 };
 
 const BitsySprite PROGMEM room_2_sprites[] = {
+  
+};
+
+const Exit PROGMEM room_0_exits[] = {
+  { 7, 0, 7, 15, 1 }
+};
+
+const Exit PROGMEM room_1_exits[] = {
+  { 7, 15, 7, 0, 0 },
+  { 0, 11, 14, 11, 2 }
+};
+
+const Exit PROGMEM room_2_exits[] = {
   
 };
 
@@ -116,7 +125,7 @@ const Room PROGMEM rooms[] = {
     { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_1_sprites}
+  }, 0, room_1_sprites, 2, room_1_exits}
 ,
   // Room 2
   {{
@@ -136,7 +145,7 @@ const Room PROGMEM rooms[] = {
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_2_sprites}
+  }, 0, room_2_sprites, 0, room_2_exits}
 
 };
 
