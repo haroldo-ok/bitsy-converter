@@ -44,7 +44,6 @@ const toImageInfoDeclaration = ({name, frames, isWall}) => `
  * Generates a C constant containing all the images contained in imageInfos
  */
 const toImageDeclaration = (name, imageInfos) => {
-//  const infosPerFrame = imageInfos.flatMap(info => Array(info.frames.length).fill(info));
   const infoDeclaration = toConstantDeclaration('tileInfos[]', 'TileInfo PROGMEM', `{
   ${ imageInfos.map(toImageInfoDeclaration).join(',\n  ') }
 }`);
@@ -217,11 +216,13 @@ uint8_t scrollY = 0;
 uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
+uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
 
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
-  arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
+  uint8_t frameNumber = frameControl % pgm_read_byte(&tileInfos[tn].frameCount);
+  arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn + frameNumber], 8, 8, WHITE);
 }
 
 void drawSprite(BitsySprite *spr) {
@@ -319,6 +320,11 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
+  
+  if (arduboy.everyXFrames(30)) {
+    frameControl++;
+    needUpdate = true;
+  }
   
   // Wait between keypresses
   if (buttonDelay > 0) {

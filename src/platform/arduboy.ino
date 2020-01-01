@@ -129,24 +129,24 @@ const Room PROGMEM rooms[] = {
 
 const TileInfo PROGMEM tileInfos[] = {
   // BLANK
-  {false, 1},
+  { false, 1 },
   // TIL_a
-  {true, 1},
+  { true, 1 },
   // TIL_b
-  {false, 2},
-  {false, 2},
+  { false, 2 },
+  { false, 2 },
   // TIL_c
-  {false, 1},
+  { false, 1 },
   // SPR_A
-  {false, 2},
-  {false, 2},
+  { false, 2 },
+  { false, 2 },
   // SPR_a
-  {false, 2},
-  {false, 2},
+  { false, 2 },
+  { false, 2 },
   // SPR_b
-  {false, 1},
+  { false, 1 },
   // ITM_0
-  {false, 1},
+  { false, 1 }
 };
 
 const uint8_t PROGMEM images[][8] = { 
@@ -181,11 +181,13 @@ uint8_t scrollY = 0;
 uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
+uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
 
 void drawTile(uint8_t tx, uint8_t ty, uint8_t tn) {
-  arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn], 8, 8, WHITE);
+  uint8_t frameNumber = frameControl % pgm_read_byte(&tileInfos[tn].frameCount);
+  arduboy.drawBitmap(tx * 8, ty * 8 - scrollY, images[tn + frameNumber], 8, 8, WHITE);
 }
 
 void drawSprite(BitsySprite *spr) {
@@ -283,6 +285,11 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
+  
+  if (arduboy.everyXFrames(30)) {
+    frameControl++;
+    needUpdate = true;
+  }
   
   // Wait between keypresses
   if (buttonDelay > 0) {
