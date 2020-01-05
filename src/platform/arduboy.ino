@@ -8,10 +8,11 @@ enum ImageOffset {
   ofs_TIL_a = 1,
   ofs_TIL_b = 2,
   ofs_TIL_c = 4,
-  ofs_SPR_A = 5,
-  ofs_SPR_a = 7,
-  ofs_SPR_b = 9,
-  ofs_ITM_0 = 10
+  ofs_TIL_d = 5,
+  ofs_SPR_A = 6,
+  ofs_SPR_a = 8,
+  ofs_SPR_b = 10,
+  ofs_ITM_0 = 11
 };
 
 typedef struct {
@@ -43,7 +44,9 @@ typedef struct Room {
 
 extern void showDialog(String s);
 
-const uint8_t FRAME_COUNT = 11;
+const uint8_t FRAME_COUNT = 12;
+
+const String PROGMEM gameTitle = "This is the title";
 
 const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
 
@@ -140,7 +143,7 @@ const Room PROGMEM rooms[] = {
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 0, 1 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
@@ -158,6 +161,8 @@ const TileInfo PROGMEM tileInfos[] = {
   { false, 2 },
   { false, 2 },
   // TIL_c
+  { false, 1 },
+  // TIL_d
   { false, 1 },
   // SPR_A
   { false, 2 },
@@ -182,21 +187,24 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00100010, B10101010, B10001000, B00100010, B10101010, B10001000, B00000000 },
   // TIL_c: index 3, offset 4, 1 frame(s)
   { B00111100, B01000010, B10000001, B10000001, B10000001, B10000001, B10101011, B01010100 },
-  // SPR_A: index 4, offset 5, 2 frame(s)
+  // TIL_d: index 4, offset 5, 1 frame(s)
+  { B01111100, B01010100, B00000000, B01110000, B01100000, B00000000, B01100000, B01111100 },
+  // SPR_A: index 5, offset 6, 2 frame(s)
   { B00100000, B00010000, B11111000, B00111111, B00111111, B01111000, B00010000, B00100000 },
   { B00000100, B00001000, B01111000, B00111111, B00111111, B11111000, B00001000, B00000100 },
-  // SPR_a: index 5, offset 7, 2 frame(s)
+  // SPR_a: index 6, offset 8, 2 frame(s)
   { B00000000, B00111100, B11111000, B01111100, B01100000, B11100000, B00010000, B00001100 },
   { B00000000, B10011110, B01111100, B01111110, B01100000, B01100000, B10010000, B00001100 },
-  // SPR_b: index 6, offset 9, 1 frame(s)
+  // SPR_b: index 7, offset 10, 1 frame(s)
   { B11110000, B00010000, B00010000, B00010000, B00010000, B00010000, B00010000, B11111111 },
-  // ITM_0: index 7, offset 10, 1 frame(s)
+  // ITM_0: index 8, offset 11, 1 frame(s)
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
 };
 
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
 
+bool startingGame = false;
 uint8_t currentLevel = 0;
 uint8_t buttonDelay = 0;
 uint8_t scrollY = 0;
@@ -334,6 +342,11 @@ void showDialog(String s) {
   }
 }
 
+void clearDisplay() {
+  arduboy.clear();
+  arduboy.display();
+}
+
 void setup() {
   // put your setup code here, to run once:
   arduboy.begin();
@@ -341,16 +354,24 @@ void setup() {
   arduboy.print("Hello World");
   arduboy.display();
   
+  startingGame = true;
   playerSprite = playerSpriteStart;
-  
-  Serial.begin(9600);
-  Serial.println("ready");
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
-  
+
+  // Display dialog if necessary
+  if (startingGame) {
+    clearDisplay();
+    showDialog(gameTitle);
+    
+    startingGame = false;
+    needUpdate = true;
+  }
+
+  // Increment frame control for animations  
   if (arduboy.everyXFrames(30)) {
     frameControl++;
     needUpdate = true;
