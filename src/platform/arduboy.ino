@@ -32,6 +32,11 @@ typedef struct {
   uint8_t destRoom;
 } Exit;
 
+typedef struct {
+  uint8_t x, y;
+  void  (*dialog)();
+} Ending;
+
 typedef struct Room {
     uint8_t tileMap[16][16];
     
@@ -40,6 +45,9 @@ typedef struct Room {
     
     uint8_t exitCount;
     Exit *exits;
+    
+    uint8_t endingCount;
+    Exit *endings;
 } Room;
 
 extern void showDialog(String s);
@@ -60,6 +68,10 @@ void dialog_ITM_0() {
 
 void dialog_SPR_1() {
   showDialog(F("Hello, I'm a chair."));  
+}
+
+void ending_0() {
+  showDialog(F("That's all, folks!!"));  
 }
 
 const BitsySprite PROGMEM room_0_sprites[] = {
@@ -86,6 +98,10 @@ const Exit PROGMEM room_1_exits[] = {
 
 const Exit PROGMEM room_2_exits[] = {
   
+};
+
+const Exit PROGMEM room_2_endings[] = {
+  { 13, 11, ending_0 }
 };
 
 const Room PROGMEM rooms[] = {
@@ -148,7 +164,7 @@ const Room PROGMEM rooms[] = {
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_2_sprites, 0, room_2_exits}
+  }, 0, room_2_sprites, 0, room_2_exits, 1, room_2_endings }
 
 };
 
