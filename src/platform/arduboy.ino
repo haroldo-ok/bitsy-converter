@@ -47,7 +47,7 @@ typedef struct Room {
     Exit *exits;
     
     uint8_t endingCount;
-    Exit *endings;
+    Ending *endings;
 } Room;
 
 extern void showDialog(String s);
@@ -100,7 +100,7 @@ const Exit PROGMEM room_2_exits[] = {
   
 };
 
-const Exit PROGMEM room_2_endings[] = {
+const Ending PROGMEM room_2_endings[] = {
   { 13, 11, ending_0 }
 };
 
@@ -320,7 +320,9 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
     Ending *edg = fetchEnding(i);
     
     Serial.print("edg "); Serial.print((unsigned long) edg);
-    Serial.print("(x y) "); Serial.print(pgm_read_byte(&edg->x)); Serial.print(", "); Serial.print(pgm_read_byte(&edg->y));
+    Serial.print(" (x y) "); Serial.print(pgm_read_byte(&edg->x)); Serial.print(", "); Serial.print(pgm_read_byte(&edg->y));
+    Serial.print(" expect "); Serial.print((unsigned long) &room_2_endings[0]);
+//    Serial.print(" (x y) "); Serial.print(room_2_endings[0].x); Serial.print(", "); Serial.print(room_2_endings[0].y);
     Serial.println();
 
     if (pgm_read_byte(&edg->x) == x && pgm_read_byte(&edg->y) == y) {
