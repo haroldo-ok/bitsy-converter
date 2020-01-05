@@ -69,10 +69,10 @@ const generateBlockDialogCommand = command => command.children
 /**
  * Generates a dialog function.
  */
-const toDialogDeclaration = (name, dialog) => {
+const toDialogDeclaration = (prefix, name, dialog) => {
   const content = dialog.type === 'block' && dialog.mode === 'dialog' ?
     generateBlockDialogCommand(dialog) : generateUnknownDialogCommand(dialog);
-  return `void dialog_${name}() {
+  return `void ${prefix}_${name}() {
   ${content}  
 }`;
 }
@@ -80,7 +80,12 @@ const toDialogDeclaration = (name, dialog) => {
 /**
  * Generates dialog functions from the world object
  */
-const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration(name, dialog)).join('\n\n');
+const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration('dialog', name, dialog)).join('\n\n');
+
+/**
+ * Generates dialog functions from the world object
+ */
+const toEndingsDeclaration = world => Object.entries(world.ending).map(([name, dialog]) => toDialogDeclaration('ending', name, dialog)).join('\n\n');
 
 /**
  * Generates a flat C array constant from a bidimensional JS array.
@@ -95,7 +100,7 @@ const toRoomDeclaration = (room) => `
   // Room ${room.id}
   {{
     ${ toMatrixDeclaration(room.tilemap) }
-  }, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits}
+  }, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits, ${room.endings.length}, room_${room.id}_endings}
 `;
 
 /**
@@ -120,11 +125,15 @@ const toRoomsDeclaration = (name, roomInfos) => {
   ${ room.exits.map(({x, y, dest}) => toArrayDeclaration([x, y, dest.x, dest.y, dest.room])).join(',\n  ') }
 }`));
 
+  const endingDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_endings[]`, 'Exit PROGMEM', `{
+  ${ room.endings.map(({x, y, id}) => toArrayDeclaration([x, y, `ending_${id}`])).join(',\n  ') }
+}`));
+
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }`);
 
-  return [...spriteDeclarations, ...exitDeclarations, roomsDeclaration].join('\n\n');
+  return [...spriteDeclarations, ...exitDeclarations, ...endingDeclarations, roomsDeclaration].join('\n\n');
 }
 
 /**
@@ -184,6 +193,7 @@ export const convertArduboy = code => {
     toConstantDeclaration('gameTitle', 'String', `"${world.title}`),
     toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
+    toEndingsDeclaration(world),
     toRoomsDeclaration('rooms', roomInfos),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
