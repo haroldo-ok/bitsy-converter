@@ -54,7 +54,7 @@ extern void showDialog(String s);
 
 const uint8_t FRAME_COUNT = 12;
 
-const String PROGMEM gameTitle = "This is the title";
+const String gameTitle = "Your game's title here";
 
 const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
 
@@ -71,7 +71,7 @@ void dialog_SPR_1() {
 }
 
 void ending_0() {
-  showDialog(F("That's all, folks!!"));  
+  showDialog(F("This is the end."));  
 }
 
 const BitsySprite PROGMEM room_0_sprites[] = {
@@ -100,6 +100,14 @@ const Exit PROGMEM room_2_exits[] = {
   
 };
 
+const Ending PROGMEM room_0_endings[] = {
+  
+};
+
+const Ending PROGMEM room_1_endings[] = {
+  
+};
+
 const Ending PROGMEM room_2_endings[] = {
   { 13, 11, ending_0 }
 };
@@ -124,7 +132,7 @@ const Room PROGMEM rooms[] = {
     { 0, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 0 },
     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 2, room_0_sprites, 1, room_0_exits}
+  }, 2, room_0_sprites, 1, room_0_exits, 0, room_0_endings}
 ,
   // Room 1
   {{
@@ -144,7 +152,7 @@ const Room PROGMEM rooms[] = {
     { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_1_sprites, 2, room_1_exits}
+  }, 0, room_1_sprites, 2, room_1_exits, 0, room_1_endings}
 ,
   // Room 2
   {{
@@ -164,7 +172,7 @@ const Room PROGMEM rooms[] = {
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_2_sprites, 0, room_2_exits, 1, room_2_endings }
+  }, 0, room_2_sprites, 0, room_2_exits, 1, room_2_endings}
 
 };
 
@@ -257,17 +265,17 @@ void drawSprite(BitsySprite *spr) {
 
 BitsySprite *fetchSprite(uint16_t spriteNumber) {
     // Basically, rooms[currentLevel].sprites + i
-  return pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite);
+  return (BitsySprite *) pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite);
 }
 
 Exit *fetchExit(uint16_t exitNumber) {
     // Basically, rooms[currentLevel].exits + i
-  return pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
+  return (Exit *) pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
 }
 
 Ending *fetchEnding(uint16_t endingNumber) {
     // Basically, rooms[currentLevel].exits + i
-  return pgm_read_word(&rooms[currentLevel].endings) + endingNumber * sizeof(Ending);
+  return (Ending *) pgm_read_word(&rooms[currentLevel].endings) + endingNumber * sizeof(Ending);
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
