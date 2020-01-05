@@ -265,17 +265,17 @@ void drawSprite(BitsySprite *spr) {
 
 BitsySprite *fetchSprite(uint16_t spriteNumber) {
     // Basically, rooms[currentLevel].sprites + i
-  return (BitsySprite *) pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite);
+  return (BitsySprite *) (pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite));
 }
 
 Exit *fetchExit(uint16_t exitNumber) {
     // Basically, rooms[currentLevel].exits + i
-  return (Exit *) pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
+  return (Exit *) (pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit));
 }
 
 Ending *fetchEnding(uint16_t endingNumber) {
     // Basically, rooms[currentLevel].exits + i
-  return (Ending *) pgm_read_word(&rooms[currentLevel].endings) + endingNumber * sizeof(Ending);
+  return (Ending *) (pgm_read_word(&rooms[currentLevel].endings) + endingNumber * sizeof(Ending));
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -320,22 +320,10 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   }
     
   // Check collision against the endings
-  Serial.print("ply(x,y) "); Serial.print(x); Serial.print(", "); Serial.print(y);
-  Serial.print(" count "); Serial.print(pgm_read_byte(&rooms[currentLevel].endingCount));
-  Serial.println();
-  
   for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].endingCount); i++) {
-    Ending *edg = fetchEnding(i);
-    
-    Serial.print("edg "); Serial.print((unsigned long) edg);
-    Serial.print(" (x y) "); Serial.print(pgm_read_byte(&edg->x)); Serial.print(", "); Serial.print(pgm_read_byte(&edg->y));
-    Serial.print(" expect "); Serial.print((unsigned long) &room_2_endings[0]);
-//    Serial.print(" (x y) "); Serial.print(room_2_endings[0].x); Serial.print(", "); Serial.print(room_2_endings[0].y);
-    Serial.println();
-
+    Ending *edg = fetchEnding(i);    
     if (pgm_read_byte(&edg->x) == x && pgm_read_byte(&edg->y) == y) {
       currentEnding = pgm_read_word(&edg->dialog);
-      Serial.print("curr "); Serial.print((unsigned long) currentEnding);
       return true;
     }
   }
@@ -421,8 +409,6 @@ void endGame() {
     
   startingGame = true;
   needUpdate = true;
-  
-  Serial.begin(9600);
 }
 
 void setup() {
