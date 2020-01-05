@@ -8,10 +8,11 @@ enum ImageOffset {
   ofs_TIL_a = 1,
   ofs_TIL_b = 2,
   ofs_TIL_c = 4,
-  ofs_SPR_A = 5,
-  ofs_SPR_a = 7,
-  ofs_SPR_b = 9,
-  ofs_ITM_0 = 10
+  ofs_TIL_d = 5,
+  ofs_SPR_A = 6,
+  ofs_SPR_a = 8,
+  ofs_SPR_b = 10,
+  ofs_ITM_0 = 11
 };
 
 typedef struct {
@@ -31,6 +32,11 @@ typedef struct {
   uint8_t destRoom;
 } Exit;
 
+typedef struct {
+  uint8_t x, y;
+  void  (*dialog)();
+} Ending;
+
 typedef struct Room {
     uint8_t tileMap[16][16];
     
@@ -39,11 +45,16 @@ typedef struct Room {
     
     uint8_t exitCount;
     Exit *exits;
+    
+    uint8_t endingCount;
+    Ending *endings;
 } Room;
 
 extern void showDialog(String s);
 
-const uint8_t FRAME_COUNT = 11;
+const uint8_t FRAME_COUNT = 12;
+
+const String gameTitle = "Your game's title here";
 
 const BitsySprite PROGMEM playerSpriteStart = { ofs_SPR_A, 4, 4 };
 
@@ -57,6 +68,10 @@ void dialog_ITM_0() {
 
 void dialog_SPR_1() {
   showDialog(F("Hello, I'm a chair."));  
+}
+
+void ending_0() {
+  showDialog(F("This is the end."));  
 }
 
 const BitsySprite PROGMEM room_0_sprites[] = {
@@ -85,6 +100,18 @@ const Exit PROGMEM room_2_exits[] = {
   
 };
 
+const Ending PROGMEM room_0_endings[] = {
+  
+};
+
+const Ending PROGMEM room_1_endings[] = {
+  
+};
+
+const Ending PROGMEM room_2_endings[] = {
+  { 13, 11, ending_0 }
+};
+
 const Room PROGMEM rooms[] = {
 
   // Room 0
@@ -105,7 +132,7 @@ const Room PROGMEM rooms[] = {
     { 0, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 0 },
     { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 2, room_0_sprites, 1, room_0_exits}
+  }, 2, room_0_sprites, 1, room_0_exits, 0, room_0_endings}
 ,
   // Room 1
   {{
@@ -125,7 +152,7 @@ const Room PROGMEM rooms[] = {
     { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_1_sprites, 2, room_1_exits}
+  }, 0, room_1_sprites, 2, room_1_exits, 0, room_1_endings}
 ,
   // Room 2
   {{
@@ -140,12 +167,12 @@ const Room PROGMEM rooms[] = {
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1 },
+    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 0, 1 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
     { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_2_sprites, 0, room_2_exits}
+  }, 0, room_2_sprites, 0, room_2_exits, 1, room_2_endings}
 
 };
 
@@ -158,6 +185,8 @@ const TileInfo PROGMEM tileInfos[] = {
   { false, 2 },
   { false, 2 },
   // TIL_c
+  { false, 1 },
+  // TIL_d
   { false, 1 },
   // SPR_A
   { false, 2 },
@@ -182,21 +211,24 @@ const uint8_t PROGMEM images[][8] = {
   { B00000000, B00100010, B10101010, B10001000, B00100010, B10101010, B10001000, B00000000 },
   // TIL_c: index 3, offset 4, 1 frame(s)
   { B00111100, B01000010, B10000001, B10000001, B10000001, B10000001, B10101011, B01010100 },
-  // SPR_A: index 4, offset 5, 2 frame(s)
+  // TIL_d: index 4, offset 5, 1 frame(s)
+  { B01111100, B01010100, B00000000, B01110000, B01100000, B00000000, B01100000, B01111100 },
+  // SPR_A: index 5, offset 6, 2 frame(s)
   { B00100000, B00010000, B11111000, B00111111, B00111111, B01111000, B00010000, B00100000 },
   { B00000100, B00001000, B01111000, B00111111, B00111111, B11111000, B00001000, B00000100 },
-  // SPR_a: index 5, offset 7, 2 frame(s)
+  // SPR_a: index 6, offset 8, 2 frame(s)
   { B00000000, B00111100, B11111000, B01111100, B01100000, B11100000, B00010000, B00001100 },
   { B00000000, B10011110, B01111100, B01111110, B01100000, B01100000, B10010000, B00001100 },
-  // SPR_b: index 6, offset 9, 1 frame(s)
+  // SPR_b: index 7, offset 10, 1 frame(s)
   { B11110000, B00010000, B00010000, B00010000, B00010000, B00010000, B00010000, B11111111 },
-  // ITM_0: index 7, offset 10, 1 frame(s)
+  // ITM_0: index 8, offset 11, 1 frame(s)
   { B00000000, B00010000, B00111000, B01001000, B01001000, B00111000, B00000000, B00000000 } 
 };
 
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
 
+bool startingGame = false;
 uint8_t currentLevel = 0;
 uint8_t buttonDelay = 0;
 uint8_t scrollY = 0;
@@ -206,6 +238,7 @@ BitsySprite playerSprite;
 uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
+void  (*currentEnding)() = NULL;
 
 void calculateRequiredScrolling() {
   if (playerSprite.y < 4) {
@@ -232,12 +265,17 @@ void drawSprite(BitsySprite *spr) {
 
 BitsySprite *fetchSprite(uint16_t spriteNumber) {
     // Basically, rooms[currentLevel].sprites + i
-  return pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite);
+  return (BitsySprite *) (pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite));
 }
 
 Exit *fetchExit(uint16_t exitNumber) {
     // Basically, rooms[currentLevel].exits + i
-  return pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
+  return (Exit *) (pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit));
+}
+
+Ending *fetchEnding(uint16_t endingNumber) {
+    // Basically, rooms[currentLevel].exits + i
+  return (Ending *) (pgm_read_word(&rooms[currentLevel].endings) + endingNumber * sizeof(Ending));
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -277,6 +315,15 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
       calculateRequiredScrolling();    
       scrollY = targetScrollY;
       
+      return true;
+    }
+  }
+    
+  // Check collision against the endings
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].endingCount); i++) {
+    Ending *edg = fetchEnding(i);    
+    if (pgm_read_byte(&edg->x) == x && pgm_read_byte(&edg->y) == y) {
+      currentEnding = pgm_read_word(&edg->dialog);
       return true;
     }
   }
@@ -334,6 +381,36 @@ void showDialog(String s) {
   }
 }
 
+void clearDisplay() {
+  arduboy.clear();
+  arduboy.display();
+}
+
+void startGame() {
+  clearDisplay();
+  showDialog(gameTitle);
+  
+  playerSprite = playerSpriteStart;
+  currentLevel = 0;
+  
+  scrollY = 0;
+  targetScrollY = 0;
+
+  currentDialog = NULL;
+  currentEnding = NULL;
+
+  startingGame = false;
+  needUpdate = true;
+}
+
+void endGame() {
+  (*currentEnding)();
+  currentEnding = NULL;
+    
+  startingGame = true;
+  needUpdate = true;
+}
+
 void setup() {
   // put your setup code here, to run once:
   arduboy.begin();
@@ -341,16 +418,19 @@ void setup() {
   arduboy.print("Hello World");
   arduboy.display();
   
-  playerSprite = playerSpriteStart;
-  
-  Serial.begin(9600);
-  Serial.println("ready");
+  startingGame = true;
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
-  
+
+  // Display dialog if necessary
+  if (startingGame) {
+    startGame();
+  }
+
+  // Increment frame control for animations  
   if (arduboy.everyXFrames(30)) {
     frameControl++;
     needUpdate = true;
@@ -408,6 +488,10 @@ void loop() {
     (*currentDialog)();
     currentDialog = NULL;
     needUpdate = true;
+  }
+  
+  if (currentEnding) {
+    endGame();
   }
   
 }

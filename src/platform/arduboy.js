@@ -69,10 +69,10 @@ const generateBlockDialogCommand = command => command.children
 /**
  * Generates a dialog function.
  */
-const toDialogDeclaration = (name, dialog) => {
+const toDialogDeclaration = (prefix, name, dialog) => {
   const content = dialog.type === 'block' && dialog.mode === 'dialog' ?
     generateBlockDialogCommand(dialog) : generateUnknownDialogCommand(dialog);
-  return `void dialog_${name}() {
+  return `void ${prefix}_${name}() {
   ${content}  
 }`;
 }
@@ -80,7 +80,12 @@ const toDialogDeclaration = (name, dialog) => {
 /**
  * Generates dialog functions from the world object
  */
-const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration(name, dialog)).join('\n\n');
+const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration('dialog', name, dialog)).join('\n\n');
+
+/**
+ * Generates dialog functions from the world object
+ */
+const toEndingsDeclaration = world => Object.entries(world.ending).map(([name, dialog]) => toDialogDeclaration('ending', name, dialog)).join('\n\n');
 
 /**
  * Generates a flat C array constant from a bidimensional JS array.
@@ -95,7 +100,7 @@ const toRoomDeclaration = (room) => `
   // Room ${room.id}
   {{
     ${ toMatrixDeclaration(room.tilemap) }
-  }, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits}
+  }, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits, ${room.endings.length}, room_${room.id}_endings}
 `;
 
 /**
@@ -120,11 +125,15 @@ const toRoomsDeclaration = (name, roomInfos) => {
   ${ room.exits.map(({x, y, dest}) => toArrayDeclaration([x, y, dest.x, dest.y, dest.room])).join(',\n  ') }
 }`));
 
+  const endingDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_endings[]`, 'Ending PROGMEM', `{
+  ${ room.endings.map(({x, y, id}) => toArrayDeclaration([x, y, `ending_${id}`])).join(',\n  ') }
+}`));
+
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }`);
 
-  return [...spriteDeclarations, ...exitDeclarations, roomsDeclaration].join('\n\n');
+  return [...spriteDeclarations, ...exitDeclarations, ...endingDeclarations, roomsDeclaration].join('\n\n');
 }
 
 /**
@@ -181,8 +190,10 @@ export const convertArduboy = code => {
   const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
+    toConstantDeclaration('gameTitle', 'String', `"${world.title}"`),
     toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
+    toEndingsDeclaration(world),
     toRoomsDeclaration('rooms', roomInfos),
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
@@ -211,6 +222,11 @@ typedef struct {
   uint8_t destRoom;
 } Exit;
 
+typedef struct {
+  uint8_t x, y;
+  void  (*dialog)();
+} Ending;
+
 typedef struct Room {
     uint8_t tileMap[16][16];
     
@@ -219,6 +235,9 @@ typedef struct Room {
     
     uint8_t exitCount;
     Exit *exits;
+    
+    uint8_t endingCount;
+    Ending *endings;
 } Room;
 
 extern void showDialog(String s);
@@ -228,6 +247,7 @@ ${mainGeneratedBody}
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
 
+bool startingGame = false;
 uint8_t currentLevel = 0;
 uint8_t buttonDelay = 0;
 uint8_t scrollY = 0;
@@ -237,6 +257,7 @@ BitsySprite playerSprite;
 uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
+void  (*currentEnding)() = NULL;
 
 void calculateRequiredScrolling() {
   if (playerSprite.y < 4) {
@@ -263,12 +284,17 @@ void drawSprite(BitsySprite *spr) {
 
 BitsySprite *fetchSprite(uint16_t spriteNumber) {
     // Basically, rooms[currentLevel].sprites + i
-  return pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite);
+  return (BitsySprite *) (pgm_read_word(&rooms[currentLevel].sprites) + spriteNumber * sizeof(BitsySprite));
 }
 
 Exit *fetchExit(uint16_t exitNumber) {
     // Basically, rooms[currentLevel].exits + i
-  return pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
+  return (Exit *) (pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit));
+}
+
+Ending *fetchEnding(uint16_t endingNumber) {
+    // Basically, rooms[currentLevel].exits + i
+  return (Ending *) (pgm_read_word(&rooms[currentLevel].endings) + endingNumber * sizeof(Ending));
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -308,6 +334,15 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
       calculateRequiredScrolling();    
       scrollY = targetScrollY;
       
+      return true;
+    }
+  }
+    
+  // Check collision against the endings
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].endingCount); i++) {
+    Ending *edg = fetchEnding(i);    
+    if (pgm_read_byte(&edg->x) == x && pgm_read_byte(&edg->y) == y) {
+      currentEnding = pgm_read_word(&edg->dialog);
       return true;
     }
   }
@@ -365,6 +400,36 @@ void showDialog(String s) {
   }
 }
 
+void clearDisplay() {
+  arduboy.clear();
+  arduboy.display();
+}
+
+void startGame() {
+  clearDisplay();
+  showDialog(gameTitle);
+  
+  playerSprite = playerSpriteStart;
+  currentLevel = 0;
+  
+  scrollY = 0;
+  targetScrollY = 0;
+
+  currentDialog = NULL;
+  currentEnding = NULL;
+
+  startingGame = false;
+  needUpdate = true;
+}
+
+void endGame() {
+  (*currentEnding)();
+  currentEnding = NULL;
+    
+  startingGame = true;
+  needUpdate = true;
+}
+
 void setup() {
   // put your setup code here, to run once:
   arduboy.begin();
@@ -372,16 +437,19 @@ void setup() {
   arduboy.print("Hello World");
   arduboy.display();
   
-  playerSprite = playerSpriteStart;
-  
-  Serial.begin(9600);
-  Serial.println("ready");
+  startingGame = true;
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
-  
+
+  // Display dialog if necessary
+  if (startingGame) {
+    startGame();
+  }
+
+  // Increment frame control for animations  
   if (arduboy.everyXFrames(30)) {
     frameControl++;
     needUpdate = true;
@@ -439,6 +507,10 @@ void loop() {
     (*currentDialog)();
     currentDialog = NULL;
     needUpdate = true;
+  }
+  
+  if (currentEnding) {
+    endGame();
   }
   
 }
