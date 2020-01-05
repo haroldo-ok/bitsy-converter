@@ -190,7 +190,7 @@ export const convertArduboy = code => {
   const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
-    toConstantDeclaration('gameTitle', 'String', `"${world.title}`),
+    toConstantDeclaration('gameTitle', 'String', `"${world.title}"`),
     toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
     toEndingsDeclaration(world),
