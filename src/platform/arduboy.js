@@ -211,6 +211,11 @@ typedef struct {
   uint8_t destRoom;
 } Exit;
 
+typedef struct {
+  uint8_t x, y;
+  void  (*dialog)();
+} Ending;
+
 typedef struct Room {
     uint8_t tileMap[16][16];
     
@@ -219,6 +224,9 @@ typedef struct Room {
     
     uint8_t exitCount;
     Exit *exits;
+    
+    uint8_t endingCount;
+    Ending *endings;
 } Room;
 
 extern void showDialog(String s);
@@ -228,6 +236,7 @@ ${mainGeneratedBody}
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
 
+bool startingGame = false;
 uint8_t currentLevel = 0;
 uint8_t buttonDelay = 0;
 uint8_t scrollY = 0;
@@ -237,6 +246,7 @@ BitsySprite playerSprite;
 uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
+void  (*currentEnding)() = NULL;
 
 void calculateRequiredScrolling() {
   if (playerSprite.y < 4) {
@@ -269,6 +279,11 @@ BitsySprite *fetchSprite(uint16_t spriteNumber) {
 Exit *fetchExit(uint16_t exitNumber) {
     // Basically, rooms[currentLevel].exits + i
   return pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
+}
+
+Ending *fetchEnding(uint16_t endingNumber) {
+    // Basically, rooms[currentLevel].exits + i
+  return pgm_read_word(&rooms[currentLevel].endings) + endingNumber * sizeof(Ending);
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -308,6 +323,27 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
       calculateRequiredScrolling();    
       scrollY = targetScrollY;
       
+      return true;
+    }
+  }
+    
+  // Check collision against the endings
+  Serial.print("ply(x,y) "); Serial.print(x); Serial.print(", "); Serial.print(y);
+  Serial.print(" count "); Serial.print(pgm_read_byte(&rooms[currentLevel].endingCount));
+  Serial.println();
+  
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].endingCount); i++) {
+    Ending *edg = fetchEnding(i);
+    
+    Serial.print("edg "); Serial.print((unsigned long) edg);
+    Serial.print(" (x y) "); Serial.print(pgm_read_byte(&edg->x)); Serial.print(", "); Serial.print(pgm_read_byte(&edg->y));
+    Serial.print(" expect "); Serial.print((unsigned long) &room_2_endings[0]);
+//    Serial.print(" (x y) "); Serial.print(room_2_endings[0].x); Serial.print(", "); Serial.print(room_2_endings[0].y);
+    Serial.println();
+
+    if (pgm_read_byte(&edg->x) == x && pgm_read_byte(&edg->y) == y) {
+      currentEnding = pgm_read_word(&edg->dialog);
+      Serial.print("curr "); Serial.print((unsigned long) currentEnding);
       return true;
     }
   }
@@ -365,6 +401,38 @@ void showDialog(String s) {
   }
 }
 
+void clearDisplay() {
+  arduboy.clear();
+  arduboy.display();
+}
+
+void startGame() {
+  clearDisplay();
+  showDialog(gameTitle);
+  
+  playerSprite = playerSpriteStart;
+  currentLevel = 0;
+  
+  scrollY = 0;
+  targetScrollY = 0;
+
+  currentDialog = NULL;
+  currentEnding = NULL;
+
+  startingGame = false;
+  needUpdate = true;
+}
+
+void endGame() {
+  (*currentEnding)();
+  currentEnding = NULL;
+    
+  startingGame = true;
+  needUpdate = true;
+  
+  Serial.begin(9600);
+}
+
 void setup() {
   // put your setup code here, to run once:
   arduboy.begin();
@@ -372,16 +440,19 @@ void setup() {
   arduboy.print("Hello World");
   arduboy.display();
   
-  playerSprite = playerSpriteStart;
-  
-  Serial.begin(9600);
-  Serial.println("ready");
+  startingGame = true;
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
   if (!arduboy.nextFrame()) return;
-  
+
+  // Display dialog if necessary
+  if (startingGame) {
+    startGame();
+  }
+
+  // Increment frame control for animations  
   if (arduboy.everyXFrames(30)) {
     frameControl++;
     needUpdate = true;
@@ -439,6 +510,10 @@ void loop() {
     (*currentDialog)();
     currentDialog = NULL;
     needUpdate = true;
+  }
+  
+  if (currentEnding) {
+    endGame();
   }
   
 }
