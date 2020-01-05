@@ -230,6 +230,7 @@ BitsySprite playerSprite;
 uint16_t frameControl = 0;
 
 void  (*currentDialog)() = NULL;
+void  (*currentEnding)() = NULL;
 
 void calculateRequiredScrolling() {
   if (playerSprite.y < 4) {
@@ -262,6 +263,11 @@ BitsySprite *fetchSprite(uint16_t spriteNumber) {
 Exit *fetchExit(uint16_t exitNumber) {
     // Basically, rooms[currentLevel].exits + i
   return pgm_read_word(&rooms[currentLevel].exits) + exitNumber * sizeof(Exit);
+}
+
+Ending *fetchEnding(uint16_t endingNumber) {
+    // Basically, rooms[currentLevel].exits + i
+  return pgm_read_word(&rooms[currentLevel].endings) + endingNumber * sizeof(Ending);
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -301,6 +307,25 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
       calculateRequiredScrolling();    
       scrollY = targetScrollY;
       
+      return true;
+    }
+  }
+    
+  // Check collision against the endings
+  Serial.print("ply(x,y) "); Serial.print(x); Serial.print(", "); Serial.print(y);
+  Serial.print(" count "); Serial.print(pgm_read_byte(&rooms[currentLevel].endingCount));
+  Serial.println();
+  
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].endingCount); i++) {
+    Ending *edg = fetchEnding(i);
+    
+    Serial.print("edg "); Serial.print((unsigned long) edg);
+    Serial.print("(x y) "); Serial.print(pgm_read_byte(&edg->x)); Serial.print(", "); Serial.print(pgm_read_byte(&edg->y));
+    Serial.println();
+
+    if (pgm_read_byte(&edg->x) == x && pgm_read_byte(&edg->y) == y) {
+      currentEnding = pgm_read_word(&edg->dialog);
+      Serial.print("curr "); Serial.print((unsigned long) currentEnding);
       return true;
     }
   }
@@ -363,6 +388,33 @@ void clearDisplay() {
   arduboy.display();
 }
 
+void startGame() {
+  clearDisplay();
+  showDialog(gameTitle);
+  
+  playerSprite = playerSpriteStart;
+  currentLevel = 0;
+  
+  scrollY = 0;
+  targetScrollY = 0;
+
+  currentDialog = NULL;
+  currentEnding = NULL;
+
+  startingGame = false;
+  needUpdate = true;
+}
+
+void endGame() {
+  (*currentEnding)();
+  currentEnding = NULL;
+    
+  startingGame = true;
+  needUpdate = true;
+  
+  Serial.begin(9600);
+}
+
 void setup() {
   // put your setup code here, to run once:
   arduboy.begin();
@@ -371,7 +423,6 @@ void setup() {
   arduboy.display();
   
   startingGame = true;
-  playerSprite = playerSpriteStart;
 }
 
 void loop() {
@@ -380,11 +431,7 @@ void loop() {
 
   // Display dialog if necessary
   if (startingGame) {
-    clearDisplay();
-    showDialog(gameTitle);
-    
-    startingGame = false;
-    needUpdate = true;
+    startGame();
   }
 
   // Increment frame control for animations  
@@ -445,6 +492,10 @@ void loop() {
     (*currentDialog)();
     currentDialog = NULL;
     needUpdate = true;
+  }
+  
+  if (currentEnding) {
+    endGame();
   }
   
 }
