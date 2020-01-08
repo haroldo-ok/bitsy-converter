@@ -16,11 +16,13 @@
     "react-scripts": "2.0.3",
     "react-simple-code-editor": "^0.10.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.7.5"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
+    "test": "react-scripts test --transformIgnorePatterns \"node_modules/(?!lodash-es)/\" --env=jsdom",
     "eject": "react-scripts eject"
   },
   "browserslist": [
