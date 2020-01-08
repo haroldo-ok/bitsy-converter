@@ -1,4 +1,4 @@
-import {groupBy} from 'lodash-es';
+import {groupBy, fromPairs, trimStart} from 'lodash-es';
 
 import {parseWorld} from 'bitsy-parser';
 
@@ -143,7 +143,7 @@ const extractImageInfos = world => {
   const withBlank = [ ['BLANK', [ Array(8).fill(Array(8).fill(0)) ] ], ...Object.entries(world.images) ];
   const imageInfos = withBlank.map(([name, frames], index) => ({ name, frames, index }));
   
-  const tilesByDrw = Object.fromEntries(Object.values(world.tile).map(tile => [tile.drw, tile]));
+  const tilesByDrw = fromPairs(Object.values(world.tile).map(tile => [tile.drw, tile]));
   const withWalls = imageInfos.map(info => ({
     ...info, 
     isWall: !!(tilesByDrw[info.name] && tilesByDrw[info.name].isWall)
@@ -181,7 +181,7 @@ export const convertArduboy = code => {
   const world = parseWorld(code, {parseScripts: true});
   const imageInfos = extractImageInfos(world);
   
-  const imageOffsets = Object.fromEntries(imageInfos.map(({name, offset}) => [name, offset]));
+  const imageOffsets = fromPairs(imageInfos.map(({name, offset}) => [name, offset]));
   const frameCount = imageInfos.reduce((total, info) => total + info.frames.length, 0);
   
   const roomInfos = extractRoomInfos(world, imageOffsets);
@@ -198,7 +198,7 @@ export const convertArduboy = code => {
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
 
-  return `
+  return trimStart(`
 #include <Arduboy2.h>
 
 Arduboy2 arduboy;
@@ -514,5 +514,5 @@ void loop() {
   }
   
 }
-`.trimStart();
+`);
 }
