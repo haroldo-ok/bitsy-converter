@@ -17,7 +17,8 @@
     "react-simple-code-editor": "^0.10.0"
   },
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.7.5"
+    "@babel/plugin-transform-modules-commonjs": "^7.7.5",
+    "promise-fs": "^2.1.1"
   },
   "scripts": {
     "start": "react-scripts start",
