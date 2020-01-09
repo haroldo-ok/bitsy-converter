@@ -3,7 +3,8 @@ import {groupBy, fromPairs, trimStart} from 'lodash-es';
 import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation} from './world';
-import {toConstantDeclaration, toArrayDeclaration, toMatrixDeclaration, toConstantArrayDeclaration} from './c-generator';
+import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration,
+       toArrayLiteral} from './c-generator';
 
 /** 
  * Returns a transposed version of a bidimensional array. 
@@ -109,12 +110,12 @@ const toRoomsDeclaration = (name, roomInfos) => {
   
   const exitDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
     `room_${room.id}_exits`, 'Exit PROGMEM', 
-    room.exits.map( ({x, y, dest}) => toArrayDeclaration([x, y, dest.x, dest.y, dest.room]) )
+    room.exits.map( ({x, y, dest}) => toArrayLiteral([x, y, dest.x, dest.y, dest.room]) )
   ));
 
   const endingDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
     `room_${room.id}_endings`, 'Ending PROGMEM',
-    room.endings.map(({x, y, id}) => toArrayDeclaration([x, y, `ending_${id}`]))
+    room.endings.map(({x, y, id}) => toArrayLiteral([x, y, `ending_${id}`]))
   ));
 
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{

@@ -4,9 +4,9 @@
 export const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
 /**
- * Generates a C array declaration from an array
+ * Generates a C array literal from an array
  */
-export const toArrayDeclaration = elements => `{ ${elements.join(', ')} }`;
+export const toArrayLiteral = elements => `{ ${elements.join(', ')} }`;
 
 /**
  * Generates a flat C array constant from a bidimensional JS array.
