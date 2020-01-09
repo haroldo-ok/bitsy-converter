@@ -175,9 +175,9 @@ const extractRoomInfos = (world, imageOffsets) => {
 };
 
 /**
- * Generates Arduboy-compatible C++ code from a Bitsy script object.
+ * Takes the world object, and extracts extra information from it.
  */
-export const convertWorld = world => {
+const prepareWorldInformation = world => {
   const imageInfos = extractImageInfos(world);
   
   const imageOffsets = fromPairs(imageInfos.map(({name, offset}) => [name, offset]));
@@ -185,6 +185,15 @@ export const convertWorld = world => {
   
   const roomInfos = extractRoomInfos(world, imageOffsets);
   const playerSpriteStart = Object.values(world.sprite).find(sprite => isPlayerSprite(sprite, world));
+  
+  return {world, imageInfos, imageOffsets, frameCount,roomInfos, playerSpriteStart};
+};
+
+/**
+ * Generates Arduboy-compatible C++ code from a Bitsy script object.
+ */
+export const convertWorld = world => {
+  const {imageInfos, imageOffsets, frameCount,roomInfos, playerSpriteStart} = prepareWorldInformation(world);
   
   const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
