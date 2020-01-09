@@ -177,8 +177,7 @@ const extractRoomInfos = (world, imageOffsets) => {
 /**
  * Generates Arduboy-compatible C++ code from a Bitsy script object.
  */
-export const convertArduboy = code => {
-  const world = parseWorld(code, {parseScripts: true});
+export const convertWorld = world => {
   const imageInfos = extractImageInfos(world);
   
   const imageOffsets = fromPairs(imageInfos.map(({name, offset}) => [name, offset]));
@@ -515,4 +514,9 @@ void loop() {
   
 }
 `);
+}
+
+export const convertArduboy = code => {
+  const world = parseWorld(code, {parseScripts: true}); 
+  return convertWorld(world);
 }
