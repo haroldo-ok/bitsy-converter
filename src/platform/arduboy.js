@@ -3,6 +3,7 @@ import {groupBy, fromPairs, trimStart} from 'lodash-es';
 import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation} from './world';
+import {toConstantDeclaration, toArrayDeclaration, toMatrixDeclaration} from './c-generator';
 
 /** 
  * Returns a transposed version of a bidimensional array. 
@@ -28,11 +29,6 @@ const toEnumDeclaration = (name, object, keyFunction = k => k) =>`
 enum ${name} {
 ${ Object.entries(object).map(([k, i]) => `  ${keyFunction(k)} = ${i}`).join(',\n') }
 };`
-
-/**
- * Generates a C constant declaration.
- */
-const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
 /**
  * Generates image information declaration.
@@ -90,12 +86,6 @@ const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, d
 const toEndingsDeclaration = world => Object.entries(world.ending).map(([name, dialog]) => toDialogDeclaration('ending', name, dialog)).join('\n\n');
 
 /**
- * Generates a flat C array constant from a bidimensional JS array.
- */
-const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\n    ') => 
-  matrix.map(row => `{ ${row.map(cell => transform(cell)).join(', ')} }`).join(`,${innerIndent}`);
-
-/**
  * Generates a C constant from a room object.
  */
 const toRoomDeclaration = (room) => `
@@ -109,11 +99,6 @@ const toRoomDeclaration = (room) => `
  * Generates a C constant from a sprite object.
  */
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
-
-/**
- * Generates a C array declaration from an array
- */
-const toArrayDeclaration = elements => `{ ${elements.join(', ')} }`;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
