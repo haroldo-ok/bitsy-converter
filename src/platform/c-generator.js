@@ -13,3 +13,10 @@ export const toArrayDeclaration = elements => `{ ${elements.join(', ')} }`;
  */
 export const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\n    ') => 
   matrix.map(row => `{ ${row.map(cell => transform(cell)).join(', ')} }`).join(`,${innerIndent}`);
+
+/**
+ * Generates a C constant array declaration.
+ */
+export const toConstantArrayDeclaration = (name, elementType, elements) => toConstantDeclaration(`${name}[]`, elementType, `{
+  ${ elements.join(',\n  ') }
+}`);

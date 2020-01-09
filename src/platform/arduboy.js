@@ -3,7 +3,7 @@ import {groupBy, fromPairs, trimStart} from 'lodash-es';
 import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation} from './world';
-import {toConstantDeclaration, toArrayDeclaration, toMatrixDeclaration} from './c-generator';
+import {toConstantDeclaration, toArrayDeclaration, toMatrixDeclaration, toConstantArrayDeclaration} from './c-generator';
 
 /** 
  * Returns a transposed version of a bidimensional array. 
@@ -104,17 +104,18 @@ const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprit
  * Generates a C constant representing all the rooms contained in a room object.
  */
 const toRoomsDeclaration = (name, roomInfos) => {
-  const spriteDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_sprites[]`, 'BitsySprite PROGMEM', `{
-  ${ room.sprites.map(toSpriteDeclaration).join(',\n  ') }
-}`));
+  const spriteDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+    `room_${room.id}_sprites`, 'BitsySprite PROGMEM', room.sprites.map(toSpriteDeclaration)));
   
-  const exitDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_exits[]`, 'Exit PROGMEM', `{
-  ${ room.exits.map(({x, y, dest}) => toArrayDeclaration([x, y, dest.x, dest.y, dest.room])).join(',\n  ') }
-}`));
+  const exitDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+    `room_${room.id}_exits`, 'Exit PROGMEM', 
+    room.exits.map( ({x, y, dest}) => toArrayDeclaration([x, y, dest.x, dest.y, dest.room]) )
+  ));
 
-  const endingDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_endings[]`, 'Ending PROGMEM', `{
-  ${ room.endings.map(({x, y, id}) => toArrayDeclaration([x, y, `ending_${id}`])).join(',\n  ') }
-}`));
+  const endingDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+    `room_${room.id}_endings`, 'Ending PROGMEM',
+    room.endings.map(({x, y, id}) => toArrayDeclaration([x, y, `ending_${id}`]))
+  ));
 
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
