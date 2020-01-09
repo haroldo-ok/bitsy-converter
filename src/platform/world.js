@@ -27,14 +27,29 @@ const extractImageInfos = world => {
 const isPlayerSprite = (sprite, world) => sprite.id === world.playerId;
 
 /**
+ * Returns a list containing the sprites that aren't from the player.
+ */
+const listNonPlayerSprites = (sprites, world) => (sprites || []).filter(sprite => !isPlayerSprite(sprite, world));
+
+/**
+ * Given the value contained in a map cell, returns the corresponding image offset.
+ */
+const imageOffsetForMapCell = (cell, world, imageOffsets) => cell === '0' ? 0 : imageOffsets[world.tile[cell].drw];
+
+/**
+ * Produces a matrix of image offsets from a matrix of cell values.
+ */
+const convertRoomMapToOffsets = (tilemap, world, imageOffsets) => tilemap.map(row => row.map(v => imageOffsetForMapCell(v, world, imageOffsets)));
+
+/**
  * Generates an array containing information about the rooms contained in the world object.
  */
 const extractRoomInfos = (world, imageOffsets) => {
   const spritesPerRoom = groupBy(Object.values(world.sprite), 'room');
   return Object.values(world.room).map(room => ({
     ...room,
-    sprites: (spritesPerRoom[room.id] || []).filter(sprite => !isPlayerSprite(sprite, world)),
-    tilemap: room.tilemap.map(row => row.map(v => v === '0' ? 0 : imageOffsets[world.tile[v].drw]))
+    sprites: listNonPlayerSprites(spritesPerRoom[room.id], world),
+    tilemap: convertRoomMapToOffsets(room.tilemap, world, imageOffsets),
   }));
 };
 
