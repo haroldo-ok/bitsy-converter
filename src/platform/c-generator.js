@@ -27,3 +27,11 @@ export const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\
 export const toConstantArrayDeclaration = (name, elementType, elements) => toConstantDeclaration(`${name}[]`, elementType, `{
   ${ elements.join(',\n  ') }
 }`);
+
+/**
+ * Generates a C enum declaration from a JS object.
+ */
+export const toEnumDeclaration = (name, object, keyFunction = k => k) =>`
+enum ${name} {
+${ Object.entries(object).map(([k, i]) => `  ${keyFunction(k)} = ${i}`).join(',\n') }
+};`

@@ -3,7 +3,7 @@ import {groupBy, fromPairs, trimStart} from 'lodash-es';
 import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation} from './world';
-import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration,
+import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toEnumDeclaration,
        toArrayLiteral, toStringLiteral} from './c-generator';
 
 /** 
@@ -22,14 +22,6 @@ const toBinaryConst = a => `B${a.join('')}`;
  * Assumes the array is 8x8.
  */
 const convertTile = tile => transpose(tile).map(row => toBinaryConst(row.reverse())).join(', ');
-
-/**
- * Generates a C++ enum declaration from a JS object.
- */
-const toEnumDeclaration = (name, object, keyFunction = k => k) =>`
-enum ${name} {
-${ Object.entries(object).map(([k, i]) => `  ${keyFunction(k)} = ${i}`).join(',\n') }
-};`
 
 /**
  * Generates image information declaration.
