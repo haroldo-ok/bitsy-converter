@@ -70,6 +70,35 @@ typedef struct Room {
     Ending *endings;
 } Room;
 
+void showDialog(char *s);
+
+
+
+const uint8_t FRAME_COUNT = 12;
+
+const char gameTitle[] = "Your game's title here";
+
+const BitsySprite playerSpriteStart = { ofs_SPR_A, 4, 4 };
+
+
+void dialog_SPR_0() {
+  showDialog("I'm a cat. Meow!");  
+}
+
+void dialog_ITM_0() {
+  showDialog("Encontraste um copo com chá quentinho");  
+}
+
+void dialog_SPR_1() {
+  showDialog("Hello, I'm a chair.");  
+}
+
+void ending_0() {
+  showDialog("This is the end.");  
+}
+
+
+
 const byte char_table[8][8] = {
   /*{w:8,h:8,brev:1,count:8}*/ 
   {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF},
@@ -658,6 +687,10 @@ void setup_graphics() {
   cvu_memtovmemcpy(SPRITE_PATTERNS, sprite_table, sizeof(sprite_table));
   flip_sprite_patterns(SPRITE_PATTERNS + 512, (const byte*)sprite_table, sizeof(sprite_table));
   flip_sprite_patterns(SPRITE_PATTERNS + 384, (const byte*)blimp_sprite_table, sizeof(blimp_sprite_table));
+}
+
+void showDialog(char *s) {
+  int i = *s;
 }
 
 void main() {
