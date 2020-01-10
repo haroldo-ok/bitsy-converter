@@ -23,6 +23,53 @@ For more information, see "Making Games for the NES".
 #define CH_FLOOR 65
 #define CH_LADDER 66
 
+enum ImageOffset {
+  ofs_BLANK = 0,
+  ofs_TIL_a = 1,
+  ofs_TIL_b = 2,
+  ofs_TIL_c = 4,
+  ofs_TIL_d = 5,
+  ofs_SPR_A = 6,
+  ofs_SPR_a = 8,
+  ofs_SPR_b = 10,
+  ofs_ITM_0 = 11
+};
+
+typedef struct {
+    uint8_t image;
+    uint8_t x, y;
+    void  (*dialog)();
+} BitsySprite;
+
+typedef struct {
+  bool isWall;
+  uint8_t frameCount;
+} TileInfo;
+
+typedef struct {
+  uint8_t origX, origY;
+  uint8_t destX, destY;
+  uint8_t destRoom;
+} Exit;
+
+typedef struct {
+  uint8_t x, y;
+  void  (*dialog)();
+} Ending;
+
+typedef struct Room {
+    uint8_t tileMap[16][16];
+    
+    uint8_t spriteCount;
+    BitsySprite *sprites;
+    
+    uint8_t exitCount;
+    Exit *exits;
+    
+    uint8_t endingCount;
+    Ending *endings;
+} Room;
+
 const byte char_table[8][8] = {
   /*{w:8,h:8,brev:1,count:8}*/ 
   {0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF},
