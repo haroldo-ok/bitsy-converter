@@ -1,4 +1,4 @@
-import {groupBy, fromPairs, trimStart} from 'lodash-es';
+import {trimStart} from 'lodash-es';
 
 import {parseWorld} from 'bitsy-parser';
 
