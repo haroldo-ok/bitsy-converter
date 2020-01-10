@@ -1,12 +1,19 @@
-/**
- * Generates a C constant declaration.
- */
-export const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
 /**
  * Generates a C array literal from an array
  */
 export const toArrayLiteral = elements => `{ ${elements.join(', ')} }`;
+
+/**
+ * Generates a C string literal from a string
+ */
+export const toStringLiteral = text => `"${text}"`;
+
+
+/**
+ * Generates a C constant declaration.
+ */
+export const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
 /**
  * Generates a flat C array constant from a bidimensional JS array.

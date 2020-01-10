@@ -4,7 +4,7 @@ import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation} from './world';
 import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration,
-       toArrayLiteral} from './c-generator';
+       toArrayLiteral, toStringLiteral} from './c-generator';
 
 /** 
  * Returns a transposed version of a bidimensional array. 
@@ -60,7 +60,7 @@ ${content}
 
 const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
 
-const generatePrintDialogCommand = command => `showDialog(F("${command.arguments[0].value}"));`;
+const generatePrintDialogCommand = command => `showDialog(F(${toStringLiteral(command.arguments[0].value)}));`;
 
 const generateBlockDialogCommand = command => command.children
   .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
@@ -134,7 +134,7 @@ export const convertWorld = world => {
   const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
-    toConstantDeclaration('gameTitle', 'String', `"${world.title}"`),
+    toConstantDeclaration('gameTitle', 'String', toStringLiteral(world.title)),
     toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
     toEndingsDeclaration(world),
