@@ -1,6 +1,10 @@
-import {groupBy} from 'lodash-es';
+import {trimStart} from 'lodash-es';
 
 import {parseWorld} from 'bitsy-parser';
+
+import {prepareWorldInformation} from './world';
+import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toEnumDeclaration,
+       toArrayLiteral, toStringLiteral} from './c-generator';
 
 /** 
  * Returns a transposed version of a bidimensional array. 
@@ -18,19 +22,6 @@ const toBinaryConst = a => `B${a.join('')}`;
  * Assumes the array is 8x8.
  */
 const convertTile = tile => transpose(tile).map(row => toBinaryConst(row.reverse())).join(', ');
-
-/**
- * Generates a C++ enum declaration from a JS object.
- */
-const toEnumDeclaration = (name, object, keyFunction = k => k) =>`
-enum ${name} {
-${ Object.entries(object).map(([k, i]) => `  ${keyFunction(k)} = ${i}`).join(',\n') }
-};`
-
-/**
- * Generates a C constant declaration.
- */
-const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
 /**
  * Generates image information declaration.
@@ -61,7 +52,7 @@ ${content}
 
 const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
 
-const generatePrintDialogCommand = command => `showDialog(F("${command.arguments[0].value}"));`;
+const generatePrintDialogCommand = command => `showDialog(F(${toStringLiteral(command.arguments[0].value)}));`;
 
 const generateBlockDialogCommand = command => command.children
   .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
@@ -88,12 +79,6 @@ const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, d
 const toEndingsDeclaration = world => Object.entries(world.ending).map(([name, dialog]) => toDialogDeclaration('ending', name, dialog)).join('\n\n');
 
 /**
- * Generates a flat C array constant from a bidimensional JS array.
- */
-const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\n    ') => 
-  matrix.map(row => `{ ${row.map(cell => transform(cell)).join(', ')} }`).join(`,${innerIndent}`);
-
-/**
  * Generates a C constant from a room object.
  */
 const toRoomDeclaration = (room) => `
@@ -109,25 +94,21 @@ const toRoomDeclaration = (room) => `
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
 
 /**
- * Generates a C array declaration from an array
- */
-const toArrayDeclaration = elements => `{ ${elements.join(', ')} }`;
-
-/**
  * Generates a C constant representing all the rooms contained in a room object.
  */
 const toRoomsDeclaration = (name, roomInfos) => {
-  const spriteDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_sprites[]`, 'BitsySprite PROGMEM', `{
-  ${ room.sprites.map(toSpriteDeclaration).join(',\n  ') }
-}`));
+  const spriteDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+    `room_${room.id}_sprites`, 'BitsySprite PROGMEM', room.sprites.map(toSpriteDeclaration)));
   
-  const exitDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_exits[]`, 'Exit PROGMEM', `{
-  ${ room.exits.map(({x, y, dest}) => toArrayDeclaration([x, y, dest.x, dest.y, dest.room])).join(',\n  ') }
-}`));
+  const exitDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+    `room_${room.id}_exits`, 'Exit PROGMEM', 
+    room.exits.map( ({x, y, dest}) => toArrayLiteral([x, y, dest.x, dest.y, dest.room]) )
+  ));
 
-  const endingDeclarations = roomInfos.map(room => toConstantDeclaration(`room_${room.id}_endings[]`, 'Ending PROGMEM', `{
-  ${ room.endings.map(({x, y, id}) => toArrayDeclaration([x, y, `ending_${id}`])).join(',\n  ') }
-}`));
+  const endingDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+    `room_${room.id}_endings`, 'Ending PROGMEM',
+    room.endings.map(({x, y, id}) => toArrayLiteral([x, y, `ending_${id}`]))
+  ));
 
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
@@ -137,60 +118,15 @@ ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }
 
 /**
- * Generates an object containing various information about the images contained in the world object.
- */
-const extractImageInfos = world => {
-  const withBlank = [ ['BLANK', [ Array(8).fill(Array(8).fill(0)) ] ], ...Object.entries(world.images) ];
-  const imageInfos = withBlank.map(([name, frames], index) => ({ name, frames, index }));
-  
-  const tilesByDrw = Object.fromEntries(Object.values(world.tile).map(tile => [tile.drw, tile]));
-  const withWalls = imageInfos.map(info => ({
-    ...info, 
-    isWall: !!(tilesByDrw[info.name] && tilesByDrw[info.name].isWall)
-  }));
-  
-  const withOffsets = withWalls.reduce(({offset, results}, info) => ({
-    offset: offset + info.frames.length,
-    results: [...results, {offset, ...info}]
-  }), {offset: 0, results: []}).results;  
-  
-  return withOffsets;
-}
-
-/**
- * Checks if a given sprite is from the player.
- */
-const isPlayerSprite = (sprite, world) => sprite.id === world.playerId;
-
-/**
- * Generates an array containing information about the rooms contained in the world object.
- */
-const extractRoomInfos = (world, imageOffsets) => {
-  const spritesPerRoom = groupBy(Object.values(world.sprite), 'room');
-  return Object.values(world.room).map(room => ({
-    ...room,
-    sprites: (spritesPerRoom[room.id] || []).filter(sprite => !isPlayerSprite(sprite, world)),
-    tilemap: room.tilemap.map(row => row.map(v => v === '0' ? 0 : imageOffsets[world.tile[v].drw]))
-  }));
-};
-
-/**
  * Generates Arduboy-compatible C++ code from a Bitsy script object.
  */
-export const convertArduboy = code => {
-  const world = parseWorld(code, {parseScripts: true});
-  const imageInfos = extractImageInfos(world);
-  
-  const imageOffsets = Object.fromEntries(imageInfos.map(({name, offset}) => [name, offset]));
-  const frameCount = imageInfos.reduce((total, info) => total + info.frames.length, 0);
-  
-  const roomInfos = extractRoomInfos(world, imageOffsets);
-  const playerSpriteStart = Object.values(world.sprite).find(sprite => isPlayerSprite(sprite, world));
+export const convertWorld = world => {
+  const {imageInfos, imageOffsets, frameCount,roomInfos, playerSpriteStart} = prepareWorldInformation(world);
   
   const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
-    toConstantDeclaration('gameTitle', 'String', `"${world.title}"`),
+    toConstantDeclaration('gameTitle', 'String', toStringLiteral(world.title)),
     toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
     toEndingsDeclaration(world),
@@ -198,7 +134,7 @@ export const convertArduboy = code => {
 	  toImageDeclaration('images', imageInfos),
   ].join('\n\n');
 
-  return `
+  return trimStart(`
 #include <Arduboy2.h>
 
 Arduboy2 arduboy;
@@ -514,5 +450,10 @@ void loop() {
   }
   
 }
-`.trimStart();
+`);
+}
+
+export const convertArduboy = code => {
+  const world = parseWorld(code, {parseScripts: true}); 
+  return convertWorld(world);
 }

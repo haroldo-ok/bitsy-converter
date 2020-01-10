@@ -21,7 +21,7 @@ import exampleSource from './example.bitsy';
 
 import ReactGA from 'react-ga';
 
-ReactGA.initialize('UA-130174335-4');
+ReactGA.initialize('UA-130174335-4', { testMode: process.env.NODE_ENV === 'test' });
 ReactGA.pageview(window.location.pathname + window.location.search)
 
 const convertJSON = code => stringify(parseWorld(code, {parseScripts: true}), {maxLength: 160});
