@@ -3,7 +3,7 @@
 This tool allows one to convert Bitsy scripts into various output formats:
 
 * JSON: fully supported;
-* Arduboy source code: work in progress; 
+* Arduboy source code: mostly implemented, though only supports dialogs if they are very simple; 
 * More formats will come later.
 
 All you have to do is paste the script on the left panel, and the converted result will be displayed on the right panel; you can alternate between JSON and Arduboy formats by.
