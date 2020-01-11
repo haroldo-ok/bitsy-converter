@@ -833,6 +833,9 @@ void setup_graphics() {
   cvu_memtovmemcpy(SPRITE_PATTERNS, sprite_table, sizeof(sprite_table));
   flip_sprite_patterns(SPRITE_PATTERNS + 512, (const byte*)sprite_table, sizeof(sprite_table));
   flip_sprite_patterns(SPRITE_PATTERNS + 384, (const byte*)blimp_sprite_table, sizeof(blimp_sprite_table));
+
+  // Load the images as chars
+  cvu_memtovmemcpy(PATTERN+8*64, images[0], 8 * FRAME_COUNT);
 }
 
 void showDialog(char *s) {
