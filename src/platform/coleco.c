@@ -23,6 +23,11 @@ For more information, see "Making Games for the NES".
 #define CH_FLOOR 65
 #define CH_LADDER 66
 
+#define ROOM_COLS 16
+#define ROOM_ROWS 16
+#define ROOM_X_OFS ((COLS - ROOM_COLS) >> 1)
+#define ROOM_Y_OFS ((ROWS - ROOM_ROWS) >> 1)
+
 enum ImageOffset {
   ofs_BLANK = 0,
   ofs_TIL_a = 1,
@@ -838,6 +843,17 @@ void setup_graphics() {
   cvu_memtovmemcpy(PATTERN+8*64, images[0], 8 * FRAME_COUNT);
 }
 
+void drawBackground() {
+  char buf[COLS];
+//  cvu_memtovmemcpy(IMAGE + COLS*(ROWS-1) - COLS*screen_y, buf, COLS);
+  for (uint16_t i = 0; i != ROOM_ROWS; i++) {
+    for (uint8_t j = 0; j != ROOM_COLS; j++) {
+      buf[j] = rooms[0].tileMap[i][j] + 64;
+    }
+    cvu_memtovmemcpy(IMAGE + ROOM_X_OFS + COLS * (ROOM_Y_OFS + i), buf, ROOM_COLS);
+  }
+}
+
 void showDialog(char *s) {
   int i = *s;
 }
@@ -847,8 +863,14 @@ void main() {
   setup_graphics();
   cv_set_screen_active(true);
   cv_set_vint_handler(&vint_handler);  
+  
+  drawBackground();
+  
+  /*
   make_levels();
   play_scene();
+  */
+  for (;;);
 }
 
 /*
