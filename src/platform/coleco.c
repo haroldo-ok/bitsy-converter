@@ -27,6 +27,7 @@ For more information, see "Making Games for the NES".
 #define ROOM_ROWS 16
 #define ROOM_X_OFS ((COLS - ROOM_COLS) >> 1)
 #define ROOM_Y_OFS ((ROWS - ROOM_ROWS) >> 1)
+#define FIRST_TILE 64
 
 enum ImageOffset {
   ofs_BLANK = 0,
@@ -834,13 +835,15 @@ void setup_graphics() {
   cvu_vmemset(COLOR+8, 0x0|BGCOL, 32-8); // set chars 63-255
   cvu_vmemset(COLOR+16, 0xb0|BGCOL, 1); // set chars 128-128+8
 #endif
-
+/*
   cvu_memtovmemcpy(SPRITE_PATTERNS, sprite_table, sizeof(sprite_table));
   flip_sprite_patterns(SPRITE_PATTERNS + 512, (const byte*)sprite_table, sizeof(sprite_table));
   flip_sprite_patterns(SPRITE_PATTERNS + 384, (const byte*)blimp_sprite_table, sizeof(blimp_sprite_table));
+  */
 
   // Load the images as chars
   cvu_memtovmemcpy(PATTERN+8*64, images[0], 8 * FRAME_COUNT);
+  cvu_memtovmemcpy(SPRITE_PATTERNS, images[0], 8 * FRAME_COUNT);
 }
 
 void drawBackground() {
@@ -848,9 +851,25 @@ void drawBackground() {
 //  cvu_memtovmemcpy(IMAGE + COLS*(ROWS-1) - COLS*screen_y, buf, COLS);
   for (uint16_t i = 0; i != ROOM_ROWS; i++) {
     for (uint8_t j = 0; j != ROOM_COLS; j++) {
-      buf[j] = rooms[0].tileMap[i][j] + 64;
+      buf[j] = rooms[0].tileMap[i][j] + FIRST_TILE;
     }
     cvu_memtovmemcpy(IMAGE + ROOM_X_OFS + COLS * (ROOM_Y_OFS + i), buf, ROOM_COLS);
+  }
+}
+
+void drawSprites() {
+  struct cvu_sprite sprite;
+  sprite.x = 0;
+  sprite.y = 0;
+  sprite.name = FIRST_TILE;
+  sprite.tag = 0x80;
+
+  for(int i = 0; i < 32; i++) {
+    cvu_set_sprite_x(&sprite, i * 8);	// Set initial cursor position.
+    cvu_set_sprite_y(&sprite, i * 8);	// Set initial cursor position.
+    cvu_set_sprite_color(&sprite, CV_COLOR_WHITE);
+    sprite.name = i;	// Use sprite pattern number 0.
+    cvu_set_sprite(SPRITES, i, &sprite);
   }
 }
 
@@ -860,11 +879,14 @@ void showDialog(char *s) {
 
 void main() {
   vdp_setup();
+  cv_set_sprite_big(false);
+
   setup_graphics();
   cv_set_screen_active(true);
   cv_set_vint_handler(&vint_handler);  
   
   drawBackground();
+  drawSprites();
   
   /*
   make_levels();
