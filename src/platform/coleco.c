@@ -897,19 +897,20 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   // Calculate where the player will try to move to
   uint8_t x = playerSprite.x + dx;
   uint8_t y = playerSprite.y + dy;
+  uint8_t tn;
 
   // Out of bounds  
   if (x > 15 || y > 15) {
     return false;
   }
 
-  /*
   // Check if there are background tiles in the way
-  uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[y][x]);
-  if (tn && pgm_read_byte(&tileInfos[tn].isWall)) {
+  tn = rooms[currentLevel].tileMap[y][x];
+  if (tn && tileInfos[tn].isWall) {
     return false;
   }
   
+  /*
   // Check collision against the sprites
   for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
     BitsySprite *spr = fetchSprite(i);
