@@ -893,6 +893,84 @@ void drawSprites() {
 void showDialog(char *s) {
   int i = *s;
 }
+bool tryMovingPlayer(int8_t dx, uint8_t dy) {
+  // Calculate where the player will try to move to
+  uint8_t x = playerSprite.x + dx;
+  uint8_t y = playerSprite.y + dy;
+
+  // Out of bounds  
+  if (x > 15 || y > 15) {
+    return false;
+  }
+
+  /*
+  // Check if there are background tiles in the way
+  uint8_t tn = pgm_read_byte(&rooms[currentLevel].tileMap[y][x]);
+  if (tn && pgm_read_byte(&tileInfos[tn].isWall)) {
+    return false;
+  }
+  
+  // Check collision against the sprites
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
+    BitsySprite *spr = fetchSprite(i);
+    if (pgm_read_byte(&spr->x) == x && pgm_read_byte(&spr->y) == y) {
+      currentDialog = pgm_read_word(&spr->dialog);
+      return true;
+    }
+  }
+    
+  // Check collision against the exits
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].exitCount); i++) {
+    Exit *ext = fetchExit(i);
+    
+    if (pgm_read_byte(&ext->origX) == x && pgm_read_byte(&ext->origY) == y) {
+      playerSprite.x = pgm_read_byte(&ext->destX);
+      playerSprite.y = pgm_read_byte(&ext->destY);
+      currentLevel = pgm_read_byte(&ext->destRoom);
+      
+      calculateRequiredScrolling();    
+      scrollY = targetScrollY;
+      
+      return true;
+    }
+  }
+    
+  // Check collision against the endings
+  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].endingCount); i++) {
+    Ending *edg = fetchEnding(i);    
+    if (pgm_read_byte(&edg->x) == x && pgm_read_byte(&edg->y) == y) {
+      currentEnding = pgm_read_word(&edg->dialog);
+      return true;
+    }
+  }
+  */
+
+  // No obstacles found: the player can move.
+  playerSprite.x = x;
+  playerSprite.y = y;
+  
+  return true;
+}
+
+bool controlPlayer() {
+  struct cv_controller_state ctrl;
+  cv_get_controller_state(&ctrl, 0); 
+  
+  if (ctrl.joystick & CV_UP) {
+    return tryMovingPlayer(0, -1);
+  }
+  if (ctrl.joystick & CV_DOWN) {
+    return tryMovingPlayer(0, 1);
+  }
+  if (ctrl.joystick & CV_LEFT) {
+    return tryMovingPlayer(-1, 0);
+  }
+  if (ctrl.joystick & CV_RIGHT) {
+    return tryMovingPlayer(1, 0);
+  }
+  
+  return false;
+}
 
 void startGame() { 
   playerSprite.image = playerSpriteStart.image;
@@ -928,8 +1006,32 @@ void main() {
   cv_set_vint_handler(&vint_handler);  
   
   startGame();
-  drawBackground();
-  drawSprites();
+  
+  for (;;) { 
+    wait_vsync();
+    
+    // Display dialog if necessary
+    if (startingGame) {
+      startGame();
+    }
+    
+    // Wait between keypresses
+    if (buttonDelay > 0) {
+      buttonDelay--;
+    } else {
+      if (controlPlayer()) {
+        buttonDelay = BUTTON_REPEAT_RATE;
+        needUpdate = true;
+      }
+    }
+    
+    if (needUpdate) {
+      drawBackground();
+      drawSprites();
+      
+      needUpdate = false; 
+    }
+  }
   
   /*
   make_levels();
