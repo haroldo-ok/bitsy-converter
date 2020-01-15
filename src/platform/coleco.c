@@ -919,23 +919,20 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
     }
   }
     
-  /*
   // Check collision against the exits
-  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].exitCount); i++) {
-    Exit *ext = fetchExit(i);
+  for (uint8_t i = 0; i != rooms[currentLevel].exitCount; i++) {
+    Exit *ext = &rooms[currentLevel].exits[i];
     
-    if (pgm_read_byte(&ext->origX) == x && pgm_read_byte(&ext->origY) == y) {
-      playerSprite.x = pgm_read_byte(&ext->destX);
-      playerSprite.y = pgm_read_byte(&ext->destY);
-      currentLevel = pgm_read_byte(&ext->destRoom);
-      
-      calculateRequiredScrolling();    
-      scrollY = targetScrollY;
+    if (ext->origX == x && ext->origY == y) {
+      playerSprite.x = ext->destX;
+      playerSprite.y = ext->destY;
+      currentLevel = ext->destRoom; 
       
       return true;
     }
   }
     
+  /*
   // Check collision against the endings
   for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].endingCount); i++) {
     Ending *edg = fetchEnding(i);    
