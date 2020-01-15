@@ -857,19 +857,23 @@ void drawBackground() {
   }
 }
 
-void drawSprites() {
+void drawSprite(uint8_t sprNumber, BitsySprite *spr) {
   struct cvu_sprite sprite;
-  sprite.x = 0;
-  sprite.y = 0;
-  sprite.name = FIRST_TILE;
-  sprite.tag = 0x80;
 
-  for(int i = 0; i < 32; i++) {
-    cvu_set_sprite_x(&sprite, i * 8);	// Set initial cursor position.
-    cvu_set_sprite_y(&sprite, i * 8);	// Set initial cursor position.
-    cvu_set_sprite_color(&sprite, CV_COLOR_WHITE);
-    sprite.name = i;	// Use sprite pattern number 0.
-    cvu_set_sprite(SPRITES, i, &sprite);
+  cvu_set_sprite_x(&sprite, (spr->x + ROOM_X_OFS) * 8);
+  cvu_set_sprite_y(&sprite, (spr->y + ROOM_Y_OFS) * 8);
+  cvu_set_sprite_color(&sprite, CV_COLOR_WHITE);
+  sprite.name = spr->image;
+  cvu_set_sprite(SPRITES, sprNumber, &sprite); 
+}
+
+void drawSprites() { 
+  uint8_t sprNumber = 0;
+  drawSprite(sprNumber++, &playerSpriteStart);
+  
+  for (uint8_t i = 0; i < rooms[0].spriteCount; i++) { 
+    BitsySprite *spr = &rooms[0].sprites[i]; 
+    drawSprite(sprNumber++, spr);
   }
 }
 
