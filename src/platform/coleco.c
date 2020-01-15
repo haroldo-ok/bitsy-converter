@@ -259,6 +259,7 @@ uint8_t targetScrollY = 0;
 bool needUpdate = true;
 BitsySprite playerSprite;
 uint16_t frameControl = 0;
+uint8_t frameDelay = 0;
 
 void  (*currentDialog)() = NULL;
 void  (*currentEnding)() = NULL;
@@ -859,12 +860,18 @@ void setup_graphics() {
   cvu_memtovmemcpy(SPRITE_PATTERNS, images[0], 8 * FRAME_COUNT);
 }
 
+uint8_t frameNumber(uint8_t tn) {
+  uint8_t frameCount = tileInfos[tn].frameCount;
+  return frameCount > 1 ? frameControl % frameCount : 0;
+}
+
 void drawBackground() {
   char buf[COLS];
 
   for (uint16_t i = 0; i != ROOM_ROWS; i++) {
     for (uint8_t j = 0; j != ROOM_COLS; j++) {
-      buf[j] = rooms[currentLevel].tileMap[i][j] + FIRST_TILE;
+      uint8_t tileNumber = rooms[currentLevel].tileMap[i][j];
+      buf[j] = tileNumber + frameNumber(tileNumber) + FIRST_TILE;
     }
     cvu_memtovmemcpy(IMAGE + ROOM_X_OFS + COLS * (ROOM_Y_OFS + i), buf, ROOM_COLS);
   }
@@ -902,6 +909,7 @@ void drawSprites() {
 void showDialog(char *s) {
   int i = *s;
 }
+
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
   // Calculate where the player will try to move to
   uint8_t x = playerSprite.x + dx;
@@ -984,6 +992,9 @@ void startGame() {
   playerSprite.x = playerSpriteStart.x;
   playerSprite.y = playerSpriteStart.y;
   
+  frameControl = 0;
+  frameDelay = 0;
+   
   currentLevel = 0;
   
   scrollY = 0;
@@ -1017,11 +1028,20 @@ void main() {
   for (;;) { 
     wait_vsync();
     
-    // Display dialog if necessary
+    // Display title screen if necessary
     if (startingGame) {
       startGame();
     }
     
+    // Increment frame control for animations  
+    if (frameDelay) {
+      frameDelay--;
+    } else {
+      frameControl++;
+      frameDelay = 30;
+      needUpdate = true;
+    }
+
     // Wait between keypresses
     if (buttonDelay > 0) {
       buttonDelay--;
