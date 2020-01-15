@@ -910,16 +910,16 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
     return false;
   }
   
-  /*
   // Check collision against the sprites
-  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].spriteCount); i++) {
-    BitsySprite *spr = fetchSprite(i);
-    if (pgm_read_byte(&spr->x) == x && pgm_read_byte(&spr->y) == y) {
-      currentDialog = pgm_read_word(&spr->dialog);
+  for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
+    BitsySprite *spr = &rooms[currentLevel].sprites[i];
+    if (spr->x == x && spr->y == y) {
+      currentDialog = spr->dialog;
       return true;
     }
   }
     
+  /*
   // Check collision against the exits
   for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].exitCount); i++) {
     Exit *ext = fetchExit(i);
