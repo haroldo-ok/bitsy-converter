@@ -880,6 +880,13 @@ void drawSprite(uint8_t sprNumber, BitsySprite *spr) {
   cvu_set_sprite(SPRITES, sprNumber, &sprite); 
 }
 
+void finishSpriteList(uint8_t sprNumber) {
+  struct cvu_sprite sprite;
+  // If Y is 208, that sprite and all following sprites in the table are not  displayed.
+  sprite.y = 208;
+  cvu_set_sprite(SPRITES, sprNumber, &sprite); 
+}
+
 void drawSprites() { 
   uint8_t sprNumber = 0;
   drawSprite(sprNumber++, &playerSprite);
@@ -888,6 +895,8 @@ void drawSprites() {
     BitsySprite *spr = &rooms[currentLevel].sprites[i]; 
     drawSprite(sprNumber++, spr);
   }
+  
+  finishSpriteList(sprNumber);
 }
 
 void showDialog(char *s) {
