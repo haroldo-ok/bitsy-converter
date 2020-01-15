@@ -249,6 +249,19 @@ const uint8_t images[][8] = {
 };
 
 
+const uint8_t BUTTON_REPEAT_RATE = 8;
+
+bool startingGame = false;
+uint8_t currentLevel = 0;
+uint8_t buttonDelay = 0;
+uint8_t scrollY = 0;
+uint8_t targetScrollY = 0;
+bool needUpdate = true;
+BitsySprite playerSprite;
+uint16_t frameControl = 0;
+
+void  (*currentDialog)() = NULL;
+void  (*currentEnding)() = NULL;
 
 
 const byte char_table[8][8] = {
@@ -848,10 +861,10 @@ void setup_graphics() {
 
 void drawBackground() {
   char buf[COLS];
-//  cvu_memtovmemcpy(IMAGE + COLS*(ROWS-1) - COLS*screen_y, buf, COLS);
+
   for (uint16_t i = 0; i != ROOM_ROWS; i++) {
     for (uint8_t j = 0; j != ROOM_COLS; j++) {
-      buf[j] = rooms[0].tileMap[i][j] + FIRST_TILE;
+      buf[j] = rooms[currentLevel].tileMap[i][j] + FIRST_TILE;
     }
     cvu_memtovmemcpy(IMAGE + ROOM_X_OFS + COLS * (ROOM_Y_OFS + i), buf, ROOM_COLS);
   }
@@ -869,16 +882,41 @@ void drawSprite(uint8_t sprNumber, BitsySprite *spr) {
 
 void drawSprites() { 
   uint8_t sprNumber = 0;
-  drawSprite(sprNumber++, &playerSpriteStart);
+  drawSprite(sprNumber++, &playerSprite);
   
-  for (uint8_t i = 0; i < rooms[0].spriteCount; i++) { 
-    BitsySprite *spr = &rooms[0].sprites[i]; 
+  for (uint8_t i = 0; i < rooms[currentLevel].spriteCount; i++) { 
+    BitsySprite *spr = &rooms[currentLevel].sprites[i]; 
     drawSprite(sprNumber++, spr);
   }
 }
 
 void showDialog(char *s) {
   int i = *s;
+}
+
+void startGame() { 
+  playerSprite.image = playerSpriteStart.image;
+  playerSprite.x = playerSpriteStart.x;
+  playerSprite.y = playerSpriteStart.y;
+  
+  currentLevel = 0;
+  
+  scrollY = 0;
+  targetScrollY = 0;
+
+  currentDialog = NULL;
+  currentEnding = NULL;
+
+  startingGame = false;
+  needUpdate = true;
+}
+
+void endGame() {
+  (*currentEnding)();
+  currentEnding = NULL;
+    
+  startingGame = true;
+  needUpdate = true;
 }
 
 void main() {
@@ -889,6 +927,7 @@ void main() {
   cv_set_screen_active(true);
   cv_set_vint_handler(&vint_handler);  
   
+  startGame();
   drawBackground();
   drawSprites();
   
