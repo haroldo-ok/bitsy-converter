@@ -84,7 +84,7 @@ it("generates an empty exit array for the third room", async () => {
 it("generates an empty ending array for the first room", async () => {
 	const generatedCode = convertWorld(worldObject);
 	expect(containsNormalized(generatedCode, `
-		const Ending room_1_endings[0] = {{0}};
+		const Ending room_1_endings[] = {{0}};
 	`)).toBe(true);
 });
 
@@ -100,7 +100,7 @@ it("generates a populated ending array for the third room", async () => {
 it("generates an array of rooms", async () => {
 	const generatedCode = convertWorld(worldObject);
 	expect(containsNormalized(generatedCode, `
-		const Room PROGMEM rooms[] = {
+		const Room rooms[] = {
 
 		  // Room 0
 		  {{

@@ -67,7 +67,7 @@ ${content}
 
 const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
 
-const generatePrintDialogCommand = command => `showDialog(F(${toStringLiteral(command.arguments[0].value)}));`;
+const generatePrintDialogCommand = command => `showDialog(${toStringLiteral(command.arguments[0].value)});`;
 
 const generateBlockDialogCommand = command => command.children
   .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
@@ -149,7 +149,7 @@ export const convertWorld = world => {
   const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
-    toConstantDeclaration('gameTitle', 'String', toStringLiteral(world.title)),
+    toConstantDeclaration('gameTitle[]', 'char', toStringLiteral(world.title)),
     toConstantDeclaration('playerSpriteStart', 'BitsySprite', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
     toEndingsDeclaration(world),
