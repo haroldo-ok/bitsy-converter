@@ -1,8 +1,4 @@
-
-/*
-Demonstration game.
-For more information, see "Making Games for the NES".
-*/
+// Converted to SDCC + LibCV by Bitsy-Converter
 
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +17,7 @@ For more information, see "Making Games for the NES".
 #define DLG_X_OFS ((COLS - DLG_COLS) >> 1)
 #define DLG_Y_OFS 2
 
+
 enum ImageOffset {
   ofs_BLANK = 0,
   ofs_TIL_a = 1,
@@ -32,6 +29,7 @@ enum ImageOffset {
   ofs_SPR_b = 10,
   ofs_ITM_0 = 11
 };
+
 
 typedef struct {
     uint8_t image;
@@ -71,13 +69,11 @@ typedef struct Room {
 void showDialog(char *s);
 
 
-
 const uint8_t FRAME_COUNT = 12;
 
 const char gameTitle[] = "Your game's title here";
 
 const BitsySprite playerSpriteStart = { ofs_SPR_A, 4, 4 };
-
 
 void dialog_SPR_0() {
   showDialog("I'm a cat. Meow!");  
@@ -94,8 +90,6 @@ void dialog_SPR_1() {
 void ending_0() {
   showDialog("This is the end.");  
 }
-
-
 
 const BitsySprite room_0_sprites[] = {
   { ofs_SPR_a, 8, 12, dialog_SPR_0 },
@@ -117,9 +111,9 @@ const Exit room_1_exits[] = {
 
 const Exit room_2_exits[] = {{0}};
 
-const Ending room_0_endings[0] = {{0}};
+const Ending room_0_endings[] = {{0}};
 
-const Ending room_1_endings[0] = {{0}};
+const Ending room_1_endings[] = {{0}};
 
 const Ending room_2_endings[] = {
   { 13, 11, ending_0 }
@@ -189,8 +183,6 @@ const Room rooms[] = {
 
 };
 
-
-
 const TileInfo tileInfos[] = {
   // BLANK
   { false, 1 },
@@ -237,9 +229,8 @@ const uint8_t images[][8] = {
   // SPR_b: index 7, offset 10, 1 frame(s)
   { 0x01, 0x01, 0x01, 0x01, 0xFF, 0x81, 0x81, 0x81 },
   // ITM_0: index 8, offset 11, 1 frame(s)
-  { 0x00, 0x00, 0x00, 0x3C, 0x64, 0x24, 0x18, 0x00 }
+  { 0x00, 0x00, 0x00, 0x3C, 0x64, 0x24, 0x18, 0x00 } 
 };
-
 
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
@@ -672,10 +663,3 @@ void main() {
   }
   
 }
-
-/*
-return Object.entries(images).map(([name, frames]) => `
-  // ${name}
-  ${frames.map(frame => `{ ${ frame.map(line => '0x' + parseInt(line.join(''), 2).toString(16).toUpperCase().padStart(2, '0') ).join(', ') } }`).join(',\n  ')}
-`).join(',\n  ')
-*/
