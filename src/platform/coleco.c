@@ -872,6 +872,10 @@ uint8_t frameNumber(uint8_t tn) {
   return frameCount > 1 ? frameControl % frameCount : 0;
 }
 
+void clearScreen() {
+  cvu_vmemset(IMAGE, 0, COLS * ROWS);
+}
+
 void drawBackground() {
   char buf[COLS];
 
@@ -917,6 +921,7 @@ void showDialog(char *s) {
   struct cv_controller_state ctrl;
   char buf[DLG_COLS];
   uint16_t vaddr = IMAGE + DLG_X_OFS + COLS * DLG_Y_OFS; 
+  uint8_t counter = 0;  
  
   // Draw text
   for (char *p = s; *p; vaddr += COLS) {
@@ -926,13 +931,15 @@ void showDialog(char *s) {
         p++;
       }
     }
-    cvu_memtovmemcpy(vaddr, buf, ROOM_COLS);
+    cvu_memtovmemcpy(vaddr, buf, DLG_COLS);
   }
   
   // Wait button press
   do {
     wait_vsync();
     cv_get_controller_state(&ctrl, 0); 
+    cvu_vmemset(vaddr + DLG_COLS - 1, counter & 0x20 ? ' ' : '_', 1);
+    counter++;
   } while (!(ctrl.joystick & (CV_FIRE_0 | CV_FIRE_1)));
   
   // Wait button release
@@ -940,6 +947,10 @@ void showDialog(char *s) {
     wait_vsync();
     cv_get_controller_state(&ctrl, 0); 
   } while (ctrl.joystick & (CV_FIRE_0 | CV_FIRE_1));
+  
+  // Clear screen
+  clearScreen();
+  needUpdate = true;
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
