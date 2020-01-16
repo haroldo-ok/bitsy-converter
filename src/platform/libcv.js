@@ -50,7 +50,7 @@ const toImageInfoDeclaration = ({name, frames, isWall}) => `
  * Generates a C constant containing all the images contained in imageInfos
  */
 const toImageDeclaration = (name, imageInfos) => {
-  const infoDeclaration = toConstantDeclaration('tileInfos[]', 'TileInfo PROGMEM', `{
+  const infoDeclaration = toConstantDeclaration('tileInfos[]', 'TileInfo', `{
   ${ imageInfos.map(toImageInfoDeclaration).join(',\n  ') }
 }`);
   
@@ -60,7 +60,7 @@ const toImageDeclaration = (name, imageInfos) => {
   
   return `${infoDeclaration}
 
-const uint8_t PROGMEM ${name}[][8] = { 
+const uint8_t ${name}[][8] = { 
 ${content} 
 };`
 }
@@ -113,19 +113,19 @@ const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprit
  */
 const toRoomsDeclaration = (name, roomInfos) => {
   const spriteDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
-    `room_${room.id}_sprites`, 'BitsySprite PROGMEM', room.sprites.map(toSpriteDeclaration)));
+    `room_${room.id}_sprites`, 'BitsySprite', room.sprites.map(toSpriteDeclaration)));
   
   const exitDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
-    `room_${room.id}_exits`, 'Exit PROGMEM', 
+    `room_${room.id}_exits`, 'Exit', 
     room.exits.map( ({x, y, dest}) => toArrayLiteral([x, y, dest.x, dest.y, dest.room]) )
   ));
 
   const endingDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
-    `room_${room.id}_endings`, 'Ending PROGMEM',
+    `room_${room.id}_endings`, 'Ending',
     room.endings.map(({x, y, id}) => toArrayLiteral([x, y, `ending_${id}`]))
   ));
 
-  const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room PROGMEM', `{
+  const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }`);
 
@@ -142,7 +142,7 @@ export const convertWorld = world => {
   const mainGeneratedBody = [
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
     toConstantDeclaration('gameTitle', 'String', toStringLiteral(world.title)),
-    toConstantDeclaration('playerSpriteStart', 'BitsySprite PROGMEM', toSpriteDeclaration(playerSpriteStart)),
+    toConstantDeclaration('playerSpriteStart', 'BitsySprite', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
     toEndingsDeclaration(world),
     toRoomsDeclaration('rooms', roomInfos),
