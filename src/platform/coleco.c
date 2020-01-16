@@ -11,7 +11,7 @@ For more information, see "Making Games for the NES".
 
 #include "common.h"
 //#link "common.c"
-
+ 
 // for SMS
 //#link "fonts.s"
 
@@ -22,16 +22,16 @@ For more information, see "Making Games for the NES".
 #define CH_BORDER 64
 #define CH_FLOOR 65
 #define CH_LADDER 66
-
+ 
 #define ROOM_COLS 16
 #define ROOM_ROWS 16
 #define ROOM_X_OFS ((COLS - ROOM_COLS) >> 1)
 #define ROOM_Y_OFS ((ROWS - ROOM_ROWS) >> 1)
-#define FIRST_TILE 64
+#define FIRST_TILE 128
 
 #define DLG_COLS 28
 #define DLG_X_OFS ((COLS - DLG_COLS) >> 1)
-#define DLG_Y_OFS 3
+#define DLG_Y_OFS 2
 
 enum ImageOffset {
   ofs_BLANK = 0,
@@ -859,8 +859,11 @@ void setup_graphics() {
   flip_sprite_patterns(SPRITE_PATTERNS + 384, (const byte*)blimp_sprite_table, sizeof(blimp_sprite_table));
   */
 
+  // Prepare blank tile 0
+  cvu_memtovmemcpy(PATTERN, images[0], 8);
+  
   // Load the images as chars
-  cvu_memtovmemcpy(PATTERN+8*64, images[0], 8 * FRAME_COUNT);
+  cvu_memtovmemcpy(PATTERN+8*FIRST_TILE, images[0], 8 * FRAME_COUNT);
   cvu_memtovmemcpy(SPRITE_PATTERNS, images[0], 8 * FRAME_COUNT);
 }
 
