@@ -16,6 +16,7 @@ import {parseWorld} from 'bitsy-parser';
 import stringify from 'json-stringify-pretty-compact';
 
 import {convertArduboy} from './platform/arduboy'
+import {convertLibCV} from './platform/libcv'
 
 import exampleSource from './example.bitsy';
 
@@ -29,7 +30,7 @@ const convertJSON = code => stringify(parseWorld(code, {parseScripts: true}), {m
 const converters = {
   'json': convertJSON,
   'arduboy': convertArduboy,
-  'libcv': code => '// TODO: LibCV',
+  'libcv': convertLibCV,
 };
 
 class App extends Component {

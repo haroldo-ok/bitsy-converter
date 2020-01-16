@@ -155,7 +155,6 @@ it("generates an array of tile information", async () => {
 
 it("generates an array of tile image data", async () => {
 	const generatedCode = convertWorld(worldObject);
-	console.info(generatedCode);
 	expect(containsNormalized(generatedCode, `
 		const uint8_t images[][8] = { 
 
