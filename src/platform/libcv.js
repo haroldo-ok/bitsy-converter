@@ -109,18 +109,26 @@ const toRoomDeclaration = (room) => `
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
 
 /**
+ * Generates a constant array declaration, or '{{0}}' if empty.
+ */
+const toConstantArrayDeclarationOrEmpty = (name, elementType, elements) => elements && elements.length ?
+  toConstantArrayDeclaration(name, elementType, elements) : 
+  toConstantDeclaration(`${name}[]`, elementType, '{{0}}');
+      
+
+/**
  * Generates a C constant representing all the rooms contained in a room object.
  */
 const toRoomsDeclaration = (name, roomInfos) => {
-  const spriteDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+  const spriteDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
     `room_${room.id}_sprites`, 'BitsySprite', room.sprites.map(toSpriteDeclaration)));
   
-  const exitDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+  const exitDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
     `room_${room.id}_exits`, 'Exit', 
     room.exits.map( ({x, y, dest}) => toArrayLiteral([x, y, dest.x, dest.y, dest.room]) )
   ));
 
-  const endingDeclarations = roomInfos.map(room => toConstantArrayDeclaration(
+  const endingDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
     `room_${room.id}_endings`, 'Ending',
     room.endings.map(({x, y, id}) => toArrayLiteral([x, y, `ending_${id}`]))
   ));
