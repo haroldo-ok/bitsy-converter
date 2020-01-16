@@ -1,3 +1,152 @@
+import {trimStart} from 'lodash-es';
+
+import {parseWorld} from 'bitsy-parser';
+
+import {prepareWorldInformation} from './world';
+import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toEnumDeclaration,
+       toArrayLiteral, toStringLiteral} from './c-generator';
+
+/**
+ * Converts an array of bits into a number
+ */
+const parseBinary = bits => parseInt(bits.join(''), 2);
+
+/**
+ * Converts a number into its hex representation
+ */
+const toHex = n => n.toString(16).toUpperCase();
+
+/**
+ * Converts a byte into its hex representation, with padding.
+ */
+const toHexByte = n => toHex(n).padStart(2, '0');
+
+/** 
+ * Generates a image constant declaration from a bidimensional array. 
+ * Assumes the array is 8x8.
+ */
+const convertTile = tile => tile.map(row => `0x${toHexByte(parseBinary(row))}`).join(', ');
+
+/**
+ * Generates image information declaration.
+ */
+const toImageInfoDeclaration = ({name, frames, isWall}) => `
+  // ${name}
+  ${ Array(frames.length).fill(`{ ${isWall}, ${frames.length} }`).join(',\n  ') }
+`.trim();
+
+/** 
+ * Generates a C constant containing all the images contained in imageInfos
+ */
+const toImageDeclaration = (name, imageInfos) => {
+  const infoDeclaration = toConstantDeclaration('tileInfos[]', 'TileInfo', `{
+  ${ imageInfos.map(toImageInfoDeclaration).join(',\n  ') }
+}`);
+  
+  const content = imageInfos.map(({name, frames, index, offset}) => `
+  // ${name}: index ${index}, offset ${offset}, ${frames.length} frame(s)
+  ${frames.map(frame => `{ ${convertTile(frame)} }`).join(',\n  ')}`).join(',');
+  
+  return `${infoDeclaration}
+
+const uint8_t ${name}[][8] = { 
+${content} 
+};`
+}
+
+const generateUnknownDialogCommand = command => `/* Unknown command: ${command.type} name=${command.name} mode=${command.mode} */`;
+
+const generatePrintDialogCommand = command => `showDialog(${toStringLiteral(command.arguments[0].value)});`;
+
+const generateBlockDialogCommand = command => command.children
+  .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
+
+/**
+ * Generates a dialog function.
+ */
+const toDialogDeclaration = (prefix, name, dialog) => {
+  const content = dialog.type === 'block' && dialog.mode === 'dialog' ?
+    generateBlockDialogCommand(dialog) : generateUnknownDialogCommand(dialog);
+  return `void ${prefix}_${name}() {
+  ${content}  
+}`;
+}
+
+/**
+ * Generates dialog functions from the world object
+ */
+const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration('dialog', name, dialog)).join('\n\n');
+
+/**
+ * Generates dialog functions from the world object
+ */
+const toEndingsDeclaration = world => Object.entries(world.ending).map(([name, dialog]) => toDialogDeclaration('ending', name, dialog)).join('\n\n');
+
+/**
+ * Generates a C constant from a room object.
+ */
+const toRoomDeclaration = (room) => `
+  // Room ${room.id}
+  {{
+    ${ toMatrixDeclaration(room.tilemap) }
+  }, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits, ${room.endings.length}, room_${room.id}_endings}
+`;
+
+/**
+ * Generates a C constant from a sprite object.
+ */
+const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
+
+/**
+ * Generates a constant array declaration, or '{{0}}' if empty.
+ */
+const toConstantArrayDeclarationOrEmpty = (name, elementType, elements) => elements && elements.length ?
+  toConstantArrayDeclaration(name, elementType, elements) : 
+  toConstantDeclaration(`${name}[]`, elementType, '{{0}}');
+      
+
+/**
+ * Generates a C constant representing all the rooms contained in a room object.
+ */
+const toRoomsDeclaration = (name, roomInfos) => {
+  const spriteDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
+    `room_${room.id}_sprites`, 'BitsySprite', room.sprites.map(toSpriteDeclaration)));
+  
+  const exitDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
+    `room_${room.id}_exits`, 'Exit', 
+    room.exits.map( ({x, y, dest}) => toArrayLiteral([x, y, dest.x, dest.y, dest.room]) )
+  ));
+
+  const endingDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
+    `room_${room.id}_endings`, 'Ending',
+    room.endings.map(({x, y, id}) => toArrayLiteral([x, y, `ending_${id}`]))
+  ));
+
+  const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room', `{
+${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
+}`);
+
+  return [...spriteDeclarations, ...exitDeclarations, ...endingDeclarations, roomsDeclaration].join('\n\n');
+}
+
+/**
+ * Generates Arduboy-compatible C++ code from a Bitsy script object.
+ */
+export const convertWorld = world => {
+  const {imageInfos, imageOffsets, frameCount,roomInfos, playerSpriteStart} = prepareWorldInformation(world);
+  
+  const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
+  const mainGeneratedBody = [
+    toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
+    toConstantDeclaration('gameTitle[]', 'char', toStringLiteral(world.title)),
+    toConstantDeclaration('playerSpriteStart', 'BitsySprite', toSpriteDeclaration(playerSpriteStart)),
+    toDialogsDeclaration(world),
+    toEndingsDeclaration(world),
+    toRoomsDeclaration('rooms', roomInfos),
+	  toImageDeclaration('images', imageInfos),
+  ].join('\n\n');
+
+  return trimStart(`
 // Converted to SDCC + LibCV by Bitsy-Converter
 
 #include <stdlib.h>
@@ -17,18 +166,7 @@
 #define DLG_X_OFS ((COLS - DLG_COLS) >> 1)
 #define DLG_Y_OFS 2
 
-
-enum ImageOffset {
-  ofs_BLANK = 0,
-  ofs_TIL_a = 1,
-  ofs_TIL_b = 2,
-  ofs_TIL_c = 4,
-  ofs_TIL_d = 5,
-  ofs_SPR_A = 6,
-  ofs_SPR_a = 8,
-  ofs_SPR_b = 10,
-  ofs_ITM_0 = 11
-};
+${imageOffsetBody}
 
 
 typedef struct {
@@ -69,168 +207,7 @@ typedef struct Room {
 void showDialog(char *s);
 
 
-const uint8_t FRAME_COUNT = 12;
-
-const char gameTitle[] = "Your game's title here";
-
-const BitsySprite playerSpriteStart = { ofs_SPR_A, 4, 4 };
-
-void dialog_SPR_0() {
-  showDialog("I'm a cat. Meow!");  
-}
-
-void dialog_ITM_0() {
-  showDialog("Encontraste um copo com chá quentinho");  
-}
-
-void dialog_SPR_1() {
-  showDialog("Hello, I'm a chair.");  
-}
-
-void ending_0() {
-  showDialog("This is the end.");  
-}
-
-const BitsySprite room_0_sprites[] = {
-  { ofs_SPR_a, 8, 12, dialog_SPR_0 },
-  { ofs_SPR_b, 10, 6, dialog_SPR_1 }
-};
-
-const BitsySprite room_1_sprites[] = {{0}};
-
-const BitsySprite room_2_sprites[] = {{0}};
-
-const Exit room_0_exits[] = {
-  { 7, 0, 7, 15, 1 }
-};
-
-const Exit room_1_exits[] = {
-  { 7, 15, 7, 0, 0 },
-  { 0, 11, 14, 11, 2 }
-};
-
-const Exit room_2_exits[] = {{0}};
-
-const Ending room_0_endings[] = {{0}};
-
-const Ending room_1_endings[] = {{0}};
-
-const Ending room_2_endings[] = {
-  { 13, 11, ending_0 }
-};
-
-const Room rooms[] = {
-
-  // Room 0
-  {{
-    { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0 },
-    { 0, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 0 },
-    { 0, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 0 },
-    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-    { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0 },
-    { 0, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 0 },
-    { 0, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 0 },
-    { 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 2, room_0_sprites, 1, room_0_exits, 0, room_0_endings}
-,
-  // Room 1
-  {{
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 0 },
-    { 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 2, 0, 0 },
-    { 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-    { 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
-    { 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
-    { 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_1_sprites, 2, room_1_exits, 0, room_1_endings}
-,
-  // Room 2
-  {{
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 0, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
-    { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
-  }, 0, room_2_sprites, 0, room_2_exits, 1, room_2_endings}
-
-};
-
-const TileInfo tileInfos[] = {
-  // BLANK
-  { false, 1 },
-  // TIL_a
-  { true, 1 },
-  // TIL_b
-  { false, 2 },
-  { false, 2 },
-  // TIL_c
-  { false, 1 },
-  // TIL_d
-  { false, 1 },
-  // SPR_A
-  { false, 2 },
-  { false, 2 },
-  // SPR_a
-  { false, 2 },
-  { false, 2 },
-  // SPR_b
-  { false, 1 },
-  // ITM_0
-  { false, 1 }
-};
-
-const uint8_t images[][8] = { 
-
-  // BLANK: index 0, offset 0, 1 frame(s)
-  { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
-  // TIL_a: index 1, offset 1, 1 frame(s)
-  { 0xFF, 0x81, 0x81, 0x99, 0x99, 0x81, 0x81, 0xFF },
-  // TIL_b: index 2, offset 2, 2 frame(s)
-  { 0x00, 0x36, 0x00, 0x6C, 0x00, 0x36, 0x00, 0x6C },
-  { 0x00, 0x6C, 0x00, 0x36, 0x00, 0x6C, 0x00, 0x36 },
-  // TIL_c: index 3, offset 4, 1 frame(s)
-  { 0x3E, 0x42, 0x81, 0x82, 0x81, 0x82, 0x41, 0x3E },
-  // TIL_d: index 4, offset 5, 1 frame(s)
-  { 0x00, 0x00, 0xC1, 0x81, 0xD1, 0x9B, 0xDB, 0x00 },
-  // SPR_A: index 5, offset 6, 2 frame(s)
-  { 0x18, 0x18, 0x18, 0x3C, 0x7E, 0xBD, 0x24, 0x20 },
-  { 0x18, 0x18, 0x99, 0x7E, 0x3C, 0x3C, 0x24, 0x04 },
-  // SPR_a: index 6, offset 8, 2 frame(s)
-  { 0x00, 0x00, 0x51, 0x71, 0x72, 0x7C, 0x3C, 0x24 },
-  { 0x00, 0x50, 0x71, 0x71, 0x72, 0x3C, 0x3C, 0x42 },
-  // SPR_b: index 7, offset 10, 1 frame(s)
-  { 0x01, 0x01, 0x01, 0x01, 0xFF, 0x81, 0x81, 0x81 },
-  // ITM_0: index 8, offset 11, 1 frame(s)
-  { 0x00, 0x00, 0x00, 0x3C, 0x64, 0x24, 0x18, 0x00 } 
-};
+${mainGeneratedBody}
 
 
 const uint8_t BUTTON_REPEAT_RATE = 8;
@@ -662,4 +639,11 @@ void main() {
     }
   }
   
+}
+`);
+}
+
+export const convertLibCV = code => {
+  const world = parseWorld(code, {parseScripts: true}); 
+  return convertWorld(world);
 }

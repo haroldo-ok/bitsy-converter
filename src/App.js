@@ -16,6 +16,7 @@ import {parseWorld} from 'bitsy-parser';
 import stringify from 'json-stringify-pretty-compact';
 
 import {convertArduboy} from './platform/arduboy'
+import {convertLibCV} from './platform/libcv'
 
 import exampleSource from './example.bitsy';
 
@@ -25,6 +26,12 @@ ReactGA.initialize('UA-130174335-4', { testMode: process.env.NODE_ENV === 'test'
 ReactGA.pageview(window.location.pathname + window.location.search)
 
 const convertJSON = code => stringify(parseWorld(code, {parseScripts: true}), {maxLength: 160});
+
+const converters = {
+  'json': convertJSON,
+  'arduboy': convertArduboy,
+  'libcv': convertLibCV,
+};
 
 class App extends Component {
   
@@ -50,7 +57,7 @@ class App extends Component {
     code = code || this.state.original;
     format = format || this.state.format;
 
-    const converted = format === 'arduboy' ? convertArduboy(code) : convertJSON(code);
+    const converted = converters[format](code);
     
     this.setState({
       original: code,
@@ -125,7 +132,8 @@ class App extends Component {
 
               <Tabs value={this.state.format} onChange={ (event, format) => this.handleFormatChange({ format }) }>
                 <Tab value="json" label="JSON" />
-                <Tab value="arduboy" label="Arduboy (Work in progress)" />
+                <Tab value="arduboy" label="Arduboy" />
+                <Tab value="libcv" label="LibCV" />
               </Tabs>
 
               <Editor
