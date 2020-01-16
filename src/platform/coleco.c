@@ -872,22 +872,6 @@ uint8_t frameNumber(uint8_t tn) {
   return frameCount > 1 ? frameControl % frameCount : 0;
 }
 
-void clearScreen() {
-  cvu_vmemset(IMAGE, 0, COLS * ROWS);
-}
-
-void drawBackground() {
-  char buf[COLS];
-
-  for (uint16_t i = 0; i != ROOM_ROWS; i++) {
-    for (uint8_t j = 0; j != ROOM_COLS; j++) {
-      uint8_t tileNumber = rooms[currentLevel].tileMap[i][j];
-      buf[j] = tileNumber + frameNumber(tileNumber) + FIRST_TILE;
-    }
-    cvu_memtovmemcpy(IMAGE + ROOM_X_OFS + COLS * (ROOM_Y_OFS + i), buf, ROOM_COLS);
-  }
-}
-
 void drawSprite(uint8_t sprNumber, BitsySprite *spr) {
   struct cvu_sprite sprite;
 
@@ -903,6 +887,23 @@ void finishSpriteList(uint8_t sprNumber) {
   // If Y is 208, that sprite and all following sprites in the table are not  displayed.
   sprite.y = 208;
   cvu_set_sprite(SPRITES, sprNumber, &sprite); 
+}
+
+void clearDisplay() {
+  cvu_vmemset(IMAGE, 0, COLS * ROWS);
+  finishSpriteList(0);
+}
+
+void drawBackground() {
+  char buf[COLS];
+
+  for (uint16_t i = 0; i != ROOM_ROWS; i++) {
+    for (uint8_t j = 0; j != ROOM_COLS; j++) {
+      uint8_t tileNumber = rooms[currentLevel].tileMap[i][j];
+      buf[j] = tileNumber + frameNumber(tileNumber) + FIRST_TILE;
+    }
+    cvu_memtovmemcpy(IMAGE + ROOM_X_OFS + COLS * (ROOM_Y_OFS + i), buf, ROOM_COLS);
+  }
 }
 
 void drawSprites() { 
@@ -949,7 +950,7 @@ void showDialog(char *s) {
   } while (ctrl.joystick & (CV_FIRE_0 | CV_FIRE_1));
   
   // Clear screen
-  clearScreen();
+  clearDisplay();
   needUpdate = true;
 }
 
@@ -1031,6 +1032,9 @@ bool controlPlayer() {
 }
 
 void startGame() { 
+  clearDisplay();
+  showDialog(gameTitle);
+
   playerSprite.image = playerSpriteStart.image;
   playerSprite.x = playerSpriteStart.x;
   playerSprite.y = playerSpriteStart.y;
@@ -1066,8 +1070,8 @@ void main() {
   cv_set_screen_active(true);
   cv_set_vint_handler(&vint_handler);  
   
-  startGame();
-  
+  startingGame = true;
+
   for (;;) { 
     wait_vsync();
     
