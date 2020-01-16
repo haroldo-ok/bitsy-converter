@@ -993,16 +993,14 @@ bool tryMovingPlayer(int8_t dx, uint8_t dy) {
     }
   }
     
-  /*
   // Check collision against the endings
-  for (uint8_t i = 0; i != pgm_read_byte(&rooms[currentLevel].endingCount); i++) {
-    Ending *edg = fetchEnding(i);    
-    if (pgm_read_byte(&edg->x) == x && pgm_read_byte(&edg->y) == y) {
-      currentEnding = pgm_read_word(&edg->dialog);
+  for (uint8_t i = 0; i != rooms[currentLevel].endingCount; i++) {
+    Ending *edg = &rooms[currentLevel].endings[i];
+    if (edg->x == x && edg->y == y) {
+      currentEnding = edg->dialog; 
       return true;
     }
   }
-  */
 
   // No obstacles found: the player can move.
   playerSprite.x = x;
@@ -1055,6 +1053,7 @@ void startGame() {
 }
 
 void endGame() {
+  clearDisplay();
   (*currentEnding)();
   currentEnding = NULL;
     
@@ -1110,6 +1109,11 @@ void main() {
       (*currentDialog)();
       currentDialog = NULL;
       needUpdate = true;
+    }
+
+  
+    if (currentEnding) {
+      endGame();
     }
   }
   
