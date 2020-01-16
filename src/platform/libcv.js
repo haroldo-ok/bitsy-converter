@@ -6,11 +6,6 @@ import {prepareWorldInformation} from './world';
 import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toEnumDeclaration,
        toArrayLiteral, toStringLiteral} from './c-generator';
 
-/** 
- * Returns a transposed version of a bidimensional array. 
- */
-const transpose = a => a[0].map((_, c) => a.map(r => r[c]));
-
 /**
  * Converts an array of bits into a number
  */
@@ -25,12 +20,6 @@ const toHex = n => n.toString(16).toUpperCase();
  * Converts a byte into its hex representation, with padding.
  */
 const toHexByte = n => toHex(n).padStart(2, '0');
-
-/** 
- * Receives an array containing one binary number per element, and turns it into a 
- * string with the format Bnnnn.
- */
-const toBinaryConst = a => `B${a.join('')}`;
 
 /** 
  * Generates a image constant declaration from a bidimensional array. 
