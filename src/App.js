@@ -26,6 +26,12 @@ ReactGA.pageview(window.location.pathname + window.location.search)
 
 const convertJSON = code => stringify(parseWorld(code, {parseScripts: true}), {maxLength: 160});
 
+const converters = {
+  'json': convertJSON,
+  'arduboy': convertArduboy,
+  'libcv': code => '// TODO: LibCV',
+};
+
 class App extends Component {
   
   constructor(props) {
@@ -50,7 +56,7 @@ class App extends Component {
     code = code || this.state.original;
     format = format || this.state.format;
 
-    const converted = format === 'arduboy' ? convertArduboy(code) : convertJSON(code);
+    const converted = converters[format](code);
     
     this.setState({
       original: code,
@@ -125,7 +131,8 @@ class App extends Component {
 
               <Tabs value={this.state.format} onChange={ (event, format) => this.handleFormatChange({ format }) }>
                 <Tab value="json" label="JSON" />
-                <Tab value="arduboy" label="Arduboy (Work in progress)" />
+                <Tab value="arduboy" label="Arduboy" />
+                <Tab value="libcv" label="LibCV" />
               </Tabs>
 
               <Editor
