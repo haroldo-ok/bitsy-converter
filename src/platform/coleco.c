@@ -914,12 +914,12 @@ void drawSprites() {
 }
 
 void showDialog(char *s) {
-  //struct cv_controller_state ctrl;
+  struct cv_controller_state ctrl;
   char buf[DLG_COLS];
   uint16_t vaddr = IMAGE + DLG_X_OFS + COLS * DLG_Y_OFS; 
-
+ 
   // Draw text
-  for (char *p = s; *p; ) {
+  for (char *p = s; *p; vaddr += COLS) {
     for (uint8_t j = 0; j != DLG_COLS; j++) {
       buf[j] = *p;
       if (*p) {
@@ -929,12 +929,17 @@ void showDialog(char *s) {
     cvu_memtovmemcpy(vaddr, buf, ROOM_COLS);
   }
   
-  /*
+  // Wait button press
   do {
     wait_vsync();
     cv_get_controller_state(&ctrl, 0); 
   } while (!(ctrl.joystick & (CV_FIRE_0 | CV_FIRE_1)));
-  */
+  
+  // Wait button release
+  do {
+    wait_vsync();
+    cv_get_controller_state(&ctrl, 0); 
+  } while (ctrl.joystick & (CV_FIRE_0 | CV_FIRE_1));
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -1082,9 +1087,14 @@ void main() {
     if (needUpdate) {
       drawBackground();
       drawSprites();
-      showDialog("Hello, world!");
       
       needUpdate = false; 
+    }
+  
+    if (currentDialog) {
+      (*currentDialog)();
+      currentDialog = NULL;
+      needUpdate = true;
     }
   }
   
