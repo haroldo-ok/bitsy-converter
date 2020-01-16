@@ -29,6 +29,10 @@ For more information, see "Making Games for the NES".
 #define ROOM_Y_OFS ((ROWS - ROOM_ROWS) >> 1)
 #define FIRST_TILE 64
 
+#define DLG_COLS 28
+#define DLG_X_OFS ((COLS - DLG_COLS) >> 1)
+#define DLG_Y_OFS 3
+
 enum ImageOffset {
   ofs_BLANK = 0,
   ofs_TIL_a = 1,
@@ -907,7 +911,27 @@ void drawSprites() {
 }
 
 void showDialog(char *s) {
-  int i = *s;
+  //struct cv_controller_state ctrl;
+  char buf[DLG_COLS];
+  uint16_t vaddr = IMAGE + DLG_X_OFS + COLS * DLG_Y_OFS; 
+
+  // Draw text
+  for (char *p = s; *p; ) {
+    for (uint8_t j = 0; j != DLG_COLS; j++) {
+      buf[j] = *p;
+      if (*p) {
+        p++;
+      }
+    }
+    cvu_memtovmemcpy(vaddr, buf, ROOM_COLS);
+  }
+  
+  /*
+  do {
+    wait_vsync();
+    cv_get_controller_state(&ctrl, 0); 
+  } while (!(ctrl.joystick & (CV_FIRE_0 | CV_FIRE_1)));
+  */
 }
 
 bool tryMovingPlayer(int8_t dx, uint8_t dy) {
@@ -1051,10 +1075,11 @@ void main() {
         needUpdate = true;
       }
     }
-    
+     
     if (needUpdate) {
       drawBackground();
       drawSprites();
+      showDialog("Hello, world!");
       
       needUpdate = false; 
     }
