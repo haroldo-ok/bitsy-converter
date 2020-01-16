@@ -883,7 +883,7 @@ void drawSprite(uint8_t sprNumber, BitsySprite *spr) {
   cvu_set_sprite_x(&sprite, (spr->x + ROOM_X_OFS) * 8);
   cvu_set_sprite_y(&sprite, (spr->y + ROOM_Y_OFS) * 8);
   cvu_set_sprite_color(&sprite, CV_COLOR_WHITE);
-  sprite.name = spr->image;
+  sprite.name = spr->image + frameNumber(spr->image);
   cvu_set_sprite(SPRITES, sprNumber, &sprite); 
 }
 
