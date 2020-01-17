@@ -4,7 +4,7 @@ This tool allows one to convert Bitsy scripts into various output formats:
 
 * JSON: fully supported;
 * Arduboy source code;
-* SDCC + LibCV, which can be compiled into ColecoVision, SG-1000, Sega Master System and MSX ROMS; 
+* SDCC + [LibCV](https://github.com/sehugg/cvlibc/), which can be compiled into ColecoVision, SG-1000, Sega Master System and MSX ROMS; 
 * More formats will come later.
 
 For now, both the Arduboy and LibCV will only support dialogs if they are simple; full dialog support is intended to come in the future.
