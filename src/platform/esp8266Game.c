@@ -282,19 +282,16 @@ void nextCadr(){
 }
 
 void init(){
-  loadrtttl(s0,1);
-  playrtttl();
-  setbgcolor(1);
+  setbgcolor(0);
   setcolor(9);
   clearscreen();
-  setimagesize(2);
-  putimage1bit(startscreen, 0, 16, 64, 32);
   setimagesize(1);
+
   gotoxy(4,11);
-  printf("Press any key to start the game.");
+//  printf("Press any key to start the game.");
+
   delay(1000);
-  while(getkey() == 0){}
-  stoprtttl();
+//  while(getkey() == 0){}
   
   // Hero sprite
   getsprite(1, hero1);
@@ -302,27 +299,8 @@ void init(){
   spritesetvalue(1, S_HEIGHT,8);
   putsprite(1, 17, 16);
   
-  getsprite(2, goblin);
-  getsprite(3, goblin);
-  getsprite(4, goblin);
-  getsprite(5, bat);
-  getsprite(6, bat);
-  getsprite(7, bat);
-  for(i = 2; i < 16; i++){
-    spritesetvalue(i, S_WIDTH, 10);
-    spritesetvalue(i, S_HEIGHT,16);  
-  }
-  getsprite(30, guihpoison);
-  spritesetvalue(30, S_WIDTH, 6);
-  spritesetvalue(30, S_HEIGHT,17);
-  spritesetvalue(30, S_IS_SCROLLED,0);
-  putsprite(30, 120, 100);
-  getsprite(31, gui);
-  spritesetvalue(31, S_WIDTH, 32);
-  spritesetvalue(31, S_HEIGHT,16);
-  spritesetvalue(31, S_IS_SCROLLED,0);
-  putsprite(31, 2, 100);
   loadtile(maze, 16, 16, 21, 21);
+
   health = 10;
   maxhealth = 10;
   attack = 1;
@@ -330,8 +308,6 @@ void init(){
   shield = 0;
   sword = 0;
   armor = 0;
-  printtosprite(5, 1, health);
-  printtosprite(5, 9, attack);
   hpoison = 4;
   level = 1;
 }
@@ -568,5 +544,3 @@ void main(){
     level++;
   }
 }  
-
-
