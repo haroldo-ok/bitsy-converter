@@ -25,18 +25,18 @@ char image_SPR_b_0[] = { 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0
 char image_ITM_0_0[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x11, 0x00, 0x01, 0x10, 0x01, 0x00, 0x00, 0x10, 0x01, 0x00, 0x00, 0x01, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00 };
     
 int images[] = { 
-    image_BLANK_0,
-    image_TIL_a_0,
-    image_TIL_b_0,
-    image_TIL_b_1,
-    image_TIL_c_0,
-    image_TIL_d_0,
-    image_SPR_A_0,
-    image_SPR_A_1,
-    image_SPR_a2_0,
-    image_SPR_a2_1,
-    image_SPR_b_0,
-    image_ITM_0_0
+  image_BLANK_0,
+  image_TIL_a_0,
+  image_TIL_b_0,
+  image_TIL_b_1,
+  image_TIL_c_0,
+  image_TIL_d_0,
+  image_SPR_A_0,
+  image_SPR_A_1,
+  image_SPR_a2_0,
+  image_SPR_a2_1,
+  image_SPR_b_0,
+  image_ITM_0_0
 }
 
 //16x16
@@ -58,7 +58,7 @@ char bat1[] = {0x0,0xb6,0xbb,0x6b,0x0,0x0,0xb6,0x66,0x6b,0x0,0x0,0xb2,0x66,0x2b,
 int bat[] = {bat0, bat1};
 //10x16
 char snake0[] = {0x0,0xb,0xbb,0x0,0x0,0x0,0xb5,0x55,0xbb,0x0,0xb,0x5b,0xbb,0x52,0xb0,0xb5,0xb0,0xb,0x25,0xb0,0xb5,0xb0,0x0,0xbb,0x0,0xb5,0xb0,0x0,0x0,0x0,0xb5,0xb0,0x0,0x0,0x0,0xb,0x5b,0xbb,0x0,0x0,0x0,0xb5,0x55,0xb0,0x0,0x0,0xb,0xbb,0x5b,0x0,0x0,0x0,0x0,0xb5,0xb0,0x0,0x0,0x0,0xb5,0xb0,0x0,0xbb,0xbb,0x5b,0x0,0xb,0x55,0x55,0xb0,0xb0,0xbd,0xbb,0xbb,0xbb,0xdb,0xb,0xdd,0xdd,0xdd,0xb0};
-char snake1[] = {0x0,0x0,0xb,0xbb,0x0,0x0,0x0,0xb5,0x55,0xb0,0x0,0xb,0x5b,0x55,0x5b,0x0,0xb5,0xbb,0x25,0x2b,0xb,0x5b,0xb,0x55,0x5b,0xb,0x5b,0x0,0xb6,0xb0,0xb,0x5b,0x0,0x6,0x0,0xb,0x5b,0xb0,0x60,0x60,0x0,0xb5,0x5b,0x0,0x0,0x0,0xb,0xb5,0xb0,0x0,0x0,0x0,0xb,0x5b,0x0,0x0,0x0,0xb,0x5b,0x0,0x0,0xbb,0xbb,0x5b,0x0,0xb,0x55,0x55,0xb0,0xb0,0xbd,0xbb,0xbb,0xbb,0xdb,0xb,0xdd,0xdd,0xdd,0xb0};	
+char snake1[] = {0x0,0x0,0xb,0xbb,0x0,0x0,0x0,0xb5,0x55,0xb0,0x0,0xb,0x5b,0x55,0x5b,0x0,0xb5,0xbb,0x25,0x2b,0xb,0x5b,0xb,0x55,0x5b,0xb,0x5b,0x0,0xb6,0xb0,0xb,0x5b,0x0,0x6,0x0,0xb,0x5b,0xb0,0x60,0x60,0x0,0xb5,0x5b,0x0,0x0,0x0,0xb,0xb5,0xb0,0x0,0x0,0x0,0xb,0x5b,0x0,0x0,0x0,0xb,0x5b,0x0,0x0,0xbb,0xbb,0x5b,0x0,0xb,0x55,0x55,0xb0,0xb0,0xbd,0xbb,0xbb,0xbb,0xdb,0xb,0xdd,0xdd,0xdd,0xb0};  
 int snake[] = {snake0, snake1};
 //32x16
 char gui[] = {0x6,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x60,0x62,0x26,0x22,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x62,0x22,0x22,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x62,0x22,0x22,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x22,0x26,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x62,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66, 0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x61,0xc6,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x1c,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x61,0x61,0xc6,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x1c,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x61,0x61,0xc6,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x6,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x66,0x60};
@@ -90,483 +90,483 @@ int s[4];
 char names[] = "bagbilbobbomboncamcapcedcogcobdoddogdotelmennfarfulgonhamhaljacjasjoclaclillobludmadmagmanmaymermulnagneloldriprobsamtaytom";
 
 void delay(int t){
-	settimer(0, t);
-	while(gettimer(0) != 0){};
+  settimer(0, t);
+  while(gettimer(0) != 0){};
 }
 
 void fRect(int rx1, int ry1, int rx2, int ry2){
-	int ri;
-	for(ri = ry1; ri < ry2; ri++)
-	line(rx1, ri, rx2, ri);
+  int ri;
+  for(ri = ry1; ri < ry2; ri++)
+  line(rx1, ri, rx2, ri);
 }
 
 void chartosprite(int x, int y, int n){
-	int i,j;
-	for(i = 0; i < 2; i++)
-		for(j = 0; j < 5; j++)
-			gui[x + i + (y + j) * 16] = guichr[n * 10 + i + j * 2];
+  int i,j;
+  for(i = 0; i < 2; i++)
+    for(j = 0; j < 5; j++)
+      gui[x + i + (y + j) * 16] = guichr[n * 10 + i + j * 2];
 }
 
 void printtosprite(int x, int y, int n){
-	int i;
-	for(i = 4; i >= 0; i--){
-		chartosprite(x + i * 2, y, n % 10); 
-		n = n / 10;
-	}
+  int i;
+  for(i = 4; i >= 0; i--){
+    chartosprite(x + i * 2, y, n % 10); 
+    n = n / 10;
+  }
 }
 
 char randomCell(){
-	char n = random(3);
-	if(x == 1)
-		s[2] = 1;
-	else
-		s[2] = maze[x - 2 + y * 21];
-	if(x == 19)
-		s[0] = 1;
-	else
-		s[0] = maze[x + 2 + y * 21];
-	if(y == 1)
-		s[1] = 1;
-	else
-		s[1] = maze[x + (y - 2) * 21];
-	if(y == 19)
-		s[3] = 1;
-	else
-		s[3] = maze[x + (y + 2) * 21];
-	if(s[n] != 0){
-		i = 8;
-		while(i){
-			n++;
-			if(n > 3)
-				n = 0;
-			if(s[n] == 0)
-				return n;
-			i--;
-		}
-	}
-	else
-		return n;
-	return 4;
+  char n = random(3);
+  if(x == 1)
+    s[2] = 1;
+  else
+    s[2] = maze[x - 2 + y * 21];
+  if(x == 19)
+    s[0] = 1;
+  else
+    s[0] = maze[x + 2 + y * 21];
+  if(y == 1)
+    s[1] = 1;
+  else
+    s[1] = maze[x + (y - 2) * 21];
+  if(y == 19)
+    s[3] = 1;
+  else
+    s[3] = maze[x + (y + 2) * 21];
+  if(s[n] != 0){
+    i = 8;
+    while(i){
+      n++;
+      if(n > 3)
+        n = 0;
+      if(s[n] == 0)
+        return n;
+      i--;
+    }
+  }
+  else
+    return n;
+  return 4;
 }
 
 void nextCell(){
-	char n = randomCell();
-	if(n == 0){
-		x++;
-		maze[x + y * 21] = floor;
-		x++;
-		maze[x + y * 21] = floor;
-	}
-	else if(n == 1){
-		y--;
-		maze[x + y * 21] = floor;
-		y--;
-		maze[x + y * 21] = floor;
-	}
-	else if(n == 2){
-		x--;
-		maze[x + y * 21] = floor;
-		x--;
-		maze[x + y * 21] = floor;
-	}
-	else if(n == 3){
-		y++;
-		maze[x + y * 21] = floor;
-		y++;
-		maze[x + y * 21] = floor;
-	}
-	if(n == 4){
-		if(isDoor){
-			maze[x + y * 21] = door;
-			isDoor = 0;
-		}
-		if(stackpoint < 2){
-			generate = 0;
-			return;
-		}
-		stackpoint--;
-		y = stack[stackpoint];
-		stackpoint--;
-		x = stack[stackpoint];
-	}
-	else{
-		stack[stackpoint] = x;
-		stackpoint++;
-		stack[stackpoint] = y;
-		stackpoint++;
-	}
+  char n = randomCell();
+  if(n == 0){
+    x++;
+    maze[x + y * 21] = floor;
+    x++;
+    maze[x + y * 21] = floor;
+  }
+  else if(n == 1){
+    y--;
+    maze[x + y * 21] = floor;
+    y--;
+    maze[x + y * 21] = floor;
+  }
+  else if(n == 2){
+    x--;
+    maze[x + y * 21] = floor;
+    x--;
+    maze[x + y * 21] = floor;
+  }
+  else if(n == 3){
+    y++;
+    maze[x + y * 21] = floor;
+    y++;
+    maze[x + y * 21] = floor;
+  }
+  if(n == 4){
+    if(isDoor){
+      maze[x + y * 21] = door;
+      isDoor = 0;
+    }
+    if(stackpoint < 2){
+      generate = 0;
+      return;
+    }
+    stackpoint--;
+    y = stack[stackpoint];
+    stackpoint--;
+    x = stack[stackpoint];
+  }
+  else{
+    stack[stackpoint] = x;
+    stackpoint++;
+    stack[stackpoint] = y;
+    stackpoint++;
+  }
 }
 
 void generateMaze(){
-	int r;
-	isDoor = 1;
-	for(x = 0; x < 21; x++){
-		for(y = 0; y < 21; y++){
-			if(((x + 1) % 2 == 0) & ((y + 1) % 2 == 0))
-				maze[x + y * 21] = 0;
-			else
-				maze[x + y * 21] = wall1;
-		}
-	}
-	x = 1;
-	y = 1;
-	maze[x + y * 21] = floor;
-	while(generate)
-		nextCell();
-	for(x = 1; x < 20; x++){
-		for(y = 0; y < 20; y++){
-			if((maze[x + y * 21] == wall1) && (maze[x + (y + 1) * 21] == floor || maze[x + (y + 1) * 21] == door)){
-				maze[x + y * 21] = wall0;
-			}
-		}
-	}
-	generate = 1;
-	isMaze = 1;
-	x = 1;
-	y = 1;
-	offsety = 0;
-	offsetx = 0;
-	j = 2;
-	for(i = 0; i < 100; i++){
-		r = 23 + random(397);
-		if(maze[r] == floor){
-			putsprite(j, (r % 21) * 16 + 3, (r / 21) * 16);
-			spritesetvalue(j, S_LIVES, level + random(1));
-			j++;
-			if(j == 11)
-				return;
-		}
-	}
+  int r;
+  isDoor = 1;
+  for(x = 0; x < 21; x++){
+    for(y = 0; y < 21; y++){
+      if(((x + 1) % 2 == 0) & ((y + 1) % 2 == 0))
+        maze[x + y * 21] = 0;
+      else
+        maze[x + y * 21] = wall1;
+    }
+  }
+  x = 1;
+  y = 1;
+  maze[x + y * 21] = floor;
+  while(generate)
+    nextCell();
+  for(x = 1; x < 20; x++){
+    for(y = 0; y < 20; y++){
+      if((maze[x + y * 21] == wall1) && (maze[x + (y + 1) * 21] == floor || maze[x + (y + 1) * 21] == door)){
+        maze[x + y * 21] = wall0;
+      }
+    }
+  }
+  generate = 1;
+  isMaze = 1;
+  x = 1;
+  y = 1;
+  offsety = 0;
+  offsetx = 0;
+  j = 2;
+  for(i = 0; i < 100; i++){
+    r = 23 + random(397);
+    if(maze[r] == floor){
+      putsprite(j, (r % 21) * 16 + 3, (r / 21) * 16);
+      spritesetvalue(j, S_LIVES, level + random(1));
+      j++;
+      if(j == 11)
+        return;
+    }
+  }
 }
 
 void nextCadr(){
-	int sx,sy;
-	sx = spritegetvalue(1, S_X);
-	sy = spritegetvalue(1, S_Y);
-	if(gettimer(0) == 0){
-		settimer(0, 300);
-		cadr = 1 - cadr;
-		
-		// Hero sprite
-//		getsprite(1, hero[cadr]);
-		getsprite(1, images[cadr + ofs_SPR_A]);
-		
-		getsprite(2, goblin[cadr]);
-		getsprite(3, goblin[cadr]);
-		getsprite(4, goblin[cadr]);
-		getsprite(5, bat[cadr]);
-		getsprite(6, bat[cadr]);
-		getsprite(7, bat[cadr]);
-		getsprite(8, snake[cadr]);
-		getsprite(9, snake[cadr]);
-		getsprite(10, snake[cadr]);
-	}
-	if(sx > 64 && offsetx >= (-208)){
-		offsetx -= 2;
-		scroll(2);
-	}
-	else if(sx < 48 && offsetx < (-4)){
-		offsetx += 2;
-		scroll(0);
-	}
-	else if(sy > 64 && offsety >= (-210)){
-		offsety -= 2;
-		scroll(1);
-		scroll(1);
-	}
-	else if(sy < 48 && offsety < (-6)){
-		offsety += 2;
-		scroll(3);
-		scroll(3);
-	}
+  int sx,sy;
+  sx = spritegetvalue(1, S_X);
+  sy = spritegetvalue(1, S_Y);
+  if(gettimer(0) == 0){
+    settimer(0, 300);
+    cadr = 1 - cadr;
+    
+    // Hero sprite
+//    getsprite(1, hero[cadr]);
+    getsprite(1, images[cadr + ofs_SPR_A]);
+    
+    getsprite(2, goblin[cadr]);
+    getsprite(3, goblin[cadr]);
+    getsprite(4, goblin[cadr]);
+    getsprite(5, bat[cadr]);
+    getsprite(6, bat[cadr]);
+    getsprite(7, bat[cadr]);
+    getsprite(8, snake[cadr]);
+    getsprite(9, snake[cadr]);
+    getsprite(10, snake[cadr]);
+  }
+  if(sx > 64 && offsetx >= (-208)){
+    offsetx -= 2;
+    scroll(2);
+  }
+  else if(sx < 48 && offsetx < (-4)){
+    offsetx += 2;
+    scroll(0);
+  }
+  else if(sy > 64 && offsety >= (-210)){
+    offsety -= 2;
+    scroll(1);
+    scroll(1);
+  }
+  else if(sy < 48 && offsety < (-6)){
+    offsety += 2;
+    scroll(3);
+    scroll(3);
+  }
 }
 
 void init(){
-	loadrtttl(s0,1);
-	playrtttl();
-	setbgcolor(1);
-	setcolor(9);
-	clearscreen();
-	setimagesize(2);
-	putimage1bit(startscreen, 0, 16, 64, 32);
-	setimagesize(1);
-	gotoxy(4,11);
-	printf("Press any key to start the game.");
-	delay(1000);
-	while(getkey() == 0){}
-	stoprtttl();
-	
-	// Hero sprite
-	getsprite(1, hero1);
-	spritesetvalue(1, S_WIDTH, 8);
-	spritesetvalue(1, S_HEIGHT,8);
-	putsprite(1, 17, 16);
-	
-	getsprite(2, goblin);
-	getsprite(3, goblin);
-	getsprite(4, goblin);
-	getsprite(5, bat);
-	getsprite(6, bat);
-	getsprite(7, bat);
-	for(i = 2; i < 16; i++){
-		spritesetvalue(i, S_WIDTH, 10);
-		spritesetvalue(i, S_HEIGHT,16);	
-	}
-	getsprite(30, guihpoison);
-	spritesetvalue(30, S_WIDTH, 6);
-	spritesetvalue(30, S_HEIGHT,17);
-	spritesetvalue(30, S_IS_SCROLLED,0);
-	putsprite(30, 120, 100);
-	getsprite(31, gui);
-	spritesetvalue(31, S_WIDTH, 32);
-	spritesetvalue(31, S_HEIGHT,16);
-	spritesetvalue(31, S_IS_SCROLLED,0);
-	putsprite(31, 2, 100);
-	loadtile(maze, 16, 16, 21, 21);
-	health = 10;
-	maxhealth = 10;
-	attack = 1;
-	block = 0;
-	shield = 0;
-	sword = 0;
-	armor = 0;
-	printtosprite(5, 1, health);
-	printtosprite(5, 9, attack);
-	hpoison = 4;
-	level = 1;
+  loadrtttl(s0,1);
+  playrtttl();
+  setbgcolor(1);
+  setcolor(9);
+  clearscreen();
+  setimagesize(2);
+  putimage1bit(startscreen, 0, 16, 64, 32);
+  setimagesize(1);
+  gotoxy(4,11);
+  printf("Press any key to start the game.");
+  delay(1000);
+  while(getkey() == 0){}
+  stoprtttl();
+  
+  // Hero sprite
+  getsprite(1, hero1);
+  spritesetvalue(1, S_WIDTH, 8);
+  spritesetvalue(1, S_HEIGHT,8);
+  putsprite(1, 17, 16);
+  
+  getsprite(2, goblin);
+  getsprite(3, goblin);
+  getsprite(4, goblin);
+  getsprite(5, bat);
+  getsprite(6, bat);
+  getsprite(7, bat);
+  for(i = 2; i < 16; i++){
+    spritesetvalue(i, S_WIDTH, 10);
+    spritesetvalue(i, S_HEIGHT,16);  
+  }
+  getsprite(30, guihpoison);
+  spritesetvalue(30, S_WIDTH, 6);
+  spritesetvalue(30, S_HEIGHT,17);
+  spritesetvalue(30, S_IS_SCROLLED,0);
+  putsprite(30, 120, 100);
+  getsprite(31, gui);
+  spritesetvalue(31, S_WIDTH, 32);
+  spritesetvalue(31, S_HEIGHT,16);
+  spritesetvalue(31, S_IS_SCROLLED,0);
+  putsprite(31, 2, 100);
+  loadtile(maze, 16, 16, 21, 21);
+  health = 10;
+  maxhealth = 10;
+  attack = 1;
+  block = 0;
+  shield = 0;
+  sword = 0;
+  armor = 0;
+  printtosprite(5, 1, health);
+  printtosprite(5, 9, attack);
+  hpoison = 4;
+  level = 1;
 }
 
 void endGame(){
-	loadrtttl(s0,1);
-	playrtttl();
-	setbgcolor(1);
-	setcolor(9);
-	clearscreen();
-	for(i = 0; i < 32; i++)
-		spritesetvalue(i, S_Y, spritegetvalue(i, S_Y) + 1000);
-	setimagesize(2);
-	putimage1bit(endscreen, 0, 32, 64, 24);	
-	setimagesize(1);
-	gotoxy(6,2);
-	printf("Game over");
-	gotoxy(6,11);
-	printf("floor %d", level);
-	gotoxy(6,13);
-	printf("gold %d", gold);
-	delay(1000);
-	while(getkey() == 0){}
-	init();
+  loadrtttl(s0,1);
+  playrtttl();
+  setbgcolor(1);
+  setcolor(9);
+  clearscreen();
+  for(i = 0; i < 32; i++)
+    spritesetvalue(i, S_Y, spritegetvalue(i, S_Y) + 1000);
+  setimagesize(2);
+  putimage1bit(endscreen, 0, 32, 64, 24);  
+  setimagesize(1);
+  gotoxy(6,2);
+  printf("Game over");
+  gotoxy(6,11);
+  printf("floor %d", level);
+  gotoxy(6,13);
+  printf("gold %d", gold);
+  delay(1000);
+  while(getkey() == 0){}
+  init();
 }
 
 void viewPage(){
-	setcolor(1);
-	setbgcolor(9);
-	for(i = 0; i < 16; i++)
-		spritesetvalue(i, S_Y, spritegetvalue(i, S_Y) + 1000);
-	fRect(10, 30, 118, 98);
-	setcolor(9);
-	setbgcolor(1);
+  setcolor(1);
+  setbgcolor(9);
+  for(i = 0; i < 16; i++)
+    spritesetvalue(i, S_Y, spritegetvalue(i, S_Y) + 1000);
+  fRect(10, 30, 118, 98);
+  setcolor(9);
+  setbgcolor(1);
 }
 
 void hidePage(){
-	for(i = 0; i < 16; i++)
-		spritesetvalue(i, S_Y, spritegetvalue(i, S_Y) - 1000);
-	setcolor(1);
-	setbgcolor(0);
+  for(i = 0; i < 16; i++)
+    spritesetvalue(i, S_Y, spritegetvalue(i, S_Y) - 1000);
+  setcolor(1);
+  setbgcolor(0);
 }
 
 void Info(){
-	viewPage();
-	gotoxy(2,4);
-	printf("floor %d", level);
-	gotoxy(2,6);
-	printf("gold %d", gold);
-	gotoxy(2,7);
-	printf("%c%d/%d", 3, health, maxhealth);
-	gotoxy(2,8);
-	printf("%c%d %c%d", 190, attack, 31, block);
-	gotoxy(2,9);
-	printf("%s %s+%d", shieldname, "shield", shield);
-	gotoxy(2,10);
-	printf("%s %s +%d", swordname, "sword", sword);
-	gotoxy(2,11);
-	printf("%s %s +%d", armorname, "armor", armor);
-	delay(500);
-	while(getkey() == 0){}
-	hidePage();
+  viewPage();
+  gotoxy(2,4);
+  printf("floor %d", level);
+  gotoxy(2,6);
+  printf("gold %d", gold);
+  gotoxy(2,7);
+  printf("%c%d/%d", 3, health, maxhealth);
+  gotoxy(2,8);
+  printf("%c%d %c%d", 190, attack, 31, block);
+  gotoxy(2,9);
+  printf("%s %s+%d", shieldname, "shield", shield);
+  gotoxy(2,10);
+  printf("%s %s +%d", swordname, "sword", sword);
+  gotoxy(2,11);
+  printf("%s %s +%d", armorname, "armor", armor);
+  delay(500);
+  while(getkey() == 0){}
+  hidePage();
 }
 
 void addItem(){
-	int r,r1,n,ii;
-	loadrtttl(s2,0);
-	playrtttl();
-	r = random(40);
-	r1 = random(40);
-	n = random(4);
-	for(ii = 0; ii < 3; ii++){
-		newname[ii] = names[r1 * 3 + ii];
-		newname[ii + 3] = names[r * 3 + ii];
-	}
-	newname[6] = 39;
-	newname[7] = 's';
-	newname[8] = 0;
-	if(n == 0){
-		for(ii = 0; ii < 9; ii++){
-			shieldname[ii] = newname[ii];
-		}
-		shield = level / 4 + random(level / 4) + 1;
-		printf("You got %s shield" , shieldname);
-	}
-	else if(n == 1){
-		for(ii = 0; ii < 9; ii++){
-			swordname[ii] = newname[ii];
-		}
-		sword = level / 2 + random(level / 2) + 1;
-		printf("You got %s sword" , swordname);
-	}
-	else if(n == 2){
-		for(ii = 0; ii < 9; ii++){
-			armorname[ii] = newname[ii];	
-		}
-		armor = level / 4 + random(level / 4) + 1;
-		printf("You got %s armor" , armorname);
-	}
-	else if(n > 2){
-		n = random(9);
-		if(n < 3 && hpoison < 3){
-			hpoison++;
-			printf("You got a health potion");
-		}
-		else if(n == 3){
-			attack++;
-			printf("You got a power potion");
-			spritesetvalue(30, S_HEIGHT,1 + hpoison * 4);
-		}
-		else if(n == 4){
-			maxhealth++;
-			printf("Your maximum health has increased");
-		}
-	}
-	gold += random(level);
-	block = shield + armor;
-	printtosprite(5, 9, attack + sword);
+  int r,r1,n,ii;
+  loadrtttl(s2,0);
+  playrtttl();
+  r = random(40);
+  r1 = random(40);
+  n = random(4);
+  for(ii = 0; ii < 3; ii++){
+    newname[ii] = names[r1 * 3 + ii];
+    newname[ii + 3] = names[r * 3 + ii];
+  }
+  newname[6] = 39;
+  newname[7] = 's';
+  newname[8] = 0;
+  if(n == 0){
+    for(ii = 0; ii < 9; ii++){
+      shieldname[ii] = newname[ii];
+    }
+    shield = level / 4 + random(level / 4) + 1;
+    printf("You got %s shield" , shieldname);
+  }
+  else if(n == 1){
+    for(ii = 0; ii < 9; ii++){
+      swordname[ii] = newname[ii];
+    }
+    sword = level / 2 + random(level / 2) + 1;
+    printf("You got %s sword" , swordname);
+  }
+  else if(n == 2){
+    for(ii = 0; ii < 9; ii++){
+      armorname[ii] = newname[ii];  
+    }
+    armor = level / 4 + random(level / 4) + 1;
+    printf("You got %s armor" , armorname);
+  }
+  else if(n > 2){
+    n = random(9);
+    if(n < 3 && hpoison < 3){
+      hpoison++;
+      printf("You got a health potion");
+    }
+    else if(n == 3){
+      attack++;
+      printf("You got a power potion");
+      spritesetvalue(30, S_HEIGHT,1 + hpoison * 4);
+    }
+    else if(n == 4){
+      maxhealth++;
+      printf("Your maximum health has increased");
+    }
+  }
+  gold += random(level);
+  block = shield + armor;
+  printtosprite(5, 9, attack + sword);
 }
 
 void fight(int i){
-	int n;
-	setcolor(1);
-	setbgcolor(1);
-	fRect(0, 8, 127, 32);
-	setcolor(9);
-	gotoxy(1,1);
-	tone(2000,300);
-	if(random(1)){
-		if(level > block)
-			n = level - block;
-		else
-			n = 0;
-		if(random(3) == 0)
-			n = n+1;
-		health -= n;
-		printtosprite(5, 1, health);
-		printf("The enemy took away %d health ", n);
-	}
-	else{
-		n = attack + sword - level / 2;
-		spritesetvalue(i, S_LIVES, spritegetvalue(i, S_LIVES) - n); 
-		printf("You took away %d health. ", n);
-		if(spritegetvalue(i, S_LIVES) <= 0)
-			addItem();
-	}
-	if(health <= 0)
-		endGame();
-	delay(400);
-	getkey();
-	while(getkey() == 0){}
+  int n;
+  setcolor(1);
+  setbgcolor(1);
+  fRect(0, 8, 127, 32);
+  setcolor(9);
+  gotoxy(1,1);
+  tone(2000,300);
+  if(random(1)){
+    if(level > block)
+      n = level - block;
+    else
+      n = 0;
+    if(random(3) == 0)
+      n = n+1;
+    health -= n;
+    printtosprite(5, 1, health);
+    printf("The enemy took away %d health ", n);
+  }
+  else{
+    n = attack + sword - level / 2;
+    spritesetvalue(i, S_LIVES, spritegetvalue(i, S_LIVES) - n); 
+    printf("You took away %d health. ", n);
+    if(spritegetvalue(i, S_LIVES) <= 0)
+      addItem();
+  }
+  if(health <= 0)
+    endGame();
+  delay(400);
+  getkey();
+  while(getkey() == 0){}
 }
 
 int monsterCollisionTest(){
-	int nx, ny;
-	nx = (offsetx + x * 16 + 2) / 16;
-	ny = (offsety + y * 16) / 16;
-	for(i = 2; i < 16; i++){
-		if(spritegetvalue(i, S_X) / 16 == nx && spritegetvalue(i, S_Y) / 16 == ny){
-			if(spritegetvalue(i, S_LIVES) > 0){
-				fight(i);
-				return 1;
-			}
-		}
-	}
-	return 0;
+  int nx, ny;
+  nx = (offsetx + x * 16 + 2) / 16;
+  ny = (offsety + y * 16) / 16;
+  for(i = 2; i < 16; i++){
+    if(spritegetvalue(i, S_X) / 16 == nx && spritegetvalue(i, S_Y) / 16 == ny){
+      if(spritegetvalue(i, S_LIVES) > 0){
+        fight(i);
+        return 1;
+      }
+    }
+  }
+  return 0;
 }
 
 void testkey(){
-	key = getkey();
-	if(key != prevkey){
-		if(key == KEY_LEFT){
-			tone(200,100);
-			x--;
-			if(maze[x + y * 21] == door)
-				isMaze = 0;
-			else if(maze[x + y * 21] != floor || monsterCollisionTest())
-				x++;
-		}
-		else if(key == KEY_RIGHT){
-			tone(200,100);
-			x++;
-			if(maze[x + y * 21] == door)
-				isMaze = 0;
-			else if(maze[x + y * 21] != floor || monsterCollisionTest())
-				x--;
-		}
-		if(key == KEY_UP){
-			tone(200,100);
-			y--;
-			if(maze[x + y * 21] == door)
-				isMaze = 0;
-			else if(maze[x + y * 21] != floor || monsterCollisionTest())
-				y++;
-		}
-		else if(key == KEY_DOWN){
-			tone(200,100);
-			y++;
-			if(maze[x + y * 21] == door)
-				isMaze = 0;
-			else if(maze[x + y * 21] != floor || monsterCollisionTest())
-				y--;
-		}
-		else if(key == KEY_A){
-			Info();
-		}
-		else if(key == KEY_B){
-			if(health < maxhealth && hpoison > 0){
-				health += maxhealth / 2;
-				if(health > maxhealth)
-					health = maxhealth;
-				hpoison--;
-				printtosprite(5, 1, health);
-				spritesetvalue(30, S_HEIGHT,1 + hpoison * 4);
-			}
-		}
-		putsprite(1, offsetx + x * 16, offsety + y * 16);
-		drawtile(offsetx, offsety + 4);
-	}
-	prevkey = key;
+  key = getkey();
+  if(key != prevkey){
+    if(key == KEY_LEFT){
+      tone(200,100);
+      x--;
+      if(maze[x + y * 21] == door)
+        isMaze = 0;
+      else if(maze[x + y * 21] != floor || monsterCollisionTest())
+        x++;
+    }
+    else if(key == KEY_RIGHT){
+      tone(200,100);
+      x++;
+      if(maze[x + y * 21] == door)
+        isMaze = 0;
+      else if(maze[x + y * 21] != floor || monsterCollisionTest())
+        x--;
+    }
+    if(key == KEY_UP){
+      tone(200,100);
+      y--;
+      if(maze[x + y * 21] == door)
+        isMaze = 0;
+      else if(maze[x + y * 21] != floor || monsterCollisionTest())
+        y++;
+    }
+    else if(key == KEY_DOWN){
+      tone(200,100);
+      y++;
+      if(maze[x + y * 21] == door)
+        isMaze = 0;
+      else if(maze[x + y * 21] != floor || monsterCollisionTest())
+        y--;
+    }
+    else if(key == KEY_A){
+      Info();
+    }
+    else if(key == KEY_B){
+      if(health < maxhealth && hpoison > 0){
+        health += maxhealth / 2;
+        if(health > maxhealth)
+          health = maxhealth;
+        hpoison--;
+        printtosprite(5, 1, health);
+        spritesetvalue(30, S_HEIGHT,1 + hpoison * 4);
+      }
+    }
+    putsprite(1, offsetx + x * 16, offsety + y * 16);
+    drawtile(offsetx, offsety + 4);
+  }
+  prevkey = key;
 }
 
 void main(){
-	init();
-	while(1){
-		generateMaze();
-		drawtile(0, 4);
-		while(isMaze){
-			nextCadr();
-			testkey();
-			delayredraw();
-		}
-		delay(300);
-		level++;
-	}
-}	
+  init();
+  while(1){
+    generateMaze();
+    drawtile(0, 4);
+    while(isMaze){
+      nextCadr();
+      testkey();
+      delayredraw();
+    }
+    delay(300);
+    level++;
+  }
+}  
 
 
