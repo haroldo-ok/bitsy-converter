@@ -12,6 +12,8 @@
 
 #define SPRITE_REC_SIZE 4
 
+int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
+
 int room_0_sprites[] = {
   ofs_SPR_a, 8, 12, 0,
   ofs_SPR_b, 10, 6, 0
@@ -565,6 +567,8 @@ void main(){
     for (int i = 0; i != 256; i++) {
       maze[i] = images[room_0[i]];
     }
+
+    drawSprite(1, 0, playerSpriteStart);
 
     for (char i = 0; i != 2; i++) {
       drawSprite(i + 2, i, sprites_test[0]);
