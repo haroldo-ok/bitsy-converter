@@ -10,17 +10,14 @@
 #define ofs_SPR_b 10
 #define ofs_ITM_0 11
 
-#define SPRITE_ENTRIES 4
+#define SPRITE_REC_SIZE 4
 
 int room_0_sprites[] = {
   ofs_SPR_a, 8, 12, 0,
   ofs_SPR_b, 10, 6, 0
 };
 
-int room_0_sprites_2[] = {
-  { ofs_SPR_a, 8, 12, 0 },
-  { ofs_SPR_b, 10, 6, 0 }
-};
+int sprites_test[] = {room_0_sprites};
 
 char room_0[] = {
   0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -550,6 +547,14 @@ void testkey(){
   prevkey = key;
 }
 
+void drawSprite(char targetNum, char srcIndex, int sprite[]) {
+  int p = srcIndex * SPRITE_REC_SIZE;
+  getsprite(targetNum, images[sprite[p]]);
+  spritesetvalue(sprNum, S_WIDTH, 8);
+  spritesetvalue(sprNum, S_HEIGHT,8);
+  putsprite(targetNum, sprite[p + 1] * 8, sprite[p + 2] * 8);
+}
+
 void main(){
 
 	
@@ -562,17 +567,8 @@ void main(){
     }
 
     for (char i = 0; i != 2; i++) {
-      char sprNum = i + 2;
-      int p = i * SPRITE_ENTRIES;
-
-      getsprite(sprNum, images[room_0_sprites[p]]);
-      spritesetvalue(sprNum, S_WIDTH, 8);
-      spritesetvalue(sprNum, S_HEIGHT,8);
-      putsprite(sprNum, room_0_sprites[p + 1] * 8, room_0_sprites[p + 2] * 8);
-      printf("  %d %d\n", room_0_sprites[p + 1], room_0_sprites[p + 2]);
+      drawSprite(i + 2, i, sprites_test[0]);
     }
-
-    printf("%d", room_0_sprites[2][0]);
 
     drawtile(0, 4);
     while(isMaze){
