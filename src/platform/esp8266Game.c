@@ -10,6 +10,18 @@
 #define ofs_SPR_b 10
 #define ofs_ITM_0 11
 
+#define SPRITE_ENTRIES 4
+
+int room_0_sprites[] = {
+  ofs_SPR_a, 8, 12, 0,
+  ofs_SPR_b, 10, 6, 0
+};
+
+int room_0_sprites_2[] = {
+  { ofs_SPR_a, 8, 12, 0 },
+  { ofs_SPR_b, 10, 6, 0 }
+};
+
 char room_0[] = {
   0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
   0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0,
@@ -268,16 +280,6 @@ void nextCadr(){
     // Hero sprite
 //    getsprite(1, hero[cadr]);
     getsprite(1, images[cadr + ofs_SPR_A]);
-    
-    getsprite(2, goblin[cadr]);
-    getsprite(3, goblin[cadr]);
-    getsprite(4, goblin[cadr]);
-    getsprite(5, bat[cadr]);
-    getsprite(6, bat[cadr]);
-    getsprite(7, bat[cadr]);
-    getsprite(8, snake[cadr]);
-    getsprite(9, snake[cadr]);
-    getsprite(10, snake[cadr]);
   }
   if(sx > 64 && offsetx >= (-208)){
     offsetx -= 2;
@@ -549,6 +551,8 @@ void testkey(){
 }
 
 void main(){
+
+	
   init();
   while(1){
     generateMaze();
@@ -556,6 +560,19 @@ void main(){
     for (int i = 0; i != 256; i++) {
       maze[i] = images[room_0[i]];
     }
+
+    for (char i = 0; i != 2; i++) {
+      char sprNum = i + 2;
+      int p = i * SPRITE_ENTRIES;
+
+      getsprite(sprNum, images[room_0_sprites[p]]);
+      spritesetvalue(sprNum, S_WIDTH, 8);
+      spritesetvalue(sprNum, S_HEIGHT,8);
+      putsprite(sprNum, room_0_sprites[p + 1] * 8, room_0_sprites[p + 2] * 8);
+      printf("  %d %d\n", room_0_sprites[p + 1], room_0_sprites[p + 2]);
+    }
+
+    printf("%d", room_0_sprites[2][0]);
 
     drawtile(0, 4);
     while(isMaze){
