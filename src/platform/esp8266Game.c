@@ -552,8 +552,8 @@ void testkey(){
 void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   int p = srcIndex * SPRITE_REC_SIZE;
   getsprite(targetNum, images[sprite[p]]);
-  spritesetvalue(sprNum, S_WIDTH, 8);
-  spritesetvalue(sprNum, S_HEIGHT,8);
+  spritesetvalue(targetNum, S_WIDTH, 8);
+  spritesetvalue(targetNum, S_HEIGHT,8);
   putsprite(targetNum, sprite[p + 1] * 8, sprite[p + 2] * 8);
 }
 
@@ -574,7 +574,7 @@ void main(){
       drawSprite(i + 2, i, sprites_test[0]);
     }
 
-    drawtile(0, 4);
+    drawtile(0, 0);
     while(isMaze){
       nextCadr();
       testkey();
