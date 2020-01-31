@@ -16,6 +16,8 @@
 #define SPRITE_OFS_Y 2
 #define SPRITE_OFS_DLG 3
 
+#define ROOM_REC_SIZE 4
+
 
 int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
@@ -43,7 +45,11 @@ char room_0[] = {
   0, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 0,
   0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-}
+};
+
+int rooms[] = {
+  room_0
+};
 
 char image_BLANK_0[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 char image_TIL_a_0[] = { 0x11, 0x11, 0x11, 0x11, 0x10, 0x00, 0x00, 0x01, 0x10, 0x00, 0x00, 0x01, 0x10, 0x01, 0x10, 0x01, 0x10, 0x01, 0x10, 0x01, 0x10, 0x00, 0x00, 0x01, 0x10, 0x00, 0x00, 0x01, 0x11, 0x11, 0x11, 0x11 };
@@ -569,8 +575,11 @@ void drawSprite(char targetNum, char srcIndex, int sprite[]) {
 
 char tryMovingPlayer(int dx, int dy) {
   // Calculate where the player will try to move to
-  int x = playerSprite[SPRITE_OFS_X] + dx;
-  int y = playerSprite[SPRITE_OFS_Y] + dy;
+  int x = playerSprite[SPRITE_OFS_X];
+  int y = playerSprite[SPRITE_OFS_Y];
+
+  x += dx;
+  y += dy;
 
   // Out of bounds  
   if (x < 0 || x > 15 || y < 0 || y > 15) {
@@ -630,7 +639,6 @@ void main(){
     drawtile(0, 0);
     while(isMaze){
       controlPlayer();
-
       drawSprite(1, 0, playerSprite);
       delayredraw();
     }
