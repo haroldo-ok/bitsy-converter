@@ -11,6 +11,11 @@
 #define ofs_ITM_0 11
 
 #define SPRITE_REC_SIZE 4
+#define SPRITE_OFS_TILE 0
+#define SPRITE_OFS_X 1
+#define SPRITE_OFS_Y 2
+#define SPRITE_OFS_DLG 3
+
 
 int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
@@ -551,10 +556,10 @@ void testkey(){
 
 void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   int p = srcIndex * SPRITE_REC_SIZE;
-  getsprite(targetNum, images[sprite[p]]);
+  getsprite(targetNum, images[sprite[p + SPRITE_OFS_TILE]]);
   spritesetvalue(targetNum, S_WIDTH, 8);
   spritesetvalue(targetNum, S_HEIGHT,8);
-  putsprite(targetNum, sprite[p + 1] * 8, sprite[p + 2] * 8);
+  putsprite(targetNum, sprite[p + SPRITE_OFS_X] * 8, sprite[p + SPRITE_OFS_Y] * 8);
 }
 
 void main(){
