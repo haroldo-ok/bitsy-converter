@@ -16,8 +16,14 @@
 #define SPRITE_OFS_Y 2
 #define SPRITE_OFS_DLG 3
 
-#define ROOM_REC_SIZE 4
-
+#define ROOM_REC_SIZE 7
+#define ROOM_OFS_MAP 0
+#define ROOM_OFS_SPR_COUNT 1
+#define ROOM_OFS_SPR_DATA 2
+#define ROOM_OFS_EXIT_COUNT 3
+#define ROOM_OFS_EXIT_DATA 4
+#define ROOM_OFS_END_COUNT 5
+#define ROOM_OFS_END_DATA 6
 
 int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
@@ -48,7 +54,7 @@ char room_0[] = {
 };
 
 int rooms[] = {
-  room_0
+  room_0, 2, room0_sprites, 0, 0, 0, 0
 };
 
 char image_BLANK_0[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -131,6 +137,7 @@ char names[] = "bagbilbobbomboncamcapcedcogcobdoddogdotelmennfarfulgonhamhaljacj
 
 
 
+int currentLevel = 0;
 int playerSprite[SPRITE_REC_SIZE];
 
 
@@ -612,6 +619,12 @@ char controlPlayer() {
   return false;
 }
 
+char drawRoom(char map[]) {
+  for (int i = 0; i != 256; i++) {
+    maze[i] = images[map[i]];
+  }
+}
+
 void main(){
 
 	
@@ -626,9 +639,7 @@ void main(){
 
     i = true;
 
-    for (int i = 0; i != 256; i++) {
-      maze[i] = images[room_0[i]];
-    }
+    drawRoom(rooms[currentLevel * ROOM_REC_SIZE + ROOM_OFS_MAP]);
 
     drawSprite(1, 0, playerSprite);
 
