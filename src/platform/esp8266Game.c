@@ -123,6 +123,11 @@ int s[4];
 //length 123
 char names[] = "bagbilbobbomboncamcapcedcogcobdoddogdotelmennfarfulgonhamhaljacjasjoclaclillobludmadmagmanmaymermulnagneloldriprobsamtaytom";
 
+
+
+int playerSprite[SPRITE_REC_SIZE];
+
+
 void delay(int t){
   settimer(0, t);
   while(gettimer(0) != 0){};
@@ -562,18 +567,61 @@ void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   putsprite(targetNum, sprite[p + SPRITE_OFS_X] * 8, sprite[p + SPRITE_OFS_Y] * 8);
 }
 
+char tryMovingPlayer(int dx, int dy) {
+  // Calculate where the player will try to move to
+  int x = playerSprite[SPRITE_OFS_X] + dx;
+  int y = playerSprite[SPRITE_OFS_Y] + dy;
+
+  // Out of bounds  
+  if (x < 0 || x > 15 || y < 0 || y > 15) {
+    return false;
+  }
+
+  // No obstacles found: the player can move.
+  playerSprite[SPRITE_OFS_X] = x;
+  playerSprite[SPRITE_OFS_Y] = y;
+
+  return true;
+}
+
+char controlPlayer() {
+  key = getkey();
+	
+  if (key & KEY_UP) {
+    return tryMovingPlayer(0, -1);
+  }
+  if (key & KEY_DOWN) {
+    return tryMovingPlayer(0, 1);
+  }
+  if (key & KEY_LEFT) {
+    return tryMovingPlayer(-1, 0);
+  }
+  if (key & KEY_RIGHT) {
+    return tryMovingPlayer(1, 0);
+  }
+  
+  return false;
+}
+
 void main(){
 
 	
   init();
+
+  for (int i = 0; i != SPRITE_REC_SIZE; i++) {
+    playerSprite[i] = playerSpriteStart[i];
+  }
+
   while(1){
     generateMaze();
+
+    i = true;
 
     for (int i = 0; i != 256; i++) {
       maze[i] = images[room_0[i]];
     }
 
-    drawSprite(1, 0, playerSpriteStart);
+    drawSprite(1, 0, playerSprite);
 
     for (char i = 0; i != 2; i++) {
       drawSprite(i + 2, i, sprites_test[0]);
@@ -581,8 +629,9 @@ void main(){
 
     drawtile(0, 0);
     while(isMaze){
-      nextCadr();
-      testkey();
+      controlPlayer();
+
+      drawSprite(1, 0, playerSprite);
       delayredraw();
     }
     delay(300);
