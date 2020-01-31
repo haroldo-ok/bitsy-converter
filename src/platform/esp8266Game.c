@@ -54,7 +54,7 @@ char room_0[] = {
 };
 
 int rooms[] = {
-  room_0, 2, room0_sprites, 0, 0, 0, 0
+  room_0, 2, room_0_sprites, 0, 0, 0, 0
 };
 
 char image_BLANK_0[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -625,6 +625,14 @@ char drawRoom(char map[]) {
   }
 }
 
+void drawSprites(int roomSprites[], int spriteCount) { 
+  drawSprite(1, 0, playerSprite);
+  
+  for (char i = 0; i < spriteCount; i++) {
+    drawSprite(i + 2, i, roomSprites);
+  }
+}
+
 void main(){
 
 	
@@ -639,13 +647,9 @@ void main(){
 
     i = true;
 
-    drawRoom(rooms[currentLevel * ROOM_REC_SIZE + ROOM_OFS_MAP]);
-
-    drawSprite(1, 0, playerSprite);
-
-    for (char i = 0; i != 2; i++) {
-      drawSprite(i + 2, i, sprites_test[0]);
-    }
+    int roomP = currentLevel * ROOM_REC_SIZE; 
+    drawRoom(rooms[roomP + ROOM_OFS_MAP]);
+    drawSprites(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
 
     drawtile(0, 0);
     while(isMaze){
