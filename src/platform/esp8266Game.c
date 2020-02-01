@@ -53,8 +53,28 @@ char room_0[] = {
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
+char room_1[] = {
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 2, 2, 2, 2, 2, 0, 0, 2, 2, 2, 2, 0, 0, 0,
+  0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 0, 2, 0, 0,
+  0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0,
+  0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+  1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+  4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+  1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0
+};
+
 int rooms[] = {
-  room_0, 2, room_0_sprites, 0, 0, 0, 0
+  room_0, 2, room_0_sprites, 0, 0, 0, 0,
+  room_1, 0, 0, 0, 0, 0, 0
 };
 
 char image_BLANK_0[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -633,6 +653,37 @@ void drawSprites(int roomSprites[], int spriteCount) {
   }
 }
 
+/* For some reason, using "char s[]" as a parameter makes "puts(s)" print gibberish. */
+void showDialog(int s) {
+  char blink = false;
+  char blinkDelay = 0;
+
+  setColor(11):
+  fillRect(4,4,124, 68);
+
+  setBgColor(11);
+  setColor(7):
+  gotoXY(1, 1);
+  puts(s);
+
+  // Blink cursor until player presses a button
+  while (!(getkey() & (KEY_A|KEY_B))) {
+    gotoXY(19, 7);
+    setColor(blink ? 7 : 11):
+    puts("_");
+    delay(1);
+
+    if (blinkDelay) {
+      blinkDelay--;
+    } else {
+      blink = !blink;
+      blinkDelay = 15;
+    }
+  }
+
+  while (getkey()) {}
+}
+
 void main(){
 
 	
@@ -645,13 +696,14 @@ void main(){
   while(1){
     generateMaze();
 
-    i = true;
-
     int roomP = currentLevel * ROOM_REC_SIZE; 
     drawRoom(rooms[roomP + ROOM_OFS_MAP]);
     drawSprites(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
 
     drawtile(0, 0);
+
+    showDialog("Hello, world!");
+
     while(isMaze){
       controlPlayer();
       drawSprite(1, 0, playerSprite);
