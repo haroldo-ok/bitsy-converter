@@ -10,6 +10,8 @@
 #define ofs_SPR_b 10
 #define ofs_ITM_0 11
 
+#define DIALOG_ID_SPR_a 1
+
 #define SPRITE_REC_SIZE 4
 #define SPRITE_OFS_TILE 0
 #define SPRITE_OFS_X 1
@@ -28,7 +30,7 @@
 int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
 int room_0_sprites[] = {
-  ofs_SPR_a, 8, 12, 0,
+  ofs_SPR_a, 8, 12, DIALOG_ID_SPR_a,
   ofs_SPR_b, 10, 6, 0
 };
 
@@ -684,6 +686,21 @@ void showDialog(int s) {
   while (getkey()) {}
 }
 
+// This section will have to be generated, too
+
+void dialog_SPR_a() {
+  showDialog("Testing, 1, 2, 3!");
+}
+
+// Getting around the lack of function pointers
+void showChosenDialog(int dlgNumber) {
+  switch (dlgNumber) {
+  case DIALOG_ID_SPR_a:
+    dialog_SPR_a();
+    break;
+  }  
+}
+
 void main(){
 
 	
@@ -701,8 +718,6 @@ void main(){
     drawSprites(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
 
     drawtile(0, 0);
-
-    showDialog("Hello, world!");
 
     while(isMaze){
       controlPlayer();
