@@ -11,7 +11,7 @@
 #define ofs_ITM_0 11
 
 #define DIALOG_ID_SPR_a 1
-#define DIALOG_ID_SPR_b 1
+#define DIALOG_ID_SPR_b 2
 
 #define SPRITE_REC_SIZE 4
 #define SPRITE_OFS_TILE 0
@@ -609,48 +609,17 @@ void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   putsprite(targetNum, sprite[p + SPRITE_OFS_X] * 8, sprite[p + SPRITE_OFS_Y] * 8);
 }
 
-// Passing parameters as global variables because the parameter passing is gltching out.
-int spritesCollisionX, spritesCollisionY;
-int checkSpritesCollision(int roomSprites[], int spriteCount) { 
+int checkSpritesCollision(int playerX, int playerY, int roomSprites[], int spriteCount) { 
   int p = 0;
-  int otherX, otherY;
   char i;
 
-  gotoxy(1, 3);
-  printf("%d %d %d %d\n", spritesCollisionX, spritesCollisionY, roomSprites, spriteCount);
-
   for (i = 0; i < spriteCount; i++) {
-    otherX = roomSprites[p + SPRITE_OFS_X];
-    otherY = roomSprites[p + SPRITE_OFS_X];
-    printf("%d %d\n", otherX, otherY);
-
-    if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] && spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {      
+    if (playerX == roomSprites[p + SPRITE_OFS_X] && playerY == roomSprites[p + SPRITE_OFS_Y]) {      
       currentDialog = roomSprites[p + SPRITE_OFS_DLG];
       return 1;
     }
     p += SPRITE_REC_SIZE;
   }
-/*
-  for (char i = 0; i < spriteCount; i++) {
-    otherX = roomSprites[p + SPRITE_OFS_X];
-    otherY = roomSprites[p + SPRITE_OFS_Y];
-
-    if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] && spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {
-      currentDialog = roomSprites[p + SPRITE_OFS_DLG];
-      return 1;
-    }
-    p += SPRITE_REC_SIZE;
-  }
-*/
-  /*
-  for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
-    BitsySprite *spr = &rooms[currentLevel].sprites[i];
-    if (spr->x == x && spr->y == y) {
-      currentDialog = spr->dialog;
-      return true;
-    }
-  }
-  */
 
   return 0;
 }
@@ -671,14 +640,7 @@ char tryMovingPlayer(int dx, int dy) {
   }
 
   // Check collision against the sprites
-  spritesCollisionX = x;
-  spritesCollisionY = y;
-
-  gotoxy(1, 2);
-  printf("%d %d %d %d\n", spritesCollisionX, spritesCollisionY, 
-	rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
-
-  if (checkSpritesCollision(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT])) {
+  if (checkSpritesCollision(x, y, rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT])) {
     return true;
   }
   
@@ -796,7 +758,6 @@ void main(){
       drawSprite(1, 0, playerSprite);
 
       if (currentDialog) {
-	printf("Chosen: %d\n", currentDialog);
         showChosenDialog(currentDialog);
         currentDialog = 0;
       }
