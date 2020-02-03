@@ -11,6 +11,7 @@
 #define ofs_ITM_0 11
 
 #define DIALOG_ID_SPR_a 1
+#define DIALOG_ID_SPR_b 1
 
 #define SPRITE_REC_SIZE 4
 #define SPRITE_OFS_TILE 0
@@ -31,7 +32,7 @@ int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
 int room_0_sprites[] = {
   ofs_SPR_a, 8, 12, DIALOG_ID_SPR_a,
-  ofs_SPR_b, 10, 6, 0
+  ofs_SPR_b, 10, 6, DIALOG_ID_SPR_b
 };
 
 int sprites_test[] = {room_0_sprites};
@@ -624,6 +625,7 @@ int checkSpritesCollision(int roomSprites[], int spriteCount) {
     printf("%d %d\n", otherX, otherY);
 
     if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] && spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {      
+      currentDialog = roomSprites[p + SPRITE_OFS_DLG];
       return 1;
     }
     p += SPRITE_REC_SIZE;
@@ -633,7 +635,8 @@ int checkSpritesCollision(int roomSprites[], int spriteCount) {
     otherX = roomSprites[p + SPRITE_OFS_X];
     otherY = roomSprites[p + SPRITE_OFS_Y];
 
-    if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] && spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {      
+    if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] && spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {
+      currentDialog = roomSprites[p + SPRITE_OFS_DLG];
       return 1;
     }
     p += SPRITE_REC_SIZE;
@@ -756,11 +759,18 @@ void dialog_SPR_a() {
   showDialog("Testing, 1, 2, 3!");
 }
 
+void dialog_SPR_b() {
+  showDialog("I'm a chair!");
+}
+
 // Getting around the lack of function pointers
 void showChosenDialog(int dlgNumber) {
   switch (dlgNumber) {
   case DIALOG_ID_SPR_a:
     dialog_SPR_a();
+    break;
+  case DIALOG_ID_SPR_b:
+    dialog_SPR_b();
     break;
   }  
 }
@@ -784,6 +794,13 @@ void main(){
     while(isMaze){
       controlPlayer();
       drawSprite(1, 0, playerSprite);
+
+      if (currentDialog) {
+	printf("Chosen: %d\n", currentDialog);
+        showChosenDialog(currentDialog);
+        currentDialog = 0;
+      }
+
       delayredraw();
     }
     delay(300);
