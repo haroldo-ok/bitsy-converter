@@ -643,7 +643,8 @@ char tryMovingPlayer(int dx, int dy) {
   // Calculate where the player will try to move to
   int x = playerSprite[SPRITE_OFS_X];
   int y = playerSprite[SPRITE_OFS_Y];
-  int roomP = calcRoomPointer(); 
+
+  int roomP = calcRoomPointer();
 
   x += dx;
   y += dy;
@@ -656,7 +657,12 @@ char tryMovingPlayer(int dx, int dy) {
   // Check collision against the sprites
   spritesCollisionX = x;
   spritesCollisionY = y;
-  if (checkSpritesCollision(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT])) {
+
+  gotoxy(1, 2);
+  printf("%d %d %d %d\n", spritesCollisionX, spritesCollisionY, 
+	rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
+
+  if (checkSpritesCollision(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]) {
     return true;
   }
   
