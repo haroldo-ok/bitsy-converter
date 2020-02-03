@@ -162,6 +162,8 @@ char names[] = "bagbilbobbomboncamcapcedcogcobdoddogdotelmennfarfulgonhamhaljacj
 int currentLevel = 0;
 int playerSprite[SPRITE_REC_SIZE];
 
+int currentDialog = 0;
+
 
 void delay(int t){
   settimer(0, t);
@@ -594,6 +596,10 @@ void testkey(){
   prevkey = key;
 }
 
+int calcRoomPointer() {
+  return currentLevel * ROOM_REC_SIZE;
+}
+
 void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   int p = srcIndex * SPRITE_REC_SIZE;
   getsprite(targetNum, images[sprite[p + SPRITE_OFS_TILE]]);
@@ -602,10 +608,32 @@ void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   putsprite(targetNum, sprite[p + SPRITE_OFS_X] * 8, sprite[p + SPRITE_OFS_Y] * 8);
 }
 
+char checkSpritesCollision(int x, int y, int roomSprites[], int spriteCount) { 
+  int p = 0;
+  for (char i = 0; i < spriteCount; i++) {
+    if (x == roomSprites[p + SPRITE_OFS_X] || y == roomSprites[p + SPRITE_OFS_Y]) {
+      return true;
+    }
+    p += SPRITE_REC_SIZE;
+  }
+  /*
+  for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
+    BitsySprite *spr = &rooms[currentLevel].sprites[i];
+    if (spr->x == x && spr->y == y) {
+      currentDialog = spr->dialog;
+      return true;
+    }
+  }
+  */
+
+  return false;
+}
+	
 char tryMovingPlayer(int dx, int dy) {
   // Calculate where the player will try to move to
   int x = playerSprite[SPRITE_OFS_X];
   int y = playerSprite[SPRITE_OFS_Y];
+  int roomP = calcRoomPointer(); 
 
   x += dx;
   y += dy;
@@ -615,6 +643,11 @@ char tryMovingPlayer(int dx, int dy) {
     return false;
   }
 
+  // Check collision against the sprites
+  if (checkSpritesCollision(x, y, rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT])) {
+    return true;
+  }
+  
   // No obstacles found: the player can move.
   playerSprite[SPRITE_OFS_X] = x;
   playerSprite[SPRITE_OFS_Y] = y;
@@ -702,8 +735,6 @@ void showChosenDialog(int dlgNumber) {
 }
 
 void main(){
-
-	
   init();
 
   for (int i = 0; i != SPRITE_REC_SIZE; i++) {
@@ -713,7 +744,7 @@ void main(){
   while(1){
     generateMaze();
 
-    int roomP = currentLevel * ROOM_REC_SIZE; 
+    int roomP = calcRoomPointer(); 
     drawRoom(rooms[roomP + ROOM_OFS_MAP]);
     drawSprites(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
 
