@@ -613,17 +613,28 @@ int spritesCollisionX, spritesCollisionY;
 int checkSpritesCollision(int roomSprites[], int spriteCount) { 
   int p = 0;
   int otherX, otherY;
+  char i;
 
   gotoxy(1, 3);
   printf("%d %d %d %d\n", spritesCollisionX, spritesCollisionY, roomSprites, spriteCount);
 
+  for (i = 0; i < spriteCount; i++) {
+    otherX = roomSprites[p + SPRITE_OFS_X];
+    otherY = roomSprites[p + SPRITE_OFS_X];
+    printf("%d %d\n", otherX, otherY);
+
+    if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] && spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {      
+      return 1;
+    }
+    p += SPRITE_REC_SIZE;
+  }
 /*
   for (char i = 0; i < spriteCount; i++) {
     otherX = roomSprites[p + SPRITE_OFS_X];
-    otherY = roomSprites[p + SPRITE_OFS_X];
+    otherY = roomSprites[p + SPRITE_OFS_Y];
 
-    if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] || spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {      
-      return true;
+    if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] && spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {      
+      return 1;
     }
     p += SPRITE_REC_SIZE;
   }
@@ -647,7 +658,6 @@ char tryMovingPlayer(int dx, int dy) {
   int y = playerSprite[SPRITE_OFS_Y];
 
   int roomP = calcRoomPointer();
-  int collision;
 
   x += dx;
   y += dy;
@@ -666,7 +676,6 @@ char tryMovingPlayer(int dx, int dy) {
 	rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
 
   if (checkSpritesCollision(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT])) {
-    printf("! %d", collision);
     return true;
   }
   
