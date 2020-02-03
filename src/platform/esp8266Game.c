@@ -608,10 +608,20 @@ void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   putsprite(targetNum, sprite[p + SPRITE_OFS_X] * 8, sprite[p + SPRITE_OFS_Y] * 8);
 }
 
-char checkSpritesCollision(int x, int y, int roomSprites[], int spriteCount) { 
+// Passing parameters as global variables because the parameter passing is gltching out.
+int spritesCollisionX, spritesCollisionY;
+char checkSpritesCollision(int roomSprites[], int spriteCount) { 
   int p = 0;
+  int otherX, otherY;
+
+  gotoxy(1, 3);
+  printf("%d %d %d %d\n", spritesCollisionX, spritesCollisionY, roomSprites, spriteCount);
+
   for (char i = 0; i < spriteCount; i++) {
-    if (x == roomSprites[p + SPRITE_OFS_X] || y == roomSprites[p + SPRITE_OFS_Y]) {
+    otherX = roomSprites[p + SPRITE_OFS_X];
+    otherY = roomSprites[p + SPRITE_OFS_X];
+
+    if (spritesCollisionX == roomSprites[p + SPRITE_OFS_X] || spritesCollisionY == roomSprites[p + SPRITE_OFS_Y]) {      
       return true;
     }
     p += SPRITE_REC_SIZE;
@@ -644,7 +654,9 @@ char tryMovingPlayer(int dx, int dy) {
   }
 
   // Check collision against the sprites
-  if (checkSpritesCollision(x, y, rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT])) {
+  spritesCollisionX = x;
+  spritesCollisionY = y;
+  if (checkSpritesCollision(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT])) {
     return true;
   }
   
@@ -759,4 +771,4 @@ void main(){
     level++;
   }
 
-}  
+}
