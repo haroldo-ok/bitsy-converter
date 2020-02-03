@@ -610,13 +610,14 @@ void drawSprite(char targetNum, char srcIndex, int sprite[]) {
 
 // Passing parameters as global variables because the parameter passing is gltching out.
 int spritesCollisionX, spritesCollisionY;
-char checkSpritesCollision(int roomSprites[], int spriteCount) { 
+int checkSpritesCollision(int roomSprites[], int spriteCount) { 
   int p = 0;
   int otherX, otherY;
 
   gotoxy(1, 3);
   printf("%d %d %d %d\n", spritesCollisionX, spritesCollisionY, roomSprites, spriteCount);
 
+/*
   for (char i = 0; i < spriteCount; i++) {
     otherX = roomSprites[p + SPRITE_OFS_X];
     otherY = roomSprites[p + SPRITE_OFS_X];
@@ -626,6 +627,7 @@ char checkSpritesCollision(int roomSprites[], int spriteCount) {
     }
     p += SPRITE_REC_SIZE;
   }
+*/
   /*
   for (uint8_t i = 0; i != rooms[currentLevel].spriteCount; i++) {
     BitsySprite *spr = &rooms[currentLevel].sprites[i];
@@ -636,7 +638,7 @@ char checkSpritesCollision(int roomSprites[], int spriteCount) {
   }
   */
 
-  return false;
+  return 0;
 }
 	
 char tryMovingPlayer(int dx, int dy) {
@@ -645,6 +647,7 @@ char tryMovingPlayer(int dx, int dy) {
   int y = playerSprite[SPRITE_OFS_Y];
 
   int roomP = calcRoomPointer();
+  int collision;
 
   x += dx;
   y += dy;
@@ -662,7 +665,8 @@ char tryMovingPlayer(int dx, int dy) {
   printf("%d %d %d %d\n", spritesCollisionX, spritesCollisionY, 
 	rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
 
-  if (checkSpritesCollision(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]) {
+  if (checkSpritesCollision(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT])) {
+    printf("! %d", collision);
     return true;
   }
   
