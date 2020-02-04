@@ -11,7 +11,7 @@
 #define ofs_ITM_0 11
 
 #define false 0
-#define true (!false);
+#define true 1
 
 #define DIALOG_ID_SPR_a 1
 #define DIALOG_ID_SPR_b 2
@@ -192,7 +192,9 @@ char names[] = "bagbilbobbomboncamcapcedcogcobdoddogdotelmennfarfulgonhamhaljacj
 
 
 int currentLevel = 0;
+char needUpdate = true;
 int playerSprite[SPRITE_REC_SIZE];
+int frameControl = 0;
 
 int currentDialog = 0;
 
@@ -679,6 +681,7 @@ char tryMovingPlayer(int dx, int dy) {
   playerSprite[SPRITE_OFS_X] = x;
   playerSprite[SPRITE_OFS_Y] = y;
 
+  needUpdate = true;
   return true;
 }
 
@@ -769,28 +772,40 @@ void showChosenDialog(int dlgNumber) {
 }
 
 void main(){
+  int roomP;
+	
   init();
 
   for (int i = 0; i != SPRITE_REC_SIZE; i++) {
     playerSprite[i] = playerSpriteStart[i];
   }
 
+  needUpdate = true;
+
   while(1){
     generateMaze();
 
-    int roomP = calcRoomPointer(); 
-    drawRoom(rooms[roomP + ROOM_OFS_MAP]);
-    drawSprites(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
-
-    drawtile(0, 0);
-
     while(isMaze){
       controlPlayer();
-      drawSprite(1, 0, playerSprite);
+
+      if (needUpdate) {
+        roomP = calcRoomPointer(); 
+
+        setBgColor(0);
+        clearscreen();
+
+        drawRoom(rooms[roomP + ROOM_OFS_MAP]);
+        drawtile(0, 0);
+
+        drawSprites(rooms[roomP + ROOM_OFS_SPR_DATA], rooms[roomP + ROOM_OFS_SPR_COUNT]);
+
+        needUpdate = false;
+      }
 
       if (currentDialog) {
         showChosenDialog(currentDialog);
         currentDialog = 0;
+        needUpdate = true;
       }
 
       delayredraw();
