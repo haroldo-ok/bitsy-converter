@@ -195,6 +195,7 @@ int currentLevel = 0;
 char needUpdate = true;
 int playerSprite[SPRITE_REC_SIZE];
 int frameControl = 0;
+int frameDelay = 0;
 
 int currentDialog = 0;
 
@@ -705,8 +706,14 @@ char controlPlayer() {
 }
 
 char drawRoom(char map[]) {
+  int tn, p;
+  char frameCount;
+
   for (int i = 0; i != 256; i++) {
-    maze[i] = images[map[i]];
+    tn = map[i];
+    p = tn * TILE_INFO_REC_SIZE;
+    frameCount = tileInfos[p + TILE_INFO_OFS_FRAME_COUNT];
+    maze[i] = images[tn + frameControl % frameCount];
   }
 }
 
@@ -786,6 +793,15 @@ void main(){
     generateMaze();
 
     while(isMaze){
+      // Increment frame control for animations  
+      if (frameDelay) {
+        frameDelay--;
+      } else {
+        frameControl = (frameControl + 1) % 0x7FFF;
+        frameDelay = 10;
+        needUpdate = true;
+      }
+	
       controlPlayer();
 
       if (needUpdate) {
@@ -808,7 +824,7 @@ void main(){
         needUpdate = true;
       }
 
-      delayredraw();
+      delayredraw();    
     }
     delay(300);
     level++;
