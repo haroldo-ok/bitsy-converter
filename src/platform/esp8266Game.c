@@ -10,6 +10,9 @@
 #define ofs_SPR_b 10
 #define ofs_ITM_0 11
 
+#define false 0
+#define true (!false);
+
 #define DIALOG_ID_SPR_a 1
 #define DIALOG_ID_SPR_b 2
 
@@ -27,6 +30,10 @@
 #define ROOM_OFS_EXIT_DATA 4
 #define ROOM_OFS_END_COUNT 5
 #define ROOM_OFS_END_DATA 6
+
+#define TILE_INFO_REC_SIZE 2
+#define TILE_INFO_OFS_IS_WALL 0
+#define TILE_INFO_OFS_FRAME_COUNT 1
 
 int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
@@ -78,6 +85,30 @@ char room_1[] = {
 int rooms[] = {
   room_0, 2, room_0_sprites, 0, 0, 0, 0,
   room_1, 0, 0, 0, 0, 0, 0
+};
+
+char tileInfos[] = {
+  // BLANK
+  false, 1,
+  // TIL_a
+  true, 1,
+  // TIL_b
+  false, 2,
+  false, 2,
+  // TIL_c
+  false, 1,
+  // TIL_d
+  false, 1,
+  // SPR_A
+  false, 2,
+  false, 2,
+  // SPR_a
+  false, 2,
+  false, 2,
+  // SPR_b
+  false, 1,
+  // ITM_0
+  false, 1
 };
 
 char image_BLANK_0[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
