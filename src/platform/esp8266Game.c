@@ -35,6 +35,13 @@
 #define TILE_INFO_OFS_IS_WALL 0
 #define TILE_INFO_OFS_FRAME_COUNT 1
 
+#define TILE_EXIT_REC_SIZE 5
+#define TILE_EXIT_OFS_ORIG_X 0
+#define TILE_EXIT_OFS_ORIG_Y 1
+#define TILE_EXIT_OFS_DEST_X 2
+#define TILE_EXIT_OFS_DEST_Y 3
+#define TILE_EXIT_OFS_DEST_ROOM 4
+
 int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
 int room_0_sprites[] = {
@@ -42,7 +49,14 @@ int room_0_sprites[] = {
   ofs_SPR_b, 10, 6, DIALOG_ID_SPR_b
 };
 
-int sprites_test[] = {room_0_sprites};
+char room_0_exits[] = {
+  7, 0, 7, 15, 1
+};
+
+char room_1_exits[] = {
+  7, 15, 7, 0, 0,
+  0, 11, 14, 11, 2
+};
 
 char room_0[] = {
   0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -83,8 +97,8 @@ char room_1[] = {
 };
 
 int rooms[] = {
-  room_0, 2, room_0_sprites, 0, 0, 0, 0,
-  room_1, 0, 0, 0, 0, 0, 0
+  room_0, 2, room_0_sprites, 1, room_0_exits, 0, 0,
+  room_1, 0, 0, 2, room_1_exits, 0, 0
 };
 
 char tileInfos[] = {
