@@ -236,6 +236,7 @@ char names[] = "bagbilbobbomboncamcapcedcogcobdoddogdotelmennfarfulgonhamhaljacj
 
 
 
+char startingGame = false;
 int currentLevel = 0;
 char needUpdate = true;
 int playerSprite[SPRITE_REC_SIZE];
@@ -243,6 +244,7 @@ int frameControl = 0;
 int frameDelay = 0;
 
 int currentDialog = 0;
+int currentEnding = 0;
 
 
 void delay(int t){
@@ -457,29 +459,6 @@ void init(){
   hpoison = 4;
   level = 1;
 }
-
-void endGame(){
-  loadrtttl(s0,1);
-  playrtttl();
-  setbgcolor(1);
-  setcolor(9);
-  clearscreen();
-  for(i = 0; i < 32; i++)
-    spritesetvalue(i, S_Y, spritegetvalue(i, S_Y) + 1000);
-  setimagesize(2);
-  putimage1bit(endscreen, 0, 32, 64, 24);  
-  setimagesize(1);
-  gotoxy(6,2);
-  printf("Game over");
-  gotoxy(6,11);
-  printf("floor %d", level);
-  gotoxy(6,13);
-  printf("gold %d", gold);
-  delay(1000);
-  while(getkey() == 0){}
-  init();
-}
-
 void viewPage(){
   setcolor(1);
   setbgcolor(9);
@@ -600,8 +579,6 @@ void fight(int i){
     if(spritegetvalue(i, S_LIVES) <= 0)
       addItem();
   }
-  if(health <= 0)
-    endGame();
   delay(400);
   getkey();
   while(getkey() == 0){}
@@ -742,6 +719,21 @@ char checkExitsCollision(int playerX, int playerY, char roomExits[], int exitCou
 
   return false;
 }
+	
+char checkEndingsCollision(int playerX, int playerY, char roomEndings[], int endingCount) { 
+  int p = 0;
+  char i;
+
+  for (i = 0; i < endingCount; i++) {
+   if (playerX == roomEndings[p + ENDING_OFS_X] && playerY == roomEndings[p + ENDING_OFS_Y]) {      
+      currentEnding = roomEndings[p + ENDING_OFS_DLG];
+      return true;
+    }
+    p += ENDING_REC_SIZE;
+  }
+
+  return false;
+}
 
 char tryMovingPlayer(int dx, int dy) {
   // Calculate where the player will try to move to
@@ -773,6 +765,10 @@ char tryMovingPlayer(int dx, int dy) {
     return true;
   }
 
+  // Check collision against the endings
+  if (checkEndingsCollision(x, y, rooms[roomP + ROOM_OFS_END_DATA], rooms[roomP + ROOM_OFS_END_COUNT])) {
+    return true;
+  }
 
   // No obstacles found: the player can move.
   playerSprite[SPRITE_OFS_X] = x;
@@ -893,6 +889,15 @@ void showChosenEnding(int endingNumber) {
   }  
 }
 
+void endGame() {
+  clearscreen();
+  showChosenEnding(currentEnding);
+  currentEnding = 0;
+    
+  startingGame = true;
+  needUpdate = true;
+}
+
 void main(){
   int roomP;
 	
@@ -936,6 +941,12 @@ void main(){
       if (currentDialog) {
         showChosenDialog(currentDialog);
         currentDialog = 0;
+        needUpdate = true;
+      }
+
+      if (currentEnding) {
+        showChosenEnding(currentEnding);
+        currentEnding = 0;
         needUpdate = true;
       }
 
