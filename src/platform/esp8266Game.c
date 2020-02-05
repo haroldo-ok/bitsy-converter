@@ -49,6 +49,8 @@
 #define ENDING_OFS_Y 1
 #define ENDING_OFS_DLG 2
 
+char gameTitle[] = "Your game's title here";
+
 int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
 int room_0_sprites[] = {
@@ -711,6 +713,7 @@ char checkExitsCollision(int playerX, int playerY, char roomExits[], int exitCou
       playerSprite[SPRITE_OFS_X] = roomExits[p + TILE_EXIT_OFS_DEST_X];
       playerSprite[SPRITE_OFS_Y] = roomExits[p + TILE_EXIT_OFS_DEST_Y];
       currentLevel = roomExits[p + TILE_EXIT_OFS_DEST_ROOM];
+      needUpdate = true;
 
       return true;
     }
@@ -889,6 +892,28 @@ void showChosenEnding(int endingNumber) {
   }  
 }
 
+void startGame() { 
+  int i;
+	
+  clearscreen();
+  showDialog(gameTitle);
+
+  for (i = 0; i != SPRITE_REC_SIZE; i++) {
+    playerSprite[i] = playerSpriteStart[i];
+  }
+
+  frameControl = 0;
+  frameDelay = 0;
+   
+  currentLevel = 0;
+  
+  currentDialog = 0;
+  currentEnding = 0;
+
+  startingGame = false;
+  needUpdate = true;
+}
+
 void endGame() {
   clearscreen();
   showChosenEnding(currentEnding);
@@ -903,16 +928,17 @@ void main(){
 	
   init();
 
-  for (int i = 0; i != SPRITE_REC_SIZE; i++) {
-    playerSprite[i] = playerSpriteStart[i];
-  }
-
-  needUpdate = true;
+  startingGame = true;
 
   while(1){
     generateMaze();
 
     while(isMaze){
+      // Display title screen if necessary
+      if (startingGame) {
+        startGame();
+      }
+
       // Increment frame control for animations  
       if (frameDelay) {
         frameDelay--;
@@ -947,6 +973,7 @@ void main(){
       if (currentEnding) {
         showChosenEnding(currentEnding);
         currentEnding = 0;
+        startingGame = true;
         needUpdate = true;
       }
 
