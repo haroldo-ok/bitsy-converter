@@ -816,6 +816,8 @@ void drawSprites(int roomSprites[], int spriteCount) {
 
 /* For some reason, using "char s[]" as a parameter makes "puts(s)" print gibberish. */
 void showDialog(int s) {
+  hideSpritesAfter(0);
+	
   char blink = false;
   char blinkDelay = 0;
 
