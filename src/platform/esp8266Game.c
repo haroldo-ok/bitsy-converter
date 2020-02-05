@@ -796,12 +796,22 @@ char drawRoom(char map[]) {
   }
 }
 
+void hideSpritesAfter(int startIndex) {
+  for (i = startIndex + 1; i < 32; i++) {
+    putsprite(i, 192, 192);
+  }
+}
+
 void drawSprites(int roomSprites[], int spriteCount) { 
+  int i;
+	
   drawSprite(1, 0, playerSprite);
   
-  for (char i = 0; i < spriteCount; i++) {
+  for (i = 0; i < spriteCount; i++) {
     drawSprite(i + 2, i, roomSprites);
   }
+
+  hideSpritesAfter(spriteCount + 1);
 }
 
 /* For some reason, using "char s[]" as a parameter makes "puts(s)" print gibberish. */
