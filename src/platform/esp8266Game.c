@@ -653,7 +653,19 @@ void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   putsprite(targetNum, sprite[p + SPRITE_OFS_X] * 8, sprite[p + SPRITE_OFS_Y] * 8);
 }
 
-int checkSpritesCollision(int playerX, int playerY, int roomSprites[], int spriteCount) { 
+char checkRoomTilesCollision(int playerX, int playerY, char map[]) {
+  int p;
+
+  char tn = map[playerY * 16 + playerX];
+  if (!tn) {
+    return false;
+  }
+
+  p = tn * TILE_INFO_REC_SIZE;
+  return tileInfos[p + TILE_INFO_OFS_IS_WALL];
+}
+
+char checkSpritesCollision(int playerX, int playerY, int roomSprites[], int spriteCount) { 
   int p = 0;
   char i;
 
@@ -680,6 +692,11 @@ char tryMovingPlayer(int dx, int dy) {
 
   // Out of bounds  
   if (x < 0 || x > 15 || y < 0 || y > 15) {
+    return false;
+  }
+
+  // Check if there are background tiles in the way
+  if (checkRoomTilesCollision(x, y, rooms[roomP + ROOM_OFS_MAP])) {
     return false;
   }
 
