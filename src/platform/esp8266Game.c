@@ -16,6 +16,8 @@
 #define DIALOG_ID_SPR_a 1
 #define DIALOG_ID_SPR_b 2
 
+#define ENDING_ID_0 1
+
 #define SPRITE_REC_SIZE 4
 #define SPRITE_OFS_TILE 0
 #define SPRITE_OFS_X 1
@@ -42,6 +44,11 @@
 #define TILE_EXIT_OFS_DEST_Y 3
 #define TILE_EXIT_OFS_DEST_ROOM 4
 
+#define ENDING_REC_SIZE 3
+#define ENDING_OFS_X 0
+#define ENDING_OFS_Y 1
+#define ENDING_OFS_DLG 2
+
 int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 
 int room_0_sprites[] = {
@@ -56,6 +63,10 @@ char room_0_exits[] = {
 char room_1_exits[] = {
   7, 15, 7, 0, 0,
   0, 11, 14, 11, 2
+};
+
+char room_2_endings[] = {
+  13, 11, ENDING_ID_0
 };
 
 char room_0[] = {
@@ -118,7 +129,7 @@ char room_2[] = {
 int rooms[] = {
   room_0, 2, room_0_sprites, 1, room_0_exits, 0, 0,
   room_1, 0, 0, 2, room_1_exits, 0, 0,
-  room_2, 0, 0, 0, 0, 0, 0
+  room_2, 0, 0, 0, 0, 1, room_2_endings
 };
 
 char tileInfos[] = {
@@ -865,6 +876,19 @@ void showChosenDialog(int dlgNumber) {
     break;
   case DIALOG_ID_SPR_b:
     dialog_SPR_b();
+    break;
+  }  
+}
+
+void dialog_ENDING_0() {
+  showDialog("This is the end!");
+}
+
+// Getting around the lack of function pointers
+void showChosenEnding(int endingNumber) {
+  switch (endingNumber) {
+  case ENDING_ID_0:
+    dialog_ENDING_0();
     break;
   }  
 }
