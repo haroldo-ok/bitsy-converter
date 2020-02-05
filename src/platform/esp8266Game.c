@@ -686,14 +686,32 @@ char checkSpritesCollision(int playerX, int playerY, int roomSprites[], int spri
   for (i = 0; i < spriteCount; i++) {
     if (playerX == roomSprites[p + SPRITE_OFS_X] && playerY == roomSprites[p + SPRITE_OFS_Y]) {      
       currentDialog = roomSprites[p + SPRITE_OFS_DLG];
-      return 1;
+      return true;
     }
     p += SPRITE_REC_SIZE;
   }
 
-  return 0;
+  return false;
 }
 	
+char checkExitsCollision(int playerX, int playerY, int roomExits[], int exitCount) { 
+  int p = 0;
+  char i;
+
+  for (i = 0; i < exitCount; i++) {
+    if (playerX == roomExits[p + TILE_EXIT_OFS_ORIG_X] && playerY == roomExits[p + TILE_EXIT_OFS_ORIG_Y]) {      
+      playerSprite[SPRITE_OFS_X] = roomExits[p + TILE_EXIT_OFS_DEST_X];
+      playerSprite[SPRITE_OFS_Y] = roomExits[p + TILE_EXIT_OFS_DEST_Y];
+      currentLevel = roomExits[p + TILE_EXIT_OFS_DEST_ROOM];
+
+      return true;
+    }
+    p += TILE_EXIT_REC_SIZE;
+  }
+
+  return false;
+}
+
 char tryMovingPlayer(int dx, int dy) {
   // Calculate where the player will try to move to
   int x = playerSprite[SPRITE_OFS_X];
@@ -719,6 +737,12 @@ char tryMovingPlayer(int dx, int dy) {
     return true;
   }
   
+  // Check collision against the exits
+  if (checkExitsCollision(x, y, rooms[roomP + ROOM_OFS_EXIT_DATA], rooms[roomP + ROOM_OFS_EXIT_COUNT])) {
+    return true;
+  }
+
+
   // No obstacles found: the player can move.
   playerSprite[SPRITE_OFS_X] = x;
   playerSprite[SPRITE_OFS_Y] = y;
