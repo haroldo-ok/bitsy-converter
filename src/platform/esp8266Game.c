@@ -705,15 +705,19 @@ char controlPlayer() {
   return false;
 }
 
-char drawRoom(char map[]) {
+int imageNumberForTile(char tn) {
   int tn, p;
   char frameCount;
 
+  p = tn * TILE_INFO_REC_SIZE;
+  frameCount = tileInfos[p + TILE_INFO_OFS_FRAME_COUNT];
+
+  return images[tn + frameControl % frameCount];
+}
+
+char drawRoom(char map[]) {
   for (int i = 0; i != 256; i++) {
-    tn = map[i];
-    p = tn * TILE_INFO_REC_SIZE;
-    frameCount = tileInfos[p + TILE_INFO_OFS_FRAME_COUNT];
-    maze[i] = images[tn + frameControl % frameCount];
+    maze[i] = imageNumberForTile(map[i]);
   }
 }
 
@@ -798,7 +802,7 @@ void main(){
         frameDelay--;
       } else {
         frameControl = (frameControl + 1) % 0x7FFF;
-        frameDelay = 10;
+        frameDelay = 8;
         needUpdate = true;
       }
 	
