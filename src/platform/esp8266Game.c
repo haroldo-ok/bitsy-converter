@@ -186,7 +186,7 @@ int images[] = {
   image_ITM_0_0
 }
 
-int maze[441];
+int backgroundMap[441];
 
 char startingGame = false;
 int currentLevel = 0;
@@ -209,7 +209,7 @@ void init(){
   clearscreen();
   setimagesize(1);
 
-  loadtile(maze, 8, 8, 16, 16);
+  loadtile(backgroundMap, 8, 8, 16, 16);
 
 }
 
@@ -360,7 +360,7 @@ char controlPlayer() {
 
 char drawRoom(char map[]) {
   for (int i = 0; i != 256; i++) {
-    maze[i] = imageNumberForTile(map[i]);
+    backgroundMap[i] = imageNumberForTile(map[i]);
   }
 }
 
