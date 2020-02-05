@@ -635,9 +635,19 @@ int calcRoomPointer() {
   return currentLevel * ROOM_REC_SIZE;
 }
 
+int imageNumberForTile(char tn) {
+  int tn, p;
+  char frameCount;
+
+  p = tn * TILE_INFO_REC_SIZE;
+  frameCount = tileInfos[p + TILE_INFO_OFS_FRAME_COUNT];
+
+  return images[tn + frameControl % frameCount];
+}
+
 void drawSprite(char targetNum, char srcIndex, int sprite[]) {
   int p = srcIndex * SPRITE_REC_SIZE;
-  getsprite(targetNum, images[sprite[p + SPRITE_OFS_TILE]]);
+  getsprite(targetNum, imageNumberForTile(sprite[p + SPRITE_OFS_TILE]));
   spritesetvalue(targetNum, S_WIDTH, 8);
   spritesetvalue(targetNum, S_HEIGHT,8);
   putsprite(targetNum, sprite[p + SPRITE_OFS_X] * 8, sprite[p + SPRITE_OFS_Y] * 8);
@@ -703,16 +713,6 @@ char controlPlayer() {
   }
   
   return false;
-}
-
-int imageNumberForTile(char tn) {
-  int tn, p;
-  char frameCount;
-
-  p = tn * TILE_INFO_REC_SIZE;
-  frameCount = tileInfos[p + TILE_INFO_OFS_FRAME_COUNT];
-
-  return images[tn + frameControl % frameCount];
 }
 
 char drawRoom(char map[]) {
