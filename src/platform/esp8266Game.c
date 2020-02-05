@@ -694,7 +694,7 @@ char checkSpritesCollision(int playerX, int playerY, int roomSprites[], int spri
   return false;
 }
 	
-char checkExitsCollision(int playerX, int playerY, int roomExits[], int exitCount) { 
+char checkExitsCollision(int playerX, int playerY, char roomExits[], int exitCount) { 
   int p = 0;
   char i;
 
