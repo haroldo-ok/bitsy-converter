@@ -101,8 +101,9 @@ export const prepareForCaseInsensitive = world => {
   
   const sprite = fromPairs(Object.entries(world.sprite).map(([k, v]) => [k, { ...v, drw: renamesForImages[v.drw] }]));
   const tile = fromPairs(Object.entries(world.tile).map(([k, v]) => [k, { ...v, drw: renamesForImages[v.drw] }]));
+  const item = fromPairs(Object.entries(world.item).map(([k, v]) => [k, { ...v, drw: renamesForImages[v.drw] }]));
   
-  return { ...world, tile, sprite, images };
+  return { ...world, tile, sprite, item, images };
 }
 
 /**

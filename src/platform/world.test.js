@@ -26,4 +26,9 @@ describe('handle case-insensitivity', () => {
 		expect(processedWorld.tile.a.drw).toEqual('TIL_a');
 	});
 
+	it('references to images on the "item" object should be renamed accordingly', async () => {
+		const processedWorld = prepareForCaseInsensitive(worldObject);
+		expect(processedWorld.item[0].drw).toEqual('ITM_0');
+	});
+
 });
