@@ -3,7 +3,7 @@ import {flatten, chunk, trimStart} from 'lodash-es';
 import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation} from './world';
-import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toEnumDeclaration,
+import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toDefinesDeclaration,
        toArrayLiteral, toStringLiteral} from './c-generator';
 
 /**
@@ -144,7 +144,7 @@ ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 export const convertWorld = world => {
   const {imageInfos, imageOffsets, frameCount,roomInfos, playerSpriteStart} = prepareWorldInformation(world);
   
-  const imageOffsetBody = toEnumDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
+  const imageOffsetBody = toDefinesDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
 	  /*
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),

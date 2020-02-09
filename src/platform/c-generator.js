@@ -35,3 +35,14 @@ export const toEnumDeclaration = (name, object, keyFunction = k => k) =>`
 enum ${name} {
 ${ Object.entries(object).map(([k, i]) => `  ${keyFunction(k)} = ${i}`).join(',\n') }
 };`
+
+/**
+ * Generates a simple `#define` declaration from a name and a value.
+ */
+export const toDefineDeclaration = (name, value) => `#define ${name} ${value}`;
+
+/**
+ * Generates a sequence of C defines from the keys and values of a JS object
+ */
+export const toDefinesDeclaration = (name, object, keyFunction = k => k) =>
+  Object.entries(object).map(([k, i]) => toDefineDeclaration(keyFunction(k), i)).join('\n');
