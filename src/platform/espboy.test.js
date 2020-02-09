@@ -9,7 +9,6 @@ const containsNormalized = (s1, s2) => normalizeBlanks(s1).includes(normalizeBla
 
 it('generates image offsets correctly', async () => {
 	const generatedCode = convertWorld(worldObject);
-	console.log(generatedCode);
 	expect(containsNormalized(generatedCode, `
 		#define ofs_BLANK 0
 		#define ofs_TIL_a 1
