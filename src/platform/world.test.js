@@ -16,4 +16,14 @@ describe('handle case-insensitivity', () => {
 		expect(Object.keys(processedWorld.images)).toEqual(expect.arrayContaining(['SPR_a_1']));
 	});
 
+	it('references to images on the "sprite" object should be renamed accordingly', async () => {
+		const processedWorld = prepareForCaseInsensitive(worldObject);
+		expect(processedWorld.sprite.a.drw).toEqual('SPR_a_1');
+	});
+
+	it('references to images on the "tile" object should be renamed accordingly', async () => {
+		const processedWorld = prepareForCaseInsensitive(worldObject);
+		expect(processedWorld.tile.a.drw).toEqual('TIL_a');
+	});
+
 });
