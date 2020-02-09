@@ -16,7 +16,7 @@ it('generates image offsets correctly', async () => {
 		#define ofs_TIL_c 4
 		#define ofs_TIL_d 5
 		#define ofs_SPR_A 6
-		#define ofs_SPR_a 8
+		#define ofs_SPR_a_1 8
 		#define ofs_SPR_b 10
 		#define ofs_ITM_0 11
 	`)).toBe(true);

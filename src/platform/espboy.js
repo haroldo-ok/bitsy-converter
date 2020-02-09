@@ -2,7 +2,7 @@ import {flatten, chunk, trimStart} from 'lodash-es';
 
 import {parseWorld} from 'bitsy-parser';
 
-import {prepareWorldInformation} from './world';
+import {prepareWorldInformation, prepareForCaseInsensitive} from './world';
 import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toDefinesDeclaration,
        toArrayLiteral, toStringLiteral} from './c-generator';
 
@@ -142,7 +142,8 @@ ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
  * Generates Arduboy-compatible C++ code from a Bitsy script object. 
  */
 export const convertWorld = world => {
-  const {imageInfos, imageOffsets, frameCount,roomInfos, playerSpriteStart} = prepareWorldInformation(world);
+  const caseInsensitiveWorld = prepareForCaseInsensitive(world);
+  const {imageInfos, imageOffsets, frameCount,roomInfos, playerSpriteStart} = prepareWorldInformation(caseInsensitiveWorld);
   
   const imageOffsetBody = toDefinesDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
   const mainGeneratedBody = [
