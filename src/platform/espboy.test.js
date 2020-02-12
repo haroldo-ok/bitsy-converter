@@ -30,3 +30,10 @@ it('generates dialog IDs correctly', async () => {
 		#define DIALOG_ID_SPR_1 3
 	`)).toBe(true);
 });
+
+it('generates ending IDs correctly', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		#define ENDING_ID_0 1
+	`)).toBe(true);
+});

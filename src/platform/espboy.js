@@ -92,7 +92,12 @@ const toDialogIdConstantsDeclaration = world => Object.keys(world.dialog).map((n
 const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration('dialog', name, dialog)).join('\n\n');
 
 /**
- * Generates dialog functions from the world object
+ * Generates ending ID constants from the world object
+ */
+const toEndingIdConstantsDeclaration = world => Object.keys(world.ending).map((name, idx) => toDefineDeclaration(`ENDING_ID_${name}`, idx + 1)).join('\n');
+
+/**
+ * Generates ending functions from the world object
  */
 const toEndingsDeclaration = world => Object.entries(world.ending).map(([name, dialog]) => toDialogDeclaration('ending', name, dialog)).join('\n\n');
 
@@ -152,7 +157,8 @@ export const convertWorld = world => {
   
   const definesBody = [
 	  toDefinesDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`),
-	  toDialogIdConstantsDeclaration(caseInsensitiveWorld)
+	  toDialogIdConstantsDeclaration(caseInsensitiveWorld),
+	  toEndingIdConstantsDeclaration(caseInsensitiveWorld)
   ].join('\n\n');
 	
   const mainGeneratedBody = [
