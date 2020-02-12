@@ -162,9 +162,9 @@ export const convertWorld = world => {
   ].join('\n\n');
 	
   const mainGeneratedBody = [
-	  /*
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
     toConstantDeclaration('gameTitle[]', 'char', toStringLiteral(world.title)),
+	  /*
     toConstantDeclaration('playerSpriteStart', 'BitsySprite', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
     toEndingsDeclaration(world),

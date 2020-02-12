@@ -37,3 +37,10 @@ it('generates ending IDs correctly', async () => {
 		#define ENDING_ID_0 1
 	`)).toBe(true);
 });
+
+it('generates game title constant correctly', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		char gameTitle[] = "Your game's title here";
+	`)).toBe(true);
+});
