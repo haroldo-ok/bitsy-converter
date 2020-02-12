@@ -116,6 +116,8 @@ const toRoomDeclaration = (room) => `
  */
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
 
+const toSpriteInternalDeclaration = sprite => `  ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}, ${sprite.dlg ? `dialog_${sprite.dlg}` : '0'}`;
+
 /**
  * Generates a constant array declaration, or '{{0}}' if empty.
  */
@@ -129,7 +131,7 @@ const toConstantArrayDeclarationOrEmpty = (name, elementType, elements) => eleme
  */
 const toRoomsDeclaration = (name, roomInfos) => {
   const spriteDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
-    `room_${room.id}_sprites`, 'BitsySprite', room.sprites.map(toSpriteDeclaration)));
+    `room_${room.id}_sprites`, 'int', room.sprites.map(toSpriteInternalDeclaration)));
   
   const exitDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
     `room_${room.id}_exits`, 'Exit', 
@@ -168,9 +170,9 @@ export const convertWorld = world => {
     toConstantDeclaration('playerSpriteStart', 'BitsySprite', toSpriteDeclaration(playerSpriteStart)),
     toDialogsDeclaration(world),
     toEndingsDeclaration(world),
-    toRoomsDeclaration('rooms', roomInfos),
 	*/
-	  toImageDeclaration('images', imageInfos),
+    toRoomsDeclaration('rooms', roomInfos),
+  	toImageDeclaration('images', imageInfos),
   ].join('\n\n');
 
   return trimStart(`

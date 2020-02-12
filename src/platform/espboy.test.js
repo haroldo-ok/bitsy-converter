@@ -44,3 +44,14 @@ it('generates game title constant correctly', async () => {
 		char gameTitle[] = "Your game's title here";
 	`)).toBe(true);
 });
+
+it('generates sprite arrays correctly', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		int room_0_sprites[] = {
+			ofs_SPR_a_1, 8, 12, dialog_SPR_0,
+			ofs_SPR_b, 10, 6, dialog_SPR_1
+		};
+	`)).toBe(true);
+});
+
