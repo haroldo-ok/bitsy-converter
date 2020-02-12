@@ -21,3 +21,12 @@ it('generates image offsets correctly', async () => {
 		#define ofs_ITM_0 11
 	`)).toBe(true);
 });
+
+it('generates dialog IDs correctly', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		#define DIALOG_ID_SPR_0 1
+		#define DIALOG_ID_ITM_0 2
+		#define DIALOG_ID_SPR_1 3
+	`)).toBe(true);
+});

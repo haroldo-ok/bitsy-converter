@@ -3,7 +3,7 @@ import {flatten, chunk, trimStart} from 'lodash-es';
 import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation, prepareForCaseInsensitive} from './world';
-import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toDefinesDeclaration,
+import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toDefineDeclaration, toDefinesDeclaration,
        toArrayLiteral, toStringLiteral} from './c-generator';
 
 /**
@@ -82,6 +82,11 @@ const toDialogDeclaration = (prefix, name, dialog) => {
 }
 
 /**
+ * Generates dialog ID constants from the world object
+ */
+const toDialogIdConstantsDeclaration = world => Object.keys(world.dialog).map((name, idx) => toDefineDeclaration(`DIALOG_ID_${name}`, idx + 1)).join('\n');
+
+/**
  * Generates dialog functions from the world object
  */
 const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration('dialog', name, dialog)).join('\n\n');
@@ -145,7 +150,11 @@ export const convertWorld = world => {
   const caseInsensitiveWorld = prepareForCaseInsensitive(world);
   const {imageInfos, imageOffsets, frameCount,roomInfos, playerSpriteStart} = prepareWorldInformation(caseInsensitiveWorld);
   
-  const imageOffsetBody = toDefinesDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`);
+  const definesBody = [
+	  toDefinesDeclaration('ImageOffset', imageOffsets, k => `ofs_${k}`),
+	  toDialogIdConstantsDeclaration(caseInsensitiveWorld)
+  ].join('\n\n');
+	
   const mainGeneratedBody = [
 	  /*
     toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
@@ -159,7 +168,7 @@ export const convertWorld = world => {
   ].join('\n\n');
 
   return trimStart(`
-${imageOffsetBody}
+${definesBody}
 ${mainGeneratedBody}
 `);
 }
