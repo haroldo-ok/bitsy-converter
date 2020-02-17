@@ -148,9 +148,11 @@ const toRoomsDeclaration = (name, roomInfos) => {
     room.tilemap.map(row => row.join(', ') )
   ));
 
-  const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room', `{
-${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
-}`);
+  const roomsDeclaration = toInitializedArrayDeclaration(
+    'rooms', 'int',
+    roomInfos.map(room => `room_${room.id}, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits, ${room.endings.length}, room_${room.id}_endings`)
+  );
+  console.log(roomsDeclaration);
 
   return [...spriteDeclarations, ...exitDeclarations, ...endingDeclarations, ...roomMapDeclarations, roomsDeclaration].join('\n\n');
 }
