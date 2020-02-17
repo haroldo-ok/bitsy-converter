@@ -142,13 +142,17 @@ const toRoomsDeclaration = (name, roomInfos) => {
     `room_${room.id}_endings`, 'char',
     room.endings.map(({x, y, id}) => [x, y, `ENDING_ID_${id}`].join(', ') )
   ));
-  console.log(endingDeclarations.join('\n\n'));
+
+  const roomMapDeclarations = roomInfos.map(room => toInitializedArrayDeclaration(
+    `room_${room.id}`, 'char',
+    room.tilemap.map(row => row.join(', ') )
+  ));
 
   const roomsDeclaration = toConstantDeclaration(`${name}[]`, 'Room', `{
 ${ roomInfos.map(room => toRoomDeclaration(room)).join(',') }
 }`);
 
-  return [...spriteDeclarations, ...exitDeclarations, ...endingDeclarations, roomsDeclaration].join('\n\n');
+  return [...spriteDeclarations, ...exitDeclarations, ...endingDeclarations, ...roomMapDeclarations, roomsDeclaration].join('\n\n');
 }
 
 /**
