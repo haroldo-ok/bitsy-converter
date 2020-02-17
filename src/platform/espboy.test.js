@@ -69,3 +69,12 @@ it('generates exit arrays correctly', async () => {
 	`)).toBe(true);
 });
 
+it('generates ending arrays correctly', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		char room_2_endings[] = {
+		  13, 11, ENDING_ID_0
+		};
+	`)).toBe(true);
+});
+
