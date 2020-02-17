@@ -55,3 +55,17 @@ it('generates sprite arrays correctly', async () => {
 	`)).toBe(true);
 });
 
+it('generates exit arrays correctly', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		char room_0_exits[] = {
+		  7, 0, 7, 15, 1
+		};
+
+		char room_1_exits[] = {
+		  7, 15, 7, 0, 0,
+		  0, 11, 14, 11, 2
+		};
+	`)).toBe(true);
+});
+

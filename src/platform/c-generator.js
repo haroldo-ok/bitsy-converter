@@ -16,6 +16,11 @@ export const toStringLiteral = text => `"${text}"`;
 export const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
 /**
+ * Generates a C initialized variable declaration.
+ */
+export const toInitializedDeclaration = (name, type, value) => `${type} ${name} = ${value};`;
+
+/**
  * Generates a flat C array constant from a bidimensional JS array.
  */
 export const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\n    ') => 
@@ -25,6 +30,13 @@ export const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\
  * Generates a C constant array declaration.
  */
 export const toConstantArrayDeclaration = (name, elementType, elements) => toConstantDeclaration(`${name}[]`, elementType, `{
+  ${ elements.join(',\n  ') }
+}`);
+
+/**
+ * Generates a C initialized array declaration.
+ */
+export const toInitializedArrayDeclaration = (name, elementType, elements) => toInitializedDeclaration(`${name}[]`, elementType, `{
   ${ elements.join(',\n  ') }
 }`);
 

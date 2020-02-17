@@ -4,7 +4,7 @@ import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation, prepareForCaseInsensitive} from './world';
 import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toDefineDeclaration, toDefinesDeclaration,
-       toArrayLiteral, toStringLiteral} from './c-generator';
+       toInitializedArrayDeclaration, toArrayLiteral, toStringLiteral} from './c-generator';
 
 /**
  * Converts an array of bits into a number
@@ -130,12 +130,12 @@ const toConstantArrayDeclarationOrEmpty = (name, elementType, elements) => eleme
  * Generates a C constant representing all the rooms contained in a room object.
  */
 const toRoomsDeclaration = (name, roomInfos) => {
-  const spriteDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
+  const spriteDeclarations = roomInfos.map(room => toInitializedArrayDeclaration(
     `room_${room.id}_sprites`, 'int', room.sprites.map(toSpriteInternalDeclaration)));
   
-  const exitDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
-    `room_${room.id}_exits`, 'Exit', 
-    room.exits.map( ({x, y, dest}) => toArrayLiteral([x, y, dest.x, dest.y, dest.room]) )
+  const exitDeclarations = roomInfos.map(room => toInitializedArrayDeclaration(
+    `room_${room.id}_exits`, 'char', 
+    room.exits.map( ({x, y, dest}) => [x, y, dest.x, dest.y, dest.room].join(', ') )
   ));
 
   const endingDeclarations = roomInfos.map(room => toConstantArrayDeclarationOrEmpty(
