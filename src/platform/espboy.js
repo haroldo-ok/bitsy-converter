@@ -152,7 +152,6 @@ const toRoomsDeclaration = (name, roomInfos) => {
     'rooms', 'int',
     roomInfos.map(room => `room_${room.id}, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits, ${room.endings.length}, room_${room.id}_endings`)
   );
-  console.log(roomsDeclaration);
 
   return [...spriteDeclarations, ...exitDeclarations, ...endingDeclarations, ...roomMapDeclarations, roomsDeclaration].join('\n\n');
 }
