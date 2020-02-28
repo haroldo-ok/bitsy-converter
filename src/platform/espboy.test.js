@@ -169,3 +169,13 @@ it('generates main image arrays', async () => {
 		}
 	`)).toBe(true);
 });
+
+it('generates individual dialog functions', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		void dialog_SPR_0() {
+		  showDialog("I'm a cat. Meow!");  
+		}
+	`)).toBe(true);
+});
+

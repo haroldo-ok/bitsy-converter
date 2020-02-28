@@ -174,16 +174,20 @@ export const convertWorld = world => {
     toConstantDeclaration('gameTitle[]', 'char', toStringLiteral(world.title)),
 	  /*
     toConstantDeclaration('playerSpriteStart', 'BitsySprite', toSpriteDeclaration(playerSpriteStart)),
-    toDialogsDeclaration(world),
-    toEndingsDeclaration(world),
 	*/
     toRoomsDeclaration('rooms', roomInfos),
   	toImageDeclaration('images', imageInfos),
   ].join('\n\n');
+	
+  const dialogFunctionsBody = [
+    toDialogsDeclaration(world),
+    toEndingsDeclaration(world),
+  ];	 
 
   return trimStart(`
 ${definesBody}
 ${mainGeneratedBody}
+${dialogFunctionsBody}
 `);
 }
 
