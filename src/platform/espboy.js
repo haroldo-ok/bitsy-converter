@@ -82,6 +82,21 @@ const toDialogDeclaration = (prefix, name, dialog) => {
 }
 
 /**
+ * Generates a routing function for the dialog
+ */
+const toRoutingDialogDeclaration = (functionName, constantGenerator, functionNameGenerator, names) => `
+void showChosenDialog(int dlgNumber) {
+  switch (dlgNumber) {
+${ names.map(name => `
+  case ${ constantGenerator(name) }:
+    ${ functionNameGenerator(name) }();
+    break;
+`).join('')
+}
+}
+`;
+
+/**
  * Generates dialog ID constants from the world object
  */
 const toDialogIdConstantsDeclaration = world => Object.keys(world.dialog).map((name, idx) => toDefineDeclaration(`DIALOG_ID_${name}`, idx + 1)).join('\n');
@@ -90,6 +105,11 @@ const toDialogIdConstantsDeclaration = world => Object.keys(world.dialog).map((n
  * Generates dialog functions from the world object
  */
 const toDialogsDeclaration = world => Object.entries(world.dialog).map(([name, dialog]) => toDialogDeclaration('dialog', name, dialog)).join('\n\n');
+
+/**
+ * Generates main dialog function from the world object
+ */
+const toMainDialogDeclaration = world => toRoutingDialogDeclaration('showChosenDialog', name => `DIALOG_ID_${name}`, name => `dialog_${name}`, Object.keys(world.dialog));
 
 /**
  * Generates ending ID constants from the world object
@@ -181,6 +201,7 @@ export const convertWorld = world => {
 	
   const dialogFunctionsBody = [
     toDialogsDeclaration(world),
+    toMainDialogDeclaration(world),
     toEndingsDeclaration(world),
   ];	 
 

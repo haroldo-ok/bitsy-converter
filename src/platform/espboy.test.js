@@ -179,3 +179,25 @@ it('generates individual dialog functions', async () => {
 	`)).toBe(true);
 });
 
+it('generates main dialog function', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		void showChosenDialog(int dlgNumber) {
+		  switch (dlgNumber) {
+
+		  case DIALOG_ID_SPR_0:
+			dialog_SPR_0();
+			break;
+
+		  case DIALOG_ID_ITM_0:
+			dialog_ITM_0();
+			break;
+
+		  case DIALOG_ID_SPR_1:
+			dialog_SPR_1();
+			break;
+
+		}
+	`)).toBe(true);
+});
+
