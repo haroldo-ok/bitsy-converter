@@ -4,7 +4,7 @@ import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation, prepareForCaseInsensitive} from './world';
 import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toDefineDeclaration, toDefinesDeclaration,
-       toInitializedArrayDeclaration, toArrayLiteral, toStringLiteral} from './c-generator';
+       toInitializedDeclaration, toInitializedArrayDeclaration, toArrayLiteral, toStringLiteral} from './c-generator';
 
 /**
  * Converts an array of bits into a number
@@ -35,14 +35,14 @@ const convertTile = (name, tile) =>  {
  */
 const toImageInfoDeclaration = ({name, frames, isWall}) => `
   // ${name}
-  ${ Array(frames.length).fill(`{ ${isWall}, ${frames.length} }`).join(',\n  ') }
+  ${ Array(frames.length).fill(`${isWall}, ${frames.length}`).join(',\n  ') }
 `.trim();
 
 /** 
  * Generates a C constant containing all the images contained in imageInfos
  */
 const toImageDeclaration = (name, imageInfos) => {
-  const infoDeclaration = toConstantDeclaration('tileInfos[]', 'TileInfo', `{
+  const infoDeclaration = toInitializedDeclaration('tileInfos[]', 'char', `{
   ${ imageInfos.map(toImageInfoDeclaration).join(',\n  ') }
 }`);
 	

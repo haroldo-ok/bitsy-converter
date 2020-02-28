@@ -112,3 +112,32 @@ it('generates general room array', async () => {
 		};
 	`)).toBe(true);
 });
+
+it('generates tile information array', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		char tileInfos[] = {
+		  // BLANK
+		  false, 1,
+		  // TIL_a
+		  true, 1,
+		  // TIL_b
+		  false, 2,
+		  false, 2,
+		  // TIL_c
+		  false, 1,
+		  // TIL_d
+		  false, 1,
+		  // SPR_A
+		  false, 2,
+		  false, 2,
+		  // SPR_a_1
+		  false, 2,
+		  false, 2,
+		  // SPR_b
+		  false, 1,
+		  // ITM_0
+		  false, 1
+		};
+	`)).toBe(true);
+});
