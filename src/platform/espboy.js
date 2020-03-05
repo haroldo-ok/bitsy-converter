@@ -3,8 +3,8 @@ import {flatten, chunk, trimStart} from 'lodash-es';
 import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation, prepareForCaseInsensitive} from './world';
-import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toDefineDeclaration, toDefinesDeclaration,
-       toInitializedDeclaration, toInitializedArrayDeclaration, toArrayLiteral, toStringLiteral} from './c-generator';
+import {toConstantDeclaration, toDefineDeclaration, toDefinesDeclaration,
+       toInitializedDeclaration, toInitializedArrayDeclaration, toStringLiteral} from './c-generator';
 
 /** 
  * Generates a image constant declaration from a bidimensional array. 
@@ -113,29 +113,11 @@ const toEndingsDeclaration = world => Object.entries(world.ending).map(([name, d
 const toMainEndingDeclaration = world => toRoutingDialogDeclaration('showChosenEnding', name => `ENDING_ID_${name}`, name => `ending_${name}`, Object.keys(world.ending));
 
 /**
- * Generates a C constant from a room object.
- */
-const toRoomDeclaration = (room) => `
-  // Room ${room.id}
-  {{
-    ${ toMatrixDeclaration(room.tilemap) }
-  }, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits, ${room.endings.length}, room_${room.id}_endings}
-`;
-
-/**
  * Generates a C constant from a sprite object.
  */
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
 
 const toSpriteInternalDeclaration = sprite => `  ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}, ${sprite.dlg ? `dialog_${sprite.dlg}` : '0'}`;
-
-/**
- * Generates a constant array declaration, or '{{0}}' if empty.
- */
-const toConstantArrayDeclarationOrEmpty = (name, elementType, elements) => elements && elements.length ?
-  toConstantArrayDeclaration(name, elementType, elements) : 
-  toConstantDeclaration(`${name}[]`, elementType, '{{0}}');
-      
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
