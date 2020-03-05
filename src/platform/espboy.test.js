@@ -196,7 +196,7 @@ it('generates main dialog function', async () => {
 		  case DIALOG_ID_SPR_1:
 			dialog_SPR_1();
 			break;
-
+          }
 		}
 	`)).toBe(true);
 });
@@ -207,6 +207,20 @@ it('generates individual ending functions', async () => {
 	expect(containsNormalized(generatedCode, `
 		void ending_0() {
 		  showDialog("This is the end.");  
+		}
+	`)).toBe(true);
+});
+
+it('generates main ending function', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		void showChosenEnding(int dlgNumber) {
+		  switch (dlgNumber) {
+
+		  case ENDING_ID_0:
+			ending_0();
+			break;
+		  }  
 		}
 	`)).toBe(true);
 });

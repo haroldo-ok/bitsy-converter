@@ -85,7 +85,7 @@ const toDialogDeclaration = (prefix, name, dialog) => {
  * Generates a routing function for the dialog
  */
 const toRoutingDialogDeclaration = (functionName, constantGenerator, functionNameGenerator, names) => `
-void showChosenDialog(int dlgNumber) {
+void ${functionName}(int dlgNumber) {
   switch (dlgNumber) {
 ${ names.map(name => `
   case ${ constantGenerator(name) }:
@@ -93,6 +93,7 @@ ${ names.map(name => `
     break;
 `).join('')
 }
+  }
 }
 `;
 
@@ -120,6 +121,11 @@ const toEndingIdConstantsDeclaration = world => Object.keys(world.ending).map((n
  * Generates ending functions from the world object
  */
 const toEndingsDeclaration = world => Object.entries(world.ending).map(([name, dialog]) => toDialogDeclaration('ending', name, dialog)).join('\n\n');
+
+/**
+ * Generates main ending function from the world object
+ */
+const toMainEndingDeclaration = world => toRoutingDialogDeclaration('showChosenEnding', name => `ENDING_ID_${name}`, name => `ending_${name}`, Object.keys(world.ending));
 
 /**
  * Generates a C constant from a room object.
@@ -203,8 +209,9 @@ export const convertWorld = world => {
     toDialogsDeclaration(world),
     toMainDialogDeclaration(world),
     toEndingsDeclaration(world),
+    toMainEndingDeclaration(world)
   ];	 
-
+	
   return trimStart(`
 ${definesBody}
 ${mainGeneratedBody}
