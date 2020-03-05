@@ -6,21 +6,6 @@ import {prepareWorldInformation, prepareForCaseInsensitive} from './world';
 import {toConstantDeclaration, toMatrixDeclaration, toConstantArrayDeclaration, toDefineDeclaration, toDefinesDeclaration,
        toInitializedDeclaration, toInitializedArrayDeclaration, toArrayLiteral, toStringLiteral} from './c-generator';
 
-/**
- * Converts an array of bits into a number
- */
-const parseBinary = bits => parseInt(bits.join(''), 2);
-
-/**
- * Converts a number into its hex representation
- */
-const toHex = n => n.toString(16).toUpperCase();
-
-/**
- * Converts a byte into its hex representation, with padding.
- */
-const toHexByte = n => toHex(n).padStart(2, '0');
-
 /** 
  * Generates a image constant declaration from a bidimensional array. 
  * Assumes the array is 8x8.
