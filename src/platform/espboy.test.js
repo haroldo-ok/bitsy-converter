@@ -224,3 +224,10 @@ it('generates main ending function', async () => {
 		}
 	`)).toBe(true);
 });
+
+it('generates player sprite start', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
+	`)).toBe(true);
+});
