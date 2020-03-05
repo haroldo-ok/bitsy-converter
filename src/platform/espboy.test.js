@@ -201,3 +201,12 @@ it('generates main dialog function', async () => {
 	`)).toBe(true);
 });
 
+
+it('generates individual ending functions', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		void ending_0() {
+		  showDialog("This is the end.");  
+		}
+	`)).toBe(true);
+});
