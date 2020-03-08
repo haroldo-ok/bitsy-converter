@@ -113,9 +113,9 @@ it('generates general room array', async () => {
 	const generatedCode = convertWorld(worldObject);
 	expect(containsNormalized(generatedCode, `
 		int rooms[] = {
-		  room_0, 2, room_0_sprites, 1, room_0_exits, 0, room_0_endings,
-		  room_1, 0, room_1_sprites, 2, room_1_exits, 0, room_1_endings,
-		  room_2, 0, room_2_sprites, 0, room_2_exits, 1, room_2_endings
+		  room_0, 2, room_0_sprites, 1, room_0_exits, 0, 0,
+		  room_1, 0, 0, 2, room_1_exits, 0, 0,
+		  room_2, 0, 0, 0, 0, 1, room_2_endings
 		};
 	`)).toBe(true);
 });

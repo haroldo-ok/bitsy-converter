@@ -140,10 +140,16 @@ const toRoomsDeclaration = (name, roomInfos) => {
     `room_${room.id}`, 'char',
     room.tilemap.map(row => row.join(', ') )
   ));
+	
+  const lengthAndReference = (room, arrayName) => [room[arrayName].length, room[arrayName].length ? `room_${room.id}_${arrayName}` : 0].join(', ');
 
   const roomsDeclaration = toInitializedArrayDeclaration(
     'rooms', 'int',
-    roomInfos.map(room => `room_${room.id}, ${room.sprites.length}, room_${room.id}_sprites, ${room.exits.length}, room_${room.id}_exits, ${room.endings.length}, room_${room.id}_endings`)
+    roomInfos.map(room => [`room_${room.id}`, 
+						   lengthAndReference(room, 'sprites'), 
+						   lengthAndReference(room, 'exits'), 
+						   lengthAndReference(room, 'endings')
+						  ].join(', '))
   );
 
   return [...spriteDeclarations, ...exitDeclarations, ...endingDeclarations, ...roomMapDeclarations, roomsDeclaration].join('\n\n');
