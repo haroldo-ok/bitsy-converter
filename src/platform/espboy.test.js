@@ -239,6 +239,13 @@ it('generates player sprite start', async () => {
 	`)).toBe(true);
 });
 
+it('contains "ROOM_REC_SIZE"', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		#define ROOM_REC_SIZE
+	`)).toBe(true);
+});
+
 it('should not generate "const" declarations.', async () => {
 	const generatedCode = convertWorld(worldObject);
 	expect(generatedCode).toEqual(expect.not.stringMatching(/\sconst\s/));

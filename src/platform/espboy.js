@@ -189,6 +189,37 @@ export const convertWorld = world => {
 #define false 0
 #define true 1
 
+#define SPRITE_REC_SIZE 4
+#define SPRITE_OFS_TILE 0
+#define SPRITE_OFS_X 1
+#define SPRITE_OFS_Y 2
+#define SPRITE_OFS_DLG 3
+
+#define ROOM_REC_SIZE 7
+#define ROOM_OFS_MAP 0
+#define ROOM_OFS_SPR_COUNT 1
+#define ROOM_OFS_SPR_DATA 2
+#define ROOM_OFS_EXIT_COUNT 3
+#define ROOM_OFS_EXIT_DATA 4
+#define ROOM_OFS_END_COUNT 5
+#define ROOM_OFS_END_DATA 6
+
+#define TILE_INFO_REC_SIZE 2
+#define TILE_INFO_OFS_IS_WALL 0
+#define TILE_INFO_OFS_FRAME_COUNT 1
+
+#define TILE_EXIT_REC_SIZE 5
+#define TILE_EXIT_OFS_ORIG_X 0
+#define TILE_EXIT_OFS_ORIG_Y 1
+#define TILE_EXIT_OFS_DEST_X 2
+#define TILE_EXIT_OFS_DEST_Y 3
+#define TILE_EXIT_OFS_DEST_ROOM 4
+
+#define ENDING_REC_SIZE 3
+#define ENDING_OFS_X 0
+#define ENDING_OFS_Y 1
+#define ENDING_OFS_DLG 2
+
 ${definesBody}
 ${mainGeneratedBody}
 
