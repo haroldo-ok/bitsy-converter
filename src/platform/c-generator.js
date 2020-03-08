@@ -16,6 +16,11 @@ export const toStringLiteral = text => `"${text}"`;
 export const toConstantDeclaration = (name, type, value) => `const ${type} ${name} = ${value};`;
 
 /**
+ * Generates a C initialized variable declaration.
+ */
+export const toInitializedDeclaration = (name, type, value) => `${type} ${name} = ${value};`;
+
+/**
  * Generates a flat C array constant from a bidimensional JS array.
  */
 export const toMatrixDeclaration = (matrix, transform = v => v, innerIndent = '\n    ') => 
@@ -29,9 +34,27 @@ export const toConstantArrayDeclaration = (name, elementType, elements) => toCon
 }`);
 
 /**
+ * Generates a C initialized array declaration.
+ */
+export const toInitializedArrayDeclaration = (name, elementType, elements) => toInitializedDeclaration(`${name}[]`, elementType, `{
+  ${ elements.join(',\n  ') }
+}`);
+
+/**
  * Generates a C enum declaration from a JS object.
  */
 export const toEnumDeclaration = (name, object, keyFunction = k => k) =>`
 enum ${name} {
 ${ Object.entries(object).map(([k, i]) => `  ${keyFunction(k)} = ${i}`).join(',\n') }
 };`
+
+/**
+ * Generates a simple `#define` declaration from a name and a value.
+ */
+export const toDefineDeclaration = (name, value) => `#define ${name} ${value}`;
+
+/**
+ * Generates a sequence of C defines from the keys and values of a JS object
+ */
+export const toDefinesDeclaration = (name, object, keyFunction = k => k) =>
+  Object.entries(object).map(([k, i]) => toDefineDeclaration(keyFunction(k), i)).join('\n');

@@ -17,6 +17,7 @@ import stringify from 'json-stringify-pretty-compact';
 
 import {convertArduboy} from './platform/arduboy'
 import {convertLibCV} from './platform/libcv'
+import {convertESPBoy} from './platform/espboy'
 
 import exampleSource from './example.bitsy';
 
@@ -31,6 +32,7 @@ const converters = {
   'json': convertJSON,
   'arduboy': convertArduboy,
   'libcv': convertLibCV,
+  'espboy': convertESPBoy,
 };
 
 class App extends Component {
@@ -134,6 +136,7 @@ class App extends Component {
                 <Tab value="json" label="JSON" />
                 <Tab value="arduboy" label="Arduboy" />
                 <Tab value="libcv" label="LibCV" />
+                <Tab value="espboy" label="ESP-LGE" />
               </Tabs>
 
               <Editor

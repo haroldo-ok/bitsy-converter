@@ -54,6 +54,59 @@ const extractRoomInfos = (world, imageOffsets) => {
 };
 
 /**
+ * Returns an object that tells how the keys of another object must be renamed to avoid collision on case-insensitive languages.
+ */
+const generateCaseInsensitiveRenameMap = (object) => {
+  const originalKeys = Object.keys(object);
+  
+  const lowerToKey = originalKeys.reduce((o, key) => {
+    const lower = key.toLowerCase();
+    if (!(lower in o)) {
+      o[lower] = key;
+    }
+    return o;
+  }, {});
+  
+  const translatedKeys = originalKeys.reduce((o, key) => {    
+    const lower = key.toLowerCase();
+    if (lowerToKey[lower] === key) {
+      // It wasn't colliding
+      o[key] = key;
+    } else {
+      // It was colliding; rename it.
+      let n = 0;
+      let candidate = null;
+      do {
+        n++;
+        candidate = lower + '_' + n;
+      } while (o[candidate]);
+      
+      lowerToKey[candidate] = key;
+      o[key] = key + '_' + n;
+    }
+    return o;
+  }, {});
+  
+  return translatedKeys;
+}
+
+const renameObjectKeys = (object, keyMap) => fromPairs(Object.entries(object).map(([k, v]) => [keyMap[k], v]));
+
+/**
+ * Changes the name of a few things in the world object so they won't cause trouble when generating code for a case-insentitive language.
+ */
+export const prepareForCaseInsensitive = world => {
+  const renamesForImages = generateCaseInsensitiveRenameMap(world.images);
+  const images = renameObjectKeys(world.images, renamesForImages);
+  
+  const sprite = fromPairs(Object.entries(world.sprite).map(([k, v]) => [k, { ...v, drw: renamesForImages[v.drw] }]));
+  const tile = fromPairs(Object.entries(world.tile).map(([k, v]) => [k, { ...v, drw: renamesForImages[v.drw] }]));
+  const item = fromPairs(Object.entries(world.item).map(([k, v]) => [k, { ...v, drw: renamesForImages[v.drw] }]));
+  
+  return { ...world, tile, sprite, item, images };
+}
+
+/**
  * Takes the world object, and extracts extra information from it.
  */
 export const prepareWorldInformation = world => {
