@@ -55,6 +55,13 @@ it('generates sprite arrays correctly', async () => {
 	`)).toBe(true);
 });
 
+it('should not generate empty arrays', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(containsNormalized(generatedCode, `
+		[] = { };
+	`)).toBe(false);
+});
+
 it('generates exit arrays correctly', async () => {
 	const generatedCode = convertWorld(worldObject);
 	expect(containsNormalized(generatedCode, `
@@ -232,8 +239,12 @@ it('generates player sprite start', async () => {
 	`)).toBe(true);
 });
 
-
 it('should not generate "const" declarations.', async () => {
 	const generatedCode = convertWorld(worldObject);
 	expect(generatedCode).toEqual(expect.not.stringMatching(/\sconst\s/));
+});
+
+it('should not generate "uint8_t" declarations.', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(generatedCode).toEqual(expect.not.stringMatching(/\uint8_t\s/));
 });
