@@ -231,3 +231,9 @@ it('generates player sprite start', async () => {
 		int playerSpriteStart[] = { ofs_SPR_A, 4, 4 };
 	`)).toBe(true);
 });
+
+
+it('should not generate "const" declarations.', async () => {
+	const generatedCode = convertWorld(worldObject);
+	expect(generatedCode).toEqual(expect.not.stringMatching(/\sconst\s/));
+});

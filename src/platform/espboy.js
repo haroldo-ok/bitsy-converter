@@ -3,7 +3,7 @@ import {flatten, chunk, trimStart} from 'lodash-es';
 import {parseWorld} from 'bitsy-parser';
 
 import {prepareWorldInformation, prepareForCaseInsensitive} from './world';
-import {toConstantDeclaration, toDefineDeclaration, toDefinesDeclaration,
+import {toDefineDeclaration, toDefinesDeclaration,
        toInitializedDeclaration, toInitializedArrayDeclaration, toStringLiteral} from './c-generator';
 
 /** 
@@ -163,9 +163,9 @@ export const convertWorld = world => {
   ].join('\n\n');
 	
   const mainGeneratedBody = [
-    toConstantDeclaration('FRAME_COUNT', 'uint8_t', frameCount),
-    toConstantDeclaration('gameTitle[]', 'char', toStringLiteral(world.title)),
-    toConstantDeclaration('playerSpriteStart[]', 'int', toSpriteDeclaration(playerSpriteStart)),
+    toDefineDeclaration('FRAME_COUNT', frameCount),
+    toInitializedDeclaration('gameTitle[]', 'char', toStringLiteral(world.title)),
+    toInitializedDeclaration('playerSpriteStart[]', 'int', toSpriteDeclaration(playerSpriteStart)),
     toRoomsDeclaration('rooms', roomInfos),
   	toImageDeclaration('images', imageInfos),
   ].join('\n\n');
