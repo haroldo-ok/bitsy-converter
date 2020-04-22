@@ -117,21 +117,21 @@ const toMainEndingDeclaration = world => toRoutingDialogDeclaration('showChosenE
  */
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
 
-const toSpriteInternalDeclaration = sprite => `  ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}, ${sprite.dlg ? `dialog_${sprite.dlg}` : '0'}`;
+const toSpriteInternalDeclaration = sprite => `  ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}, ${sprite.dlg ? `DIALOG_ID_${sprite.dlg}` : '0'}`;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
  */
 const toRoomsDeclaration = (name, roomInfos) => {
-  const spriteDeclarations = roomInfos.map(room => room.sprites.length == 0 ? '' : toInitializedArrayDeclaration(
+  const spriteDeclarations = roomInfos.map(room => room.sprites.length === 0 ? '' : toInitializedArrayDeclaration(
     `room_${room.id}_sprites`, 'int', room.sprites.map(toSpriteInternalDeclaration)));
   
-  const exitDeclarations = roomInfos.map(room => room.exits.length == 0 ? '' : toInitializedArrayDeclaration(
+  const exitDeclarations = roomInfos.map(room => room.exits.length === 0 ? '' : toInitializedArrayDeclaration(
     `room_${room.id}_exits`, 'char', 
     room.exits.map( ({x, y, dest}) => [x, y, dest.x, dest.y, dest.room].join(', ') )
   ));
 
-  const endingDeclarations = roomInfos.map(room => room.endings.length == 0 ? '' : toInitializedArrayDeclaration(
+  const endingDeclarations = roomInfos.map(room => room.endings.length === 0 ? '' : toInitializedArrayDeclaration(
     `room_${room.id}_endings`, 'char',
     room.endings.map(({x, y, id}) => [x, y, `ENDING_ID_${id}`].join(', ') )
   ));
