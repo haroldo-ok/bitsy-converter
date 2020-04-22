@@ -117,7 +117,7 @@ const toMainEndingDeclaration = world => toRoutingDialogDeclaration('showChosenE
  */
 const toSpriteDeclaration = sprite => `{ ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}${sprite.dlg ? `, dialog_${sprite.dlg}` : ''} }`;
 
-const toSpriteInternalDeclaration = sprite => `  ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}, ${sprite.dlg ? `dialog_${sprite.dlg}` : '0'}`;
+const toSpriteInternalDeclaration = sprite => `  ofs_${sprite.drw}, ${sprite.x}, ${sprite.y}, ${sprite.dlg ? `DIALOG_ID_${sprite.dlg}` : '0'}`;
 
 /**
  * Generates a C constant representing all the rooms contained in a room object.
