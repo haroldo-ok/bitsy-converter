@@ -54,7 +54,7 @@ const generateUnknownDialogCommand = command => `/* Unknown command: ${command.t
 
 const generatePrintDialogCommand = command => `showDialog(F(${toStringLiteral(command.arguments[0].value)}));`;
 
-const generateBlockDialogCommand = command => command.children
+const generateBlockDialogCommand = command => (command.children || [])
   .map(child => child.type === 'function'&& child.name === 'print' ? generatePrintDialogCommand(child) : generateUnknownDialogCommand(child)).join('\n  ');
 
 /**
